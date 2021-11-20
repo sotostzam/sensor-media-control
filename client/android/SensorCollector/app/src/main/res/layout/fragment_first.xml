@@ -8,34 +8,21 @@
 
     <ImageButton
         android:id="@+id/imageButton"
-        android:layout_width="196dp"
-        android:layout_height="202dp"
-        android:layout_marginStart="107dp"
-        android:layout_marginTop="32dp"
-        android:layout_marginEnd="108dp"
-        android:layout_marginBottom="201dp"
-        android:src="@drawable/blue_button"
+        android:layout_width="220dp"
+        android:layout_height="225dp"
+        android:layout_marginStart="109dp"
+        android:layout_marginTop="275dp"
+        android:layout_marginEnd="109dp"
+        android:layout_marginBottom="276dp"
+        app:tint="@android:color/holo_blue_light"
+        android:background="@android:color/transparent"
+        android:src="@drawable/ic_blue_circle_image"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="0.518"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/switch2"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.488"
         tools:ignore="SpeakableTextPresentCheck" />
-
-    <Switch
-        android:id="@+id/switch2"
-        android:layout_width="60dp"
-        android:layout_height="46dp"
-        android:layout_marginStart="175dp"
-        android:layout_marginTop="131dp"
-        android:layout_marginEnd="176dp"
-        android:layout_marginBottom="16dp"
-        android:scaleX="1.5"
-        android:scaleY="1.5"
-        app:layout_constraintBottom_toTopOf="@+id/imageButton"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
