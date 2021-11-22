@@ -8,7 +8,7 @@ android {
     defaultConfig {
         applicationId "com.arvr.sensorcollector"
         minSdk 21
-        targetSdk 28
+        targetSdk 29
         versionCode 1
         versionName "1.0"
 
@@ -17,15 +17,16 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            shrinkResources true
         }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-    compileSdkVersion 28
+    compileSdkVersion 29
     buildToolsVersion '30.0.2'
 }
 

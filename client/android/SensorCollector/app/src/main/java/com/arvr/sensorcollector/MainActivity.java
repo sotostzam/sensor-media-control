@@ -26,6 +26,9 @@ public class MainActivity extends AppCompatActivity {
         adapter = new FragmentAdapter(fm, getLifecycle());
         pager2.setAdapter(adapter);
 
+        // Disable scrolling/swiping left and right between the two tabs
+        pager2.setUserInputEnabled(false);
+
         tabLayout.addTab(tabLayout.newTab().setText("Remote"));
         tabLayout.addTab(tabLayout.newTab().setText("Settings"));
 
