@@ -40,6 +40,7 @@ import java.util.Objects;
  */
 public class SecondFragment extends Fragment
 {
+    private FragmentTwoListener listener;
 
     public static DatagramSocket mSocket = null;
     public static DatagramPacket mPacket = null;
@@ -94,8 +95,15 @@ public class SecondFragment extends Fragment
             mStrBuilder.insert(0,String.format(Locale.ENGLISH, "%.5f", timestamp_sec));
             mSensordata = mStrBuilder.toString();
 
-            // Start a new thread for sending data over UDP
-            new UDPThread(mSensordata).execute();
+            // Get streaming status
+            boolean streamStatus = listener.getStreamStatus();
+
+            // Check if streaming is allowed
+            if(streamStatus)
+            {
+                // Start a new thread for sending data over UDP
+                new UDPThread(mSensordata).execute();
+            }
 
         }
 
@@ -150,6 +158,19 @@ public class SecondFragment extends Fragment
     {
         super.onCreate(savedInstanceState);
     }
+
+    @Override
+    public void onAttach(Context context)
+    {
+        super.onAttach(context);
+        if(context instanceof FragmentTwoListener)
+        { this.listener = (FragmentTwoListener) context; }
+    }
+
+    public static interface FragmentTwoListener
+    { public boolean getStreamStatus(); }
+
+
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {

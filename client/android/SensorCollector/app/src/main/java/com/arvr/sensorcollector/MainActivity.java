@@ -8,11 +8,13 @@ import android.os.Bundle;
 
 import com.google.android.material.tabs.TabLayout;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+        implements FirstFragment.FragmentOneListener, SecondFragment.FragmentTwoListener {
 
     TabLayout tabLayout;
     ViewPager2 pager2;
     FragmentAdapter adapter;
+    boolean streamFlag;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
 
         tabLayout.addTab(tabLayout.newTab().setText("Remote"));
         tabLayout.addTab(tabLayout.newTab().setText("Settings"));
+
 
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -56,5 +59,22 @@ public class MainActivity extends AppCompatActivity {
                 tabLayout.selectTab(tabLayout.getTabAt(position));
             }
         });
+    }
+
+
+    /*
+     The MainActivity controls the communication between the 2 fragments.
+     onSendFunction() is used by the 1st fragment to send the value of streamStatus,
+     and getStreamStatus() is used by the 2nd fragment to get the value of this boolean variable.
+     */
+
+    @Override
+    public void onSendFunction(boolean streamFlag) {
+        this.streamFlag = streamFlag;
+    }
+
+    @Override
+    public boolean getStreamStatus() {
+        return this.streamFlag;
     }
 }

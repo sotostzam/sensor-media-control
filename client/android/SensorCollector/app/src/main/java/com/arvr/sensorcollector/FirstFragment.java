@@ -1,5 +1,6 @@
 package com.arvr.sensorcollector;
 
+import android.content.Context;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
 
@@ -18,6 +19,7 @@ import android.widget.ImageButton;
 public class FirstFragment extends Fragment
 {
     private ImageButton mImageButton;
+    private FragmentOneListener listener;
 
     public FirstFragment() {
         // Required empty public constructor
@@ -33,18 +35,24 @@ public class FirstFragment extends Fragment
     {
         mImageButton = (ImageButton) view.findViewById(R.id.imageButton);
 
+
         // Changing colour of image during runtime taken from:
         // https://stackoverflow.com/a/35286182/6475377
         mImageButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event)
             {
+                boolean streamFlag;
                 if (event.getAction() == MotionEvent.ACTION_DOWN)
                 {
                     mImageButton.setColorFilter(getResources().getColor(android.R.color.holo_red_dark), PorterDuff.Mode.SRC_ATOP);
+                    streamFlag = true;
+                    listener.onSendFunction(streamFlag);
                 } else if (event.getAction() == MotionEvent.ACTION_UP)
                 {
                     mImageButton.setColorFilter(getResources().getColor(android.R.color.holo_blue_light), PorterDuff.Mode.SRC_ATOP);
+                    streamFlag = false;
+                    listener.onSendFunction(streamFlag);
                 }
                 return false;
             }
@@ -57,5 +65,18 @@ public class FirstFragment extends Fragment
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_first, container, false);
+    }
+
+    @Override
+    public void onAttach(Context context)
+    {
+        super.onAttach(context);
+        if(context instanceof FragmentOneListener)
+        { this.listener = (FragmentOneListener) context; }
+
+    }
+
+    public static interface FragmentOneListener{
+        public void onSendFunction(boolean streamFlag);
     }
 }
