@@ -18,11 +18,14 @@ public class FragmentAdapter extends FragmentStateAdapter {
         if (position == 1) {
             return new SecondFragment();
         }
+        else if (position == 2){
+            return new ThirdFragment();
+        }
         return new FirstFragment();
     }
 
     @Override
     public int getItemCount() {
-        return 2;
+        return 3;
     }
 }
