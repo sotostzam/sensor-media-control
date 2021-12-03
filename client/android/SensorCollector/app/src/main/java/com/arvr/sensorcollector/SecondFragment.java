@@ -33,7 +33,9 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Locale;
+import java.util.Arrays.*;
 import java.util.Objects;
+import java.util.stream.DoubleStream;
 
 /**
  * A simple Fragment subclass.
@@ -47,11 +49,14 @@ public class SecondFragment extends Fragment
 
     private static final double NS2S = 1.0f / 1000000000.0f; // nanosec to sec
     private double[] mGyroBuffer = new double[3];
+    private double[] mRotationBuffer = new double[3];
     private boolean mGyroBufferReady = false;
+    private boolean mRotationBufferReady = false;
     private double mGyroTime = 0;
     private double mAccTime = 0;
     StringBuilder mStrBuilder = new StringBuilder(256);
-    private static final int CSV_ID_GYROSCOPE = 4;
+    private static final String CSV_ID_GYROSCOPE = "G";
+    private static final String CSV_ID_ROTATION = "R";
     private String mSensordata;
     private int mCounter = 0;
     private int mScreenDelay = 15;
@@ -77,22 +82,42 @@ public class SecondFragment extends Fragment
                 mGyroBuffer[2] = event.values[2];
                 mGyroBufferReady = true;
                 mGyroTime = timestamp_sec;
-            } else {
+            }
+            else if (event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR)
+            {
+                mRotationBuffer[0] = event.values[0];
+                mRotationBuffer[1] = event.values[1];
+                mRotationBuffer[2] = event.values[2];
+                mRotationBufferReady = true;
+            }
+            else {
                 return;
             }
 
             boolean gyroReady = (mGyroBufferReady == true);
+            boolean rotationReady = (mRotationBufferReady == true);
 
 
             mStrBuilder.setLength(0);
 
-            if (gyroReady == true)
+            if (gyroReady == true && rotationReady == true)
             {
-                addSensorToString(mStrBuilder, CSV_ID_GYROSCOPE, mGyroBuffer);
+                double[] finalBuffer = new double[6];
+                for(int i = 0; i < finalBuffer.length/2; i++)
+                {
+                    finalBuffer[i] = mGyroBuffer[i];
+                }
+                for(int i = finalBuffer.length/2; i < finalBuffer.length; i++)
+                {
+                    finalBuffer[i] = mRotationBuffer[i-3];
+                }
+
+                addSensorToString(mStrBuilder, CSV_ID_GYROSCOPE, CSV_ID_ROTATION, finalBuffer);
                 mGyroBufferReady = false;
+                mRotationBufferReady = false;
             }
 
-            mStrBuilder.insert(0,String.format(Locale.ENGLISH, "%.5f", timestamp_sec));
+            // mStrBuilder.insert(0,String.format(Locale.ENGLISH, "%.5f", timestamp_sec));
             mSensordata = mStrBuilder.toString();
 
             // Get streaming status
@@ -203,6 +228,9 @@ public class SecondFragment extends Fragment
         try {
             mSensor_Stream.registerListener(myhardwaresensorlistener,
                     mSensor_Stream.getDefaultSensor(Sensor.TYPE_GYROSCOPE), mDelay);
+
+            mSensor_Stream.registerListener(myhardwaresensorlistener,
+                    mSensor_Stream.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR), mDelay);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -316,16 +344,18 @@ public class SecondFragment extends Fragment
     }
 
     private static void addSensorToString(StringBuilder strbuilder,
-                                          int sensorid, double ...values )
+                                          String sensorid1, String sensorid2, double ...values)
     {
-        if(values.length == 3)
+        if(values.length == 6)
         {
-            strbuilder.append(String.format(Locale.ENGLISH, ", %d, %7.3f,%7.3f,%7.3f", sensorid, values[0], values[1], values[2]));
+            strbuilder.append(String.format(Locale.ENGLISH, "%s,%7.3f,%7.3f,%7.3f?%s,%7.3f,%7.3f,%7.3f",
+                    sensorid1, values[0], values[1], values[2],
+                    sensorid2, values[3], values[4], values[5]));
         }
 
-        else if (values.length == 1)
-        {
-            strbuilder.append(String.format(Locale.ENGLISH, ", %d, %7.3f", sensorid, values[0]));
-        }
+//        else if (values.length == 1)
+//        {
+//            strbuilder.append(String.format(Locale.ENGLISH, ",%s,%7.3f", sensorid, values[0]));
+//        }
     }
 }
