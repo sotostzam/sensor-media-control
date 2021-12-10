@@ -31,9 +31,10 @@ class Server:
 
         # Window and canvas initialization parameters
         self.width  = 800
-        self.height = 600
+        self.height = 400
         self.window = tk.Tk()
         self.window.title("Android's Sensors")
+        self.window.resizable(False, False)
 
         self.create_sensor_frame()
         self.create_tabs_frame()
@@ -41,7 +42,7 @@ class Server:
     def create_sensor_frame(self):
         
         # Main sensor Frame
-        self.sensor_frame = tk.Frame(self.window)
+        self.sensor_frame = tk.Frame(self.window, width=self.width/4, height=self.height)
         self.sensor_frame.grid(row=0, column=0, sticky="nswe")
         self.sensor_frame.rowconfigure(0, minsize=100, weight=0)
 
@@ -96,22 +97,23 @@ class Server:
         self.label_position_z.grid(row=2, column=1, sticky="we", padx=25)
 
     def create_tabs_frame(self):
-        # Right Frame
-        self.right_frame = tk.Frame(self.window, width = self.width, height = self.height, bg="lightblue")
-        self.right_frame.grid(row=0, column=1, sticky="nswe")
-        self.right_frame.rowconfigure(0, minsize=400, weight=1)
+        self.tab_widget = ttk.Notebook(self.window, width=int(self.width-self.width/4), height=self.height)
+        self.tab_widget.grid(row=0, column=1, sticky="news")
+        
+        s = ttk.Style()
+        s.configure('TNotebook', tabposition=tk.NSEW)
 
-        self.notebook = ttk.Notebook(self.right_frame)
-        self.notebook.grid(row=0, column=0, sticky="nswe")
+        self.settings_frame = tk.Frame(self.tab_widget)
+        self.create_settings(self.settings_frame)
 
-        self.frame1 = tk.Frame(self.notebook, width=self.width, height=self.height)
-        self.create_settings(self.frame1)
+        self.interaction_frame = tk.Frame(self.tab_widget)
+        self.interaction_frame.grid(row=0, column=0, sticky="nswe")
+        self.interaction_frame.columnconfigure(0, minsize=100, weight=1)
+        self.interaction_frame.rowconfigure(2, minsize=100, weight=1)
+        self.create_interaction_frame(self.interaction_frame)
 
-        self.canvas_interaction = tk.Canvas(master = self.window, width = self.width, height = self.height, bg="grey")
-        self.create_interaction_frame(self.canvas_interaction)
-
-        self.notebook.add(self.frame1, text='Settings')
-        self.notebook.add(self.canvas_interaction, text='Interaction Testing')
+        self.tab_widget.add(self.settings_frame, text='Settings')
+        self.tab_widget.add(self.interaction_frame, text='Interaction Testing')
 
     def create_settings(self, parent):
 
@@ -119,10 +121,16 @@ class Server:
             print ("value is:" + self.variable.get())
 
         OPTIONS = [
-        "Left Gesture",
-        "Right Gesture",
-        "Up Gesture",
-        "Down Gesture"
+        "Play/Pause",
+        "Previous",
+        "Next",
+        "Stop",
+        "Volume +",
+        "Volume -",
+        "Seek +",
+        "Seek -",
+        "Scroll UP",
+        "Scroll DOWN"
         ]
 
         gestures = tk.Label(parent, text="GESTURES")
@@ -147,36 +155,136 @@ class Server:
         self.w1.grid(row=2, column=1, sticky="we")
 
     def create_interaction_frame(self, parent):
+        """
+        Create the layout of the interaction frame. The order is the following:
+        * Interaction selection frame
+        * Test interaction frame
+        """
+        interaction_selection = tk.Frame(parent, height = self.height/4)
+        interaction_selection.grid(row=0, column=0, sticky="nswe", pady=10)
+        interaction_selection.rowconfigure(0, weight=1)
+        interaction_selection.grid_columnconfigure(0, weight=1)
+        interaction_selection.grid_columnconfigure(1, weight=1)
+        interaction_selection.grid_columnconfigure(2, weight=1)
+
+        interaction_selection_explanation = tk.Message(interaction_selection, width=180 ,text="Please select the type of interaction tests: ")
+        interaction_selection_explanation.grid(row=0, column=0, sticky="nswe")
+
+        # Mode Selection RadioButton
+        interaction_selection_choice = tk.Frame(interaction_selection)
+        interaction_selection_choice.grid(row=0, column=1, sticky="nswe")
+
+        interaction_mode = tk.IntVar(value=1)
+        interaction_choice_1 = tk.Radiobutton(interaction_selection_choice, variable=interaction_mode, value=1, tristatevalue=0, text="Speed Test")
+        interaction_choice_1.grid(row=0, column=1, sticky="w")
+        interaction_choice_2 = tk.Radiobutton(interaction_selection_choice, variable=interaction_mode, value=2, tristatevalue=0, text="Interactive Test")
+        interaction_choice_2.grid(row=1, column=1, sticky="w")
+
+        interaction_start = ttk.Button(interaction_selection, text= "Start")
+        interaction_start.grid(row=0, column=2)
+
+        tk.Frame(parent, height=1, bg="black").grid(row=1, column=0, sticky="news")
+
+        # Test Interaction Frame
+        interaction_test = tk.Frame(parent)
+        interaction_test.grid(row=2, column=0, sticky="nswe")
+        interaction_test.rowconfigure(0, weight=1)
+        interaction_test.columnconfigure(2, weight=1)
+
+        interaction_test_buttons = tk.Frame(interaction_test, bg="lightgray")
+        interaction_test_buttons.grid(row=0, column=0, sticky="nswe")
+        interaction_test_buttons.grid_columnconfigure(0, weight=1)
+        interaction_test_buttons.grid_columnconfigure(1, weight=1)
+        interaction_test_buttons.grid_columnconfigure(2, weight=1)
+        interaction_test_buttons.grid_rowconfigure(0, weight=1)
+        interaction_test_buttons.grid_rowconfigure(1, weight=1)
+        interaction_test_buttons.grid_rowconfigure(2, weight=1)
+        interaction_test_buttons.grid_rowconfigure(3, weight=1)
+        interaction_test_buttons.grid_rowconfigure(4, weight=1)
 
         def test():
             print("It works!")
 
-        self.photo_play  = tk.PhotoImage(file = r"./server/sources/play.png").subsample(5,5)
-        self.photo_pause = tk.PhotoImage(file = r"./server/sources/pause.png").subsample(5,5)
-        self.photo_next  = tk.PhotoImage(file = r"./server/sources/next.png").subsample(5,5)
-        self.photo_prev  = tk.PhotoImage(file = r"./server/sources/previous.png").subsample(5,5)
-        self.photo_stop  = tk.PhotoImage(file = r"./server/sources/stop.png").subsample(5,5)
+        self.photo_play  = tk.PhotoImage(file = r"./server/sources/play.png").subsample(7,7)
+        self.photo_next  = tk.PhotoImage(file = r"./server/sources/next.png").subsample(7,7)
+        self.photo_prev  = tk.PhotoImage(file = r"./server/sources/previous.png").subsample(7,7)
+        self.photo_stop  = tk.PhotoImage(file = r"./server/sources/stop.png").subsample(7,7)
+        self.red_btn     = tk.PhotoImage(file = r"./server/sources/red_btn.png").subsample(7,7)
+        self.green_btn   = tk.PhotoImage(file = r"./server/sources/green_btn.png").subsample(7,7)
+        self.blue_btn    = tk.PhotoImage(file = r"./server/sources/blue_btn.png").subsample(7,7)
 
-        self.interaction_button = ttk.Button(parent, text= "Play", image=self.photo_play, compound=tk.LEFT, command= test)
-        self.interaction_button.grid(row=0, column=0, sticky="we")
+        self.interaction_button = ttk.Button(interaction_test_buttons, text= "Play/Pause", image=self.photo_play, compound=tk.LEFT, command= test)
+        self.interaction_button.grid(row=0, column=1, sticky="we")
+        self.interaction_button["state"] = "disabled"
 
-        self.interaction_button_pause = ttk.Button(parent, text= "Pause", image=self.photo_pause, compound=tk.LEFT, command= test)
-        self.interaction_button_pause.grid(row=0, column=3, sticky="we")
+        self.interaction_button_next = ttk.Button(interaction_test_buttons, text= "Next", image=self.photo_next, compound=tk.LEFT, command= test)
+        self.interaction_button_next.grid(row=1, column=2, sticky="we")
 
-        self.interaction_button_next = ttk.Button(parent, text= "Next", image=self.photo_next, compound=tk.LEFT, command= test)
-        self.interaction_button_next.grid(row=1, column=3, sticky="we")
-
-        self.interaction_button_prev = ttk.Button(parent, text= "Previous", image=self.photo_prev, compound=tk.LEFT, command= test)
+        self.interaction_button_prev = ttk.Button(interaction_test_buttons, text= "Previous", image=self.photo_prev, compound=tk.LEFT, command= test)
         self.interaction_button_prev.grid(row=1, column=0, sticky="we")
         
-        self.interaction_button_stop = ttk.Button(parent, text= "Stop", image=self.photo_stop, compound=tk.LEFT, command= test)
+        self.interaction_button_stop = ttk.Button(interaction_test_buttons, text= "Stop", image=self.photo_stop, compound=tk.LEFT, command= test)
         self.interaction_button_stop.grid(row=2, column=1, sticky="we")
 
-        self.interaction_volume = ttk.Scale(parent, from_=0, to=100, orient="vertical")
-        self.interaction_volume.grid(row=3, column=1, sticky="w")
+        tk.Frame(interaction_test, height=1, bg="black").grid(row=3, column=0, sticky="we")
 
-        self.interaction_seek = ttk.Scale(parent, from_=0, to=100)
-        self.interaction_seek.grid(row=4, column=1, sticky="we")
+        self.interaction_button_1 = ttk.Button(interaction_test_buttons, text= "Button 1", image=self.red_btn, compound=tk.LEFT, command= test)
+        self.interaction_button_1.grid(row=4, column=0, sticky="we")
+
+        self.interaction_button_2 = ttk.Button(interaction_test_buttons, text= "Button 2", image=self.green_btn, compound=tk.LEFT, command= test)
+        self.interaction_button_2.grid(row=4, column=1, sticky="we")
+
+        self.interaction_button_3 = ttk.Button(interaction_test_buttons, text= "Button 3", image=self.blue_btn, compound=tk.LEFT, command= test)
+        self.interaction_button_3.grid(row=4, column=2, sticky="we")  
+
+        tk.Frame(interaction_test, height=1, bg="black").grid(row=0, column=1, sticky="ns")
+
+        interaction_test_scales = tk.Frame(interaction_test)
+        interaction_test_scales.grid(row=0, column=2, sticky="news")
+        interaction_test_scales.columnconfigure(0, weight=1)
+        interaction_test_scales.rowconfigure(0, weight=1)
+        interaction_test_scales.rowconfigure(2, weight=1)
+
+        interaction_test_scales_upper = tk.Frame(interaction_test_scales)
+        interaction_test_scales_upper.grid(row=0, column=0, sticky="news", padx=10, pady=10)
+        interaction_test_scales_upper.rowconfigure(0, weight=0)
+        interaction_test_scales_upper.rowconfigure(1, weight=1)
+        interaction_test_scales_upper.columnconfigure(0, weight=1)
+        interaction_test_scales_upper.columnconfigure(1, weight=1)
+
+        self.test_volume_user_lb = tk.Label(interaction_test_scales_upper, text="Volume Input")
+        self.test_volume_user_lb.grid(row=0, column=0, sticky="news")
+
+        self.test_volume_user = ttk.Scale(interaction_test_scales_upper, from_=0, to=100, orient="vertical")
+        self.test_volume_user.grid(row=1, column=0, sticky="news")
+
+        self.test_volume_required_lb = tk.Label(interaction_test_scales_upper, text="Volume Required")
+        self.test_volume_required_lb.grid(row=0, column=1, sticky="news")
+
+        self.test_volume_required = ttk.Scale(interaction_test_scales_upper, from_=0, to=100, orient="vertical")
+        self.test_volume_required.grid(row=1, column=1, sticky="news")
+
+        tk.Frame(interaction_test_scales, height=1, bg="black").grid(row=1, column=0, sticky="news")
+
+        interaction_test_scales_lower = tk.Frame(interaction_test_scales, bg="green")
+        interaction_test_scales_lower.grid(row=2, column=0, sticky="news", padx=10)
+        interaction_test_scales_lower.rowconfigure(0, weight=1)
+        interaction_test_scales_lower.rowconfigure(1, weight=1)
+        interaction_test_scales_lower.rowconfigure(2, weight=1)
+        interaction_test_scales_lower.rowconfigure(3, weight=1)
+        interaction_test_scales_lower.columnconfigure(0, weight=1)
+
+        self.test_seek_user_lb = tk.Label(interaction_test_scales_lower, anchor="w", text="Seek Input")
+        self.test_seek_user_lb.grid(row=0, column=0, sticky="news")
+
+        self.test_seek_user = ttk.Scale(interaction_test_scales_lower, from_=0, to=100)
+        self.test_seek_user.grid(row=1, column=0, sticky="news")
+
+        self.test_seek_required_lb = tk.Label(interaction_test_scales_lower, anchor="w", text="Seek Required")
+        self.test_seek_required_lb.grid(row=2, column=0, sticky="news")
+
+        self.test_seek_required = ttk.Scale(interaction_test_scales_lower, from_=0, to=100)
+        self.test_seek_required.grid(row=3, column=0, sticky="news")
 
     def set_udp(self, host, port):
         """
