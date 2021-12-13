@@ -28,7 +28,7 @@ class Server:
         self.volume = cast(self.interface, POINTER(IAudioEndpointVolume))
 
         # Window and canvas initialization parameters
-        self.width  = 800
+        self.width  = 700
         self.height = 400
         self.window = tk.Tk()
         self.window.title("Android's Sensors")
@@ -45,6 +45,9 @@ class Server:
 
         self.general_frame = tk.Frame(self.tab_widget)
         self.general_frame.columnconfigure(0, weight=1)
+        self.general_frame.rowconfigure(0, weight=1)
+        self.general_frame.rowconfigure(1, weight=1)
+        self.general_frame.rowconfigure(2, weight=1)
         self.create_general(self.general_frame)
 
         self.settings_frame = tk.Frame(self.tab_widget)
@@ -62,40 +65,40 @@ class Server:
 
     def create_general(self, parent):
 
-        conn_info = tk.Label(parent, text="Connection", font=("Courier", 24), anchor="w",)
-        conn_info.grid(row=0, column=0, sticky="we")
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Connection Information ~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        status_frame = tk.Frame(parent)
+        status_frame.grid(row=0, column=0, sticky="we", padx=0)
 
-        # Status Label
-        self.status_frame = tk.Frame(parent)
-        self.status_frame.grid(row=1, column=0, sticky="we", padx=0)
+        conn_info = tk.Label(status_frame, text="Connection", font=("Courier", 24), anchor="w",)
+        conn_info.grid(row=0, column=0, sticky="we", columnspan=2)
 
-        self.status_label = tk.Label(self.status_frame, text="Status:")
-        self.status_label.grid(row=0, column=0, sticky="we")
+        status_label = tk.Label(status_frame, text="Status:")
+        status_label.grid(row=1, column=0, sticky="we")
         self.status_var = tk.StringVar()
         self.status_var.set("Not Connected")
-        self.label_status_var = tk.Label(self.status_frame, textvariable=self.status_var, fg="Red")
-        self.label_status_var.grid(row=0, column=1, sticky="we", padx=25)
+        self.label_status_var = tk.Label(status_frame, textvariable=self.status_var, fg="Red")
+        self.label_status_var.grid(row=1, column=1, sticky="we", padx=25)
 
-        self.client_label = tk.Label(self.status_frame, text="Client:")
-        self.client_label.grid(row=1, column=0, sticky="we")
+        client_label = tk.Label(status_frame, text="Client:")
+        client_label.grid(row=2, column=0, sticky="we")
         self.client_var = tk.StringVar()
         self.client_var.set("Not Connected")
-        self.label_client_var = tk.Label(self.status_frame, textvariable=self.client_var, fg="Red")
-        self.label_client_var.grid(row=1, column=1, sticky="we", padx=25)
+        self.label_client_var = tk.Label(status_frame, textvariable=self.client_var, fg="Red")
+        self.label_client_var.grid(row=2, column=1, sticky="we", padx=25)
 
-        information = tk.Label(parent, text="Sensor Data", font=("Courier", 24), anchor="w",)
-        information.grid(row=2, column=0, sticky="we")
-
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Sensor Data Information ~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         information_grid = tk.Frame(parent)
-        information_grid.grid(row=3, column=0, sticky="nswe")
-        information_grid.rowconfigure(0, weight=1)
+        information_grid.grid(row=1, column=0, sticky="nswe")
         information_grid.columnconfigure(0, weight=1)
         information_grid.columnconfigure(1, weight=1)
         information_grid.columnconfigure(2, weight=1)
 
+        information = tk.Label(information_grid, text="Sensor Data", font=("Courier", 24), anchor="w",)
+        information.grid(row=0, column=0, sticky="we", columnspan=3)
+
         # Gyroscope Data
         gyro_data_frame = tk.Frame(information_grid)
-        gyro_data_frame.grid(row=0, column=0, sticky="we", padx=0)
+        gyro_data_frame.grid(row=1, column=0, sticky="we", padx=0)
 
         gyro_data_x_label = tk.Label(gyro_data_frame, text="Gyroscope x:")
         gyro_data_x_label.grid(row=0, column=0, sticky="we")
@@ -120,7 +123,7 @@ class Server:
 
         # Positional Data
         position_data_frame = tk.Frame(information_grid)
-        position_data_frame.grid(row=0, column=1, sticky="we", padx=0)
+        position_data_frame.grid(row=1, column=1, sticky="we", padx=0)
 
         position_data_x_label = tk.Label(position_data_frame, text="Acceleration x:")
         position_data_x_label.grid(row=0, column=0, sticky="we")
@@ -145,7 +148,7 @@ class Server:
 
         # Rotational Data
         rotation_data_frame = tk.Frame(information_grid)
-        rotation_data_frame.grid(row=0, column=2, sticky="we", padx=0)
+        rotation_data_frame.grid(row=1, column=2, sticky="we", padx=0)
 
         rotation_data_x_label = tk.Label(rotation_data_frame, text="Rotation x:")
         rotation_data_x_label.grid(row=0, column=0, sticky="we")
@@ -168,8 +171,19 @@ class Server:
         label_rotation_z = tk.Label(rotation_data_frame, textvariable=self.rotation_z)
         label_rotation_z.grid(row=2, column=1, sticky="we", padx=25)
 
-        modes = tk.Label(parent, text="Mode Data", font=("Courier", 24), anchor="w",)
-        modes.grid(row=4, column=0, sticky="we")
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Phone's Modes ~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        modes_frame = tk.Frame(parent)
+        modes_frame.grid(row=2, column=0, sticky="nswe", padx=0)
+
+        modes = tk.Label(modes_frame, text="Mode Data", font=("Courier", 24), anchor="w",)
+        modes.grid(row=0, column=0, sticky="we", columnspan=2)
+
+        mode_data_label = tk.Label(modes_frame, text="Current Mode:")
+        mode_data_label.grid(row=1, column=0, sticky="we")
+        self.mode_var = tk.StringVar()
+        self.mode_var.set("N/A")
+        label_mode = tk.Label(modes_frame, textvariable=self.mode_var)
+        label_mode.grid(row=1, column=1, sticky="we", padx=25)
 
     def create_settings(self, parent):
 
@@ -189,26 +203,23 @@ class Server:
         "Scroll DOWN"
         ]
 
-        gestures = tk.Label(parent, text="SETTINGS", font=("Courier", 24))
-        gestures.grid(row=0, column=0, sticky="we")
-
         self.testlabel = tk.Label(parent, text="Play/Pause: ")
-        self.testlabel.grid(row=1, column=0, sticky="we")
+        self.testlabel.grid(row=0, column=0, sticky="we")
 
         self.variable = tk.StringVar(parent)
         self.variable.set(OPTIONS[2]) # default value
 
         self.w = ttk.OptionMenu(parent, self.variable, OPTIONS[2], *OPTIONS, command=ok)
-        self.w.grid(row=1, column=1, sticky="we")
+        self.w.grid(row=0, column=1, sticky="we")
 
         self.testlabel1 = tk.Label(parent, text="Previous: ")
-        self.testlabel1.grid(row=2, column=0, sticky="we")
+        self.testlabel1.grid(row=1, column=0, sticky="we")
 
         self.variable1 = tk.StringVar(parent)
         self.variable1.set(OPTIONS[0]) # default value
 
         self.w1 = ttk.OptionMenu(parent, self.variable1, OPTIONS[0], *OPTIONS, command=ok)
-        self.w1.grid(row=2, column=1, sticky="we")
+        self.w1.grid(row=1, column=1, sticky="we")
 
     def create_interaction_frame(self, parent):
         """
