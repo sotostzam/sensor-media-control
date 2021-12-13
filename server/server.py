@@ -13,15 +13,13 @@ class Server:
     and opens a UDP socket which listens to a user-defined port.
     """
 
-    def __init__(self):
+    def __init__(self, host, port):
+        self.host = host
+        self.port = port
         self.create_gui()
         self.create_udp_stream()
 
     def create_gui(self):
-
-        self.host = ''
-        self.port = 50000
-
         self.pos_vector_y = 0
 
         # Get default audio device using PyCAW
@@ -36,72 +34,18 @@ class Server:
         self.window.title("Android's Sensors")
         self.window.resizable(False, False)
 
-        self.create_sensor_frame()
         self.create_tabs_frame()
 
-    def create_sensor_frame(self):
-        
-        # Main sensor Frame
-        self.sensor_frame = tk.Frame(self.window, width=self.width/4, height=self.height)
-        self.sensor_frame.grid(row=0, column=0, sticky="nswe")
-        self.sensor_frame.rowconfigure(0, minsize=100, weight=0)
-
-        # Gyroscope Data
-        self.gyro_data_frame = tk.Frame(self.sensor_frame)
-        self.gyro_data_frame.grid(row=0, column=0, sticky="we", padx=0)
-
-        self.gyro_data_x_label = tk.Label(self.gyro_data_frame, text="Gyroscope x:")
-        self.gyro_data_x_label.grid(row=0, column=0, sticky="we")
-        self.gyro_x = tk.StringVar()
-        self.gyro_x.set("N/A")
-        self.label_gyro_x = tk.Label(self.gyro_data_frame, textvariable=self.gyro_x)
-        self.label_gyro_x.grid(row=0, column=1, sticky="we", padx=25)
-
-        self.gyro_data_y_label = tk.Label(self.gyro_data_frame, text="Gyroscope y:")
-        self.gyro_data_y_label.grid(row=1, column=0, sticky="we")
-        self.gyro_y = tk.StringVar()
-        self.gyro_y.set("N/A")
-        self.label_gyro_y = tk.Label(self.gyro_data_frame, textvariable=self.gyro_y)
-        self.label_gyro_y.grid(row=1, column=1, sticky="we", padx=25)
-
-        self.gyro_data_z_label = tk.Label(self.gyro_data_frame, text="Gyroscope z:")
-        self.gyro_data_z_label.grid(row=2, column=0, sticky="we")
-        self.gyro_z = tk.StringVar()
-        self.gyro_z.set("N/A")
-        self.label_gyro_z = tk.Label(self.gyro_data_frame, textvariable=self.gyro_z)
-        self.label_gyro_z.grid(row=2, column=1, sticky="we", padx=25)
-
-        # Positional Data
-        self.position_data_frame = tk.Frame(self.sensor_frame)
-        self.position_data_frame.grid(row=1, column=0, sticky="we", padx=0)
-
-        self.position_data_x_label = tk.Label(self.position_data_frame, text="Acceleration x:")
-        self.position_data_x_label.grid(row=0, column=0, sticky="we")
-        self.position_x = tk.StringVar()
-        self.position_x.set("N/A")
-        self.label_position_x = tk.Label(self.position_data_frame, textvariable=self.position_x)
-        self.label_position_x.grid(row=0, column=1, sticky="we", padx=25)
-
-        self.position_data_y_label = tk.Label(self.position_data_frame, text="Acceleration y:")
-        self.position_data_y_label.grid(row=1, column=0, sticky="we")
-        self.position_y = tk.StringVar()
-        self.position_y.set("N/A")
-        self.label_position_y = tk.Label(self.position_data_frame, textvariable=self.position_y)
-        self.label_position_y.grid(row=1, column=1, sticky="we", padx=25)
-
-        self.position_data_z_label = tk.Label(self.position_data_frame, text="Acceleration z:")
-        self.position_data_z_label.grid(row=2, column=0, sticky="we")
-        self.position_z = tk.StringVar()
-        self.position_z.set("N/A")
-        self.label_position_z = tk.Label(self.position_data_frame, textvariable=self.position_z)
-        self.label_position_z.grid(row=2, column=1, sticky="we", padx=25)
-
     def create_tabs_frame(self):
-        self.tab_widget = ttk.Notebook(self.window, width=int(self.width-self.width/4), height=self.height)
-        self.tab_widget.grid(row=0, column=1, sticky="news")
+        self.tab_widget = ttk.Notebook(self.window, width=self.width, height=self.height)
+        self.tab_widget.grid(row=0, column=0, sticky="news")
         
         s = ttk.Style()
         s.configure('TNotebook', tabposition=tk.NSEW)
+
+        self.general_frame = tk.Frame(self.tab_widget)
+        self.general_frame.columnconfigure(0, weight=1)
+        self.create_general(self.general_frame)
 
         self.settings_frame = tk.Frame(self.tab_widget)
         self.create_settings(self.settings_frame)
@@ -112,8 +56,120 @@ class Server:
         self.interaction_frame.rowconfigure(2, minsize=100, weight=1)
         self.create_interaction_frame(self.interaction_frame)
 
+        self.tab_widget.add(self.general_frame, text='General')
         self.tab_widget.add(self.settings_frame, text='Settings')
         self.tab_widget.add(self.interaction_frame, text='Interaction Testing')
+
+    def create_general(self, parent):
+
+        conn_info = tk.Label(parent, text="Connection", font=("Courier", 24), anchor="w",)
+        conn_info.grid(row=0, column=0, sticky="we")
+
+        # Status Label
+        self.status_frame = tk.Frame(parent)
+        self.status_frame.grid(row=1, column=0, sticky="we", padx=0)
+
+        self.status_label = tk.Label(self.status_frame, text="Status:")
+        self.status_label.grid(row=0, column=0, sticky="we")
+        self.status_var = tk.StringVar()
+        self.status_var.set("Not Connected")
+        self.label_status_var = tk.Label(self.status_frame, textvariable=self.status_var, fg="Red")
+        self.label_status_var.grid(row=0, column=1, sticky="we", padx=25)
+
+        self.client_label = tk.Label(self.status_frame, text="Client:")
+        self.client_label.grid(row=1, column=0, sticky="we")
+        self.client_var = tk.StringVar()
+        self.client_var.set("Not Connected")
+        self.label_client_var = tk.Label(self.status_frame, textvariable=self.client_var, fg="Red")
+        self.label_client_var.grid(row=1, column=1, sticky="we", padx=25)
+
+        information = tk.Label(parent, text="Sensor Data", font=("Courier", 24), anchor="w",)
+        information.grid(row=2, column=0, sticky="we")
+
+        information_grid = tk.Frame(parent)
+        information_grid.grid(row=3, column=0, sticky="nswe")
+        information_grid.rowconfigure(0, weight=1)
+        information_grid.columnconfigure(0, weight=1)
+        information_grid.columnconfigure(1, weight=1)
+        information_grid.columnconfigure(2, weight=1)
+
+        # Gyroscope Data
+        gyro_data_frame = tk.Frame(information_grid)
+        gyro_data_frame.grid(row=0, column=0, sticky="we", padx=0)
+
+        gyro_data_x_label = tk.Label(gyro_data_frame, text="Gyroscope x:")
+        gyro_data_x_label.grid(row=0, column=0, sticky="we")
+        self.gyro_x = tk.StringVar()
+        self.gyro_x.set("N/A")
+        label_gyro_x = tk.Label(gyro_data_frame, textvariable=self.gyro_x)
+        label_gyro_x.grid(row=0, column=1, sticky="we", padx=25)
+
+        gyro_data_y_label = tk.Label(gyro_data_frame, text="Gyroscope y:")
+        gyro_data_y_label.grid(row=1, column=0, sticky="we")
+        self.gyro_y = tk.StringVar()
+        self.gyro_y.set("N/A")
+        label_gyro_y = tk.Label(gyro_data_frame, textvariable=self.gyro_y)
+        label_gyro_y.grid(row=1, column=1, sticky="we", padx=25)
+
+        gyro_data_z_label = tk.Label(gyro_data_frame, text="Gyroscope z:")
+        gyro_data_z_label.grid(row=2, column=0, sticky="we")
+        self.gyro_z = tk.StringVar()
+        self.gyro_z.set("N/A")
+        label_gyro_z = tk.Label(gyro_data_frame, textvariable=self.gyro_z)
+        label_gyro_z.grid(row=2, column=1, sticky="we", padx=25)
+
+        # Positional Data
+        position_data_frame = tk.Frame(information_grid)
+        position_data_frame.grid(row=0, column=1, sticky="we", padx=0)
+
+        position_data_x_label = tk.Label(position_data_frame, text="Acceleration x:")
+        position_data_x_label.grid(row=0, column=0, sticky="we")
+        self.position_x = tk.StringVar()
+        self.position_x.set("N/A")
+        label_position_x = tk.Label(position_data_frame, textvariable=self.position_x)
+        label_position_x.grid(row=0, column=1, sticky="we", padx=25)
+
+        position_data_y_label = tk.Label(position_data_frame, text="Acceleration y:")
+        position_data_y_label.grid(row=1, column=0, sticky="we")
+        self.position_y = tk.StringVar()
+        self.position_y.set("N/A")
+        label_position_y = tk.Label(position_data_frame, textvariable=self.position_y)
+        label_position_y.grid(row=1, column=1, sticky="we", padx=25)
+
+        position_data_z_label = tk.Label(position_data_frame, text="Acceleration z:")
+        position_data_z_label.grid(row=2, column=0, sticky="we")
+        self.position_z = tk.StringVar()
+        self.position_z.set("N/A")
+        label_position_z = tk.Label(position_data_frame, textvariable=self.position_z)
+        label_position_z.grid(row=2, column=1, sticky="we", padx=25)
+
+        # Rotational Data
+        rotation_data_frame = tk.Frame(information_grid)
+        rotation_data_frame.grid(row=0, column=2, sticky="we", padx=0)
+
+        rotation_data_x_label = tk.Label(rotation_data_frame, text="Rotation x:")
+        rotation_data_x_label.grid(row=0, column=0, sticky="we")
+        self.rotation_x = tk.StringVar()
+        self.rotation_x.set("N/A")
+        label_rotation_x = tk.Label(rotation_data_frame, textvariable=self.rotation_x)
+        label_rotation_x.grid(row=0, column=1, sticky="we", padx=25)
+
+        rotation_data_y_label = tk.Label(rotation_data_frame, text="Rotation y:")
+        rotation_data_y_label.grid(row=1, column=0, sticky="we")
+        self.rotation_y = tk.StringVar()
+        self.rotation_y.set("N/A")
+        label_rotation_y = tk.Label(rotation_data_frame, textvariable=self.rotation_y)
+        label_rotation_y.grid(row=1, column=1, sticky="we", padx=25)
+
+        rotation_data_z_label = tk.Label(rotation_data_frame, text="Rotation z:")
+        rotation_data_z_label.grid(row=2, column=0, sticky="we")
+        self.rotation_z = tk.StringVar()
+        self.rotation_z.set("N/A")
+        label_rotation_z = tk.Label(rotation_data_frame, textvariable=self.rotation_z)
+        label_rotation_z.grid(row=2, column=1, sticky="we", padx=25)
+
+        modes = tk.Label(parent, text="Mode Data", font=("Courier", 24), anchor="w",)
+        modes.grid(row=4, column=0, sticky="we")
 
     def create_settings(self, parent):
 
@@ -133,7 +189,7 @@ class Server:
         "Scroll DOWN"
         ]
 
-        gestures = tk.Label(parent, text="GESTURES")
+        gestures = tk.Label(parent, text="SETTINGS", font=("Courier", 24))
         gestures.grid(row=0, column=0, sticky="we")
 
         self.testlabel = tk.Label(parent, text="Play/Pause: ")
@@ -286,17 +342,6 @@ class Server:
         self.test_seek_required = ttk.Scale(interaction_test_scales_lower, from_=0, to=100)
         self.test_seek_required.grid(row=3, column=0, sticky="news")
 
-    def set_udp(self, host, port):
-        """
-        Set the host's IP and port to the UDP socket.
-
-        Args:
-            host (int): IP adress of current machine
-            port (int): Port of connected device
-        """
-        self.host = host
-        self.port = port
-
     def get_data(self):
         """
         Deserialize the UDP data stream from the Android.
@@ -304,6 +349,7 @@ class Server:
         - type `G`: Gyroscope sensor values in x,y,z
         - type `R`: Rotation vector sensor values in x,y,z
         """
+        connected = False
         while True:
             try:
                 # Buffer size 1024
@@ -311,6 +357,13 @@ class Server:
                 message_string = message.decode("utf-8")
 
                 if message_string:
+                    if not connected:
+                        self.label_status_var.config(fg='green')
+                        self.label_client_var.config(fg='black')
+                        self.status_var.set("Receiving Data")
+                        self.client_var.set(address[0])
+                        connected = True
+
                     message_string = message_string.replace(' ','').split("?")
 
                     data = {}
@@ -333,8 +386,7 @@ class Server:
 
                     if self.pos_vector_y - old_vector > 0:
                         self.increase_vol(self.pos_vector_y)
-
-                            
+   
             except (KeyboardInterrupt, SystemExit):
                 raise traceback.print_exc()
 
@@ -356,6 +408,7 @@ class Server:
         Create a socket connection and listen to datapackets.
         """
 
+        # TODO We need to check here ifwe need socket.SOCK_STREAM for TCP connection
         self.s = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 
         # Bind the IP address and port number to socket instance
@@ -363,10 +416,9 @@ class Server:
 
         print("Success binding: UDP server up and listening")
 
-        self.sensor_data = threading.Thread(target=self.get_data, daemon=True)
+        self.sensor_data = threading.Thread(target=self.get_data, daemon=True) # Use daemon=True to kill thread when applications exits
         self.sensor_data.start()
 
 if __name__ == "__main__":
-    app = Server()
-    app.set_udp('', 50000)
+    app = Server(host='', port=50000)
     app.window.mainloop()
