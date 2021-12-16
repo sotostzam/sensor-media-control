@@ -100,34 +100,29 @@ public class SecondFragment extends Fragment
 
             mStrBuilder.setLength(0);
 
-            if (gyroReady == true && rotationReady == true)
-            {
+            if (gyroReady == true && rotationReady == true) {
                 double[] finalBuffer = new double[6];
-                for(int i = 0; i < finalBuffer.length/2; i++)
-                {
+                for (int i = 0; i < finalBuffer.length / 2; i++) {
                     finalBuffer[i] = mGyroBuffer[i];
                 }
-                for(int i = finalBuffer.length/2; i < finalBuffer.length; i++)
-                {
-                    finalBuffer[i] = mRotationBuffer[i-3];
+                for (int i = finalBuffer.length / 2; i < finalBuffer.length; i++) {
+                    finalBuffer[i] = mRotationBuffer[i - 3];
                 }
 
                 addSensorToString(mStrBuilder, CSV_ID_GYROSCOPE, CSV_ID_ROTATION, finalBuffer);
                 mGyroBufferReady = false;
                 mRotationBufferReady = false;
-            }
 
-            // mStrBuilder.insert(0,String.format(Locale.ENGLISH, "%.5f", timestamp_sec));
-            mSensordata = mStrBuilder.toString();
+                mSensordata = mStrBuilder.toString();
 
-            // Get streaming status
-            boolean streamStatus = listener.getStreamStatus();
+                // Get streaming status
+                boolean streamStatus = listener.getStreamStatus();
 
-            // Check if streaming is allowed
-            if(streamStatus)
-            {
-                // Start a new thread for sending data over UDP
-                new UDPThread(mSensordata).execute();
+                // Check if streaming is allowed
+                if (streamStatus) {
+                    // Start a new thread for sending data over UDP
+                    new UDPThread(mSensordata).execute();
+                }
             }
 
         }
@@ -346,16 +341,12 @@ public class SecondFragment extends Fragment
     private static void addSensorToString(StringBuilder strbuilder,
                                           String sensorid1, String sensorid2, double ...values)
     {
-        if(values.length == 6)
+        //if(values.length == 6)
         {
             strbuilder.append(String.format(Locale.ENGLISH, "%s,%7.3f,%7.3f,%7.3f?%s,%7.3f,%7.3f,%7.3f",
                     sensorid1, values[0], values[1], values[2],
                     sensorid2, values[3], values[4], values[5]));
         }
 
-//        else if (values.length == 1)
-//        {
-//            strbuilder.append(String.format(Locale.ENGLISH, ",%s,%7.3f", sensorid, values[0]));
-//        }
     }
 }
