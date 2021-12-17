@@ -33,7 +33,7 @@ public class FirstFragment extends Fragment
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
     {
-        mImageButton = (ImageButton) view.findViewById(R.id.imageButton);
+        mImageButton = (ImageButton) view.findViewById(R.id.imageButton5);
 
 
         // Changing colour of image during runtime taken from:

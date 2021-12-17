@@ -5,9 +5,12 @@
       <map>
         <entry key="..\:/Users/archi/AndroidStudioProjects/SensorCollector/app/src/main/res/drawable/ic_blue_circle_image.xml" value="0.290625" />
         <entry key="..\:/Users/archi/AndroidStudioProjects/SensorCollector/app/src/main/res/drawable/ic_playbutton.xml" value="0.290625" />
+        <entry key="..\:/Users/archi/AndroidStudioProjects/SensorCollector/app/src/main/res/drawable/ic_rectanglehorizontal.xml" value="0.290625" />
+        <entry key="..\:/Users/archi/AndroidStudioProjects/SensorCollector/app/src/main/res/drawable/ic_rectanglevertical.xml" value="0.290625" />
         <entry key="..\:/Users/archi/AndroidStudioProjects/SensorCollector/app/src/main/res/layout/activity_main.xml" value="0.26766304347826086" />
         <entry key="..\:/Users/archi/AndroidStudioProjects/SensorCollector/app/src/main/res/layout/fragment_blank.xml" value="0.2223731884057971" />
-        <entry key="..\:/Users/archi/AndroidStudioProjects/SensorCollector/app/src/main/res/layout/fragment_first.xml" value="0.27447916666666666" />
+        <entry key="..\:/Users/archi/AndroidStudioProjects/SensorCollector/app/src/main/res/layout/fragment_first.xml" value="0.25" />
+        <entry key="..\:/Users/archi/AndroidStudioProjects/SensorCollector/app/src/main/res/layout/fragment_left_screen_part_press.xml" value="0.27447916666666666" />
         <entry key="..\:/Users/archi/AndroidStudioProjects/SensorCollector/app/src/main/res/layout/fragment_second.xml" value="0.264" />
         <entry key="..\:/Users/archi/AndroidStudioProjects/SensorCollector/app/src/main/res/layout/fragment_third.xml" value="0.27025641025641023" />
       </map>
