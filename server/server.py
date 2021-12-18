@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 import socket, traceback
 import threading
+import json
 
 from ctypes import cast, POINTER
 from comtypes import CLSCTX_ALL
@@ -16,11 +17,11 @@ class Server:
     def __init__(self, host, port):
         self.host = host
         self.port = port
-        self.create_gui()
-        self.create_udp_stream()
 
-    def create_gui(self):
         self.pos_vector_y = 0
+
+        self.settings = {}
+        self.populate_settings()
 
         # Get default audio device using PyCAW
         self.devices = AudioUtilities.GetSpeakers()
@@ -35,6 +36,41 @@ class Server:
         self.window.resizable(False, False)
 
         self.create_tabs_frame()
+        self.create_udp_stream()
+
+    def populate_settings(self):
+        """
+        This function populates the application's setting on startup. If there is not a settings.json file present, 
+        create one with default parameters.
+        """
+        try:
+            with open('./server/settings.json') as json_file:
+                self.settings = json.load(json_file)
+        except:
+            print('No settings file found. Created file with default settings.')
+            self.settings['LSTU'] = {'Interaction' : 'Stop', 'Type' : 'Instant'}
+            self.settings['LSTD'] = {'Interaction' : 'Stop', 'Type' : 'Instant'}
+            self.settings['LSTL'] = {'Interaction' : 'Stop', 'Type' : 'Instant'}
+            self.settings['LSTR'] = {'Interaction' : 'Stop', 'Type' : 'Instant'}
+            self.settings['RSTU'] = {'Interaction' : 'Stop', 'Type' : 'Instant'}
+            self.settings['RSTD'] = {'Interaction' : 'Stop', 'Type' : 'Instant'}
+            self.settings['RSTL'] = {'Interaction' : 'Stop', 'Type' : 'Instant'}
+            self.settings['RSTR'] = {'Interaction' : 'Stop', 'Type' : 'Instant'}
+            self.settings['TSTU'] = {'Interaction' : 'Stop', 'Type' : 'Instant'}
+            self.settings['TSTD'] = {'Interaction' : 'Stop', 'Type' : 'Instant'}
+            self.settings['TSTL'] = {'Interaction' : 'Stop', 'Type' : 'Instant'}
+            self.settings['TSTR'] = {'Interaction' : 'Stop', 'Type' : 'Instant'}
+            self.settings['BSTU'] = {'Interaction' : 'Stop', 'Type' : 'Instant'}
+            self.settings['BSTD'] = {'Interaction' : 'Stop', 'Type' : 'Instant'}
+            self.settings['BSTL'] = {'Interaction' : 'Stop', 'Type' : 'Instant'}
+            self.settings['BSTR'] = {'Interaction' : 'Stop', 'Type' : 'Instant'}
+
+    def save_settings(self):
+        """
+        Save settings from the application to a json file.
+        """
+        with open('./server/settings.json', 'w') as json_settings:
+            json.dump(self.settings, json_settings)
 
     def create_tabs_frame(self):
         self.tab_widget = ttk.Notebook(self.window, width=self.width, height=self.height)
@@ -53,7 +89,7 @@ class Server:
 
         self.settings_frame = tk.Frame(self.tab_widget)
         self.settings_frame.columnconfigure(0, weight=1)
-        self.settings_frame.rowconfigure(2, weight=1)
+        self.settings_frame.rowconfigure(0, weight=1)
         self.create_settings(self.settings_frame)
 
         self.interaction_frame = tk.Frame(self.tab_widget)
@@ -190,28 +226,6 @@ class Server:
 
     def create_settings(self, parent):
 
-        self.mode = 0  # Mode selection: 0 for screen-layout mode and 1 for orientation mode
-
-        mode_info_frame = tk.Frame(parent)
-        mode_info_frame.grid(row=0, column=0, sticky="we", pady=10)
-        mode_info_frame.rowconfigure(1, weight=1)
-        mode_info_frame.columnconfigure(0, weight=1)
-        mode_info_frame.columnconfigure(1, weight=1)
-
-        mode_info_label = tk.Label(mode_info_frame, font=("Courier", 12), text="Please select your preferred mode:")
-        mode_info_label.grid(row=0, column=0, sticky="we")
-
-        mode_btn_group = tk.Frame(mode_info_frame)
-        mode_btn_group.grid(row=0, column=1, sticky="nswe")
-
-        self.mode_1_button = ttk.Button(mode_btn_group, text= "Screen Layout Mode", command=lambda: show_frame(0))
-        self.mode_1_button.grid(row=0, column=0, sticky="we")
-
-        self.mode_2_button = ttk.Button(mode_btn_group, text= "Orientation Mode", command=lambda: show_frame(1))
-        self.mode_2_button.grid(row=1, column=0, sticky="we")
-
-        tk.Frame(parent, height=1, bg="black").grid(row=1, column=0, sticky="ew")
-
         ACTIONS = [
             "Play/Pause",
             "Previous",
@@ -228,332 +242,366 @@ class Server:
         TYPES = [
             "Constant",
             "Incremental",
-            "Exponential",
-            "Instant"
+            "Steps"
         ]
 
-        def create_slm_settings(parent_frame):
-            #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Screen Left Actions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-            slm_left = tk.Frame(parent_frame)
-            slm_left.grid(row=0, column=0, sticky="nswe")
-            slm_left.rowconfigure(0, weight=1)
+        def create_layout_settings(parent_frame):
+            #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Left Screen Actions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+            ls_frame = tk.Frame(parent_frame)
+            ls_frame.grid(row=0, column=0, sticky="nswe")
+            ls_frame.rowconfigure(0, weight=1)
+            ls_frame.columnconfigure(1, weight=1)
 
             self.icon_screen_left  = tk.PhotoImage(file = r"./server/sources/screen_left.png").subsample(3,3)
-            slml_picture = tk.Label(slm_left, image=self.icon_screen_left)
-            slml_picture.grid(row=0, column=0, sticky="nswe")
+            lsf_picture = tk.Label(ls_frame, image=self.icon_screen_left)
+            lsf_picture.grid(row=0, column=0, sticky="nswe")
 
-            slml_group = tk.Frame(slm_left)
-            slml_group.grid(row=0, column=1, sticky="we")
+            ls_group = tk.Frame(ls_frame)
+            ls_group.grid(row=0, column=1, sticky="we")
+            ls_group.columnconfigure(1, weight=1)
+            ls_group.columnconfigure(2, weight=1)
+    
+            lstu_label = tk.Label(ls_group, anchor="w", text="Tilt Up:")
+            lstu_label.grid(row=0, column=0, sticky="we")
 
-            slml_tu = tk.Label(slml_group, anchor="w", text="Tilt Up:")
-            slml_tu.grid(row=0, column=0, sticky="we")
+            self.lstu_action_vars = tk.StringVar(ls_group)
+            self.lstu_action_vars.set(self.settings['LSTU']['Interaction'])
 
-            self.slml_tu_action_vars = tk.StringVar(slml_group)
-            self.slml_tu_action_vars.set(ACTIONS[2])
+            self.lstu_action = ttk.OptionMenu(ls_group, self.lstu_action_vars, self.settings['LSTU']['Interaction'], *ACTIONS, 
+                                                    command= lambda x: modify_setting(self.lstu_action_vars, 'LSTU', 'Interaction'))
+            self.lstu_action.grid(row=0, column=1, sticky="we")
 
-            self.slml_tu_action = ttk.OptionMenu(slml_group, self.slml_tu_action_vars, ACTIONS[2], *ACTIONS, command=save_setting)
-            self.slml_tu_action.grid(row=0, column=1, sticky="we")
+            self.lstu_type_vars = tk.StringVar(ls_group)
+            self.lstu_type_vars.set(self.settings['LSTU']['Type'])
 
-            self.slml_tu_type_vars = tk.StringVar(slml_group)
-            self.slml_tu_type_vars.set(TYPES[2])
+            self.lstu_type = ttk.OptionMenu(ls_group, self.lstu_type_vars, self.settings['LSTU']['Type'], *TYPES, 
+                                                    command=lambda x: modify_setting(self.lstu_type_vars, 'LSTU', 'Type'))
+            self.lstu_type.grid(row=0, column=2, sticky="we")
 
-            self.slml_tu_type = ttk.OptionMenu(slml_group, self.slml_tu_type_vars, TYPES[2], *TYPES, command=save_setting)
-            self.slml_tu_type.grid(row=0, column=2, sticky="we")
+            lstd_label = tk.Label(ls_group, anchor="w", text="Tilt Down:")
+            lstd_label.grid(row=1, column=0, sticky="we")
 
-            slml_td = tk.Label(slml_group, anchor="w", text="Tilt Down:")
-            slml_td.grid(row=1, column=0, sticky="we")
+            self.lstd_action_vars = tk.StringVar(ls_group)
+            self.lstd_action_vars.set(self.settings['LSTD']['Interaction'])
 
-            self.slml_td_action_vars = tk.StringVar(slml_group)
-            self.slml_td_action_vars.set(ACTIONS[0])
+            self.lstd_action = ttk.OptionMenu(ls_group, self.lstd_action_vars, self.settings['LSTD']['Interaction'], *ACTIONS, 
+                                                    command= lambda x: modify_setting(self.lstd_action_vars, 'LSTD', 'Interaction'))
+            self.lstd_action.grid(row=1, column=1, sticky="we")
 
-            self.slml_td_action = ttk.OptionMenu(slml_group, self.slml_td_action_vars, ACTIONS[0], *ACTIONS, command=save_setting)
-            self.slml_td_action.grid(row=1, column=1, sticky="we")
+            self.lstd_type_vars = tk.StringVar(ls_group)
+            self.lstd_type_vars.set(self.settings['LSTD']['Type'])
 
-            self.slml_td_type_vars = tk.StringVar(slml_group)
-            self.slml_td_type_vars.set(TYPES[2])
+            self.lstd_type = ttk.OptionMenu(ls_group, self.lstd_type_vars, self.settings['LSTD']['Type'], *TYPES, 
+                                                    command=lambda x: modify_setting(self.lstd_type_vars, 'LSTD', 'Type'))
+            self.lstd_type.grid(row=1, column=2, sticky="we")
 
-            self.slml_td_type = ttk.OptionMenu(slml_group, self.slml_td_type_vars, TYPES[2], *TYPES, command=save_setting)
-            self.slml_td_type.grid(row=1, column=2, sticky="we")
+            lstl_label = tk.Label(ls_group, anchor="w", text="Tilt Left:")
+            lstl_label.grid(row=2, column=0, sticky="we")
 
-            slml_tl = tk.Label(slml_group, anchor="w", text="Tilt Left:")
-            slml_tl.grid(row=2, column=0, sticky="we")
+            self.lstl_action_vars = tk.StringVar(ls_group)
+            self.lstl_action_vars.set(self.settings['LSTL']['Interaction'])
 
-            self.slml_tl_action_vars = tk.StringVar(slml_group)
-            self.slml_tl_action_vars.set(ACTIONS[0])
+            self.lstl_action = ttk.OptionMenu(ls_group, self.lstl_action_vars, self.settings['LSTL']['Interaction'], *ACTIONS, 
+                                                    command= lambda x: modify_setting(self.lstl_action_vars, 'LSTL', 'Interaction'))
+            self.lstl_action.grid(row=2, column=1, sticky="we")
 
-            self.slml_tl_action = ttk.OptionMenu(slml_group, self.slml_tl_action_vars, ACTIONS[0], *ACTIONS, command=save_setting)
-            self.slml_tl_action.grid(row=2, column=1, sticky="we")
+            self.lstl_type_vars = tk.StringVar(ls_group)
+            self.lstl_type_vars.set(self.settings['LSTL']['Type'])
 
-            self.slml_tl_type_vars = tk.StringVar(slml_group)
-            self.slml_tl_type_vars.set(TYPES[2])
+            self.lstl_type = ttk.OptionMenu(ls_group, self.lstl_type_vars, self.settings['LSTL']['Type'], *TYPES, 
+                                                    command=lambda x: modify_setting(self.lstl_type_vars, 'LSTL', 'Type'))
+            self.lstl_type.grid(row=2, column=2, sticky="we")
 
-            self.slml_tl_type = ttk.OptionMenu(slml_group, self.slml_tl_type_vars, TYPES[2], *TYPES, command=save_setting)
-            self.slml_tl_type.grid(row=2, column=2, sticky="we")
+            lstr_label = tk.Label(ls_group, anchor="w", text="Tilt Right:")
+            lstr_label.grid(row=3, column=0, sticky="we")
 
-            slml_tr = tk.Label(slml_group, anchor="w", text="Tilt Right:")
-            slml_tr.grid(row=3, column=0, sticky="we")
+            self.lstr_action_vars = tk.StringVar(ls_group)
+            self.lstr_action_vars.set(self.settings['LSTR']['Interaction'])
 
-            self.slml_tr_action_vars = tk.StringVar(slml_group)
-            self.slml_tr_action_vars.set(ACTIONS[0])
+            self.lstr_action = ttk.OptionMenu(ls_group, self.lstr_action_vars, self.settings['LSTR']['Interaction'], *ACTIONS, 
+                                                    command= lambda x: modify_setting(self.lstr_action_vars, 'LSTR', 'Interaction'))
+            self.lstr_action.grid(row=3, column=1, sticky="we")
 
-            self.slml_tr_action = ttk.OptionMenu(slml_group, self.slml_tr_action_vars, ACTIONS[0], *ACTIONS, command=save_setting)
-            self.slml_tr_action.grid(row=3, column=1, sticky="we")
+            self.lstr_type_vars = tk.StringVar(ls_group)
+            self.lstr_type_vars.set(self.settings['LSTR']['Type'])
 
-            self.slml_tr_type_vars = tk.StringVar(slml_group)
-            self.slml_tr_type_vars.set(TYPES[2])
-
-            self.slml_tr_type = ttk.OptionMenu(slml_group, self.slml_tr_type_vars, TYPES[2], *TYPES, command=save_setting)
-            self.slml_tr_type.grid(row=3, column=2, sticky="we")
+            self.lstr_type = ttk.OptionMenu(ls_group, self.lstr_type_vars, self.settings['LSTR']['Type'], *TYPES, 
+                                                    command=lambda x: modify_setting(self.lstr_type_vars, 'LSTR', 'Type'))
+            self.lstr_type.grid(row=3, column=2, sticky="we")
 
             tk.Frame(parent_frame, height=1, bg="black").grid(row=0, column=1, sticky="news")
+
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Screen Right Actions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-            slm_right = tk.Frame(parent_frame)
-            slm_right.grid(row=0, column=2, sticky="nswe")
-            slm_right.rowconfigure(0, weight=1)
+            rs_frame = tk.Frame(parent_frame)
+            rs_frame.grid(row=0, column=2, sticky="nswe")
+            rs_frame.rowconfigure(0, weight=1)
+            rs_frame.columnconfigure(1, weight=1)
 
             self.icon_screen_right  = tk.PhotoImage(file = r"./server/sources/screen_right.png").subsample(3,3)
-            slmr_picture = tk.Label(slm_right, image=self.icon_screen_right)
-            slmr_picture.grid(row=0, column=0, sticky="we")
+            rsf_picture = tk.Label(rs_frame, image=self.icon_screen_right)
+            rsf_picture.grid(row=0, column=0, sticky="we")
 
-            slmr_group = tk.Frame(slm_right)
-            slmr_group.grid(row=0, column=1, sticky="we")
+            rs_group = tk.Frame(rs_frame)
+            rs_group.grid(row=0, column=1, sticky="we")
+            rs_group.columnconfigure(1, weight=1)
+            rs_group.columnconfigure(2, weight=1)
 
-            slmr_tu = tk.Label(slmr_group, anchor="w", text="Tilt Up:")
-            slmr_tu.grid(row=0, column=0, sticky="we")
+            rstu_label = tk.Label(rs_group, anchor="w", text="Tilt Up:")
+            rstu_label.grid(row=0, column=0, sticky="we")
 
-            self.slmr_tu_action_vars = tk.StringVar(slmr_group)
-            self.slmr_tu_action_vars.set(ACTIONS[2])
+            self.rstu_action_vars = tk.StringVar(rs_group)
+            self.rstu_action_vars.set(self.settings['RSTU']['Interaction'])
 
-            self.slmr_tu_action = ttk.OptionMenu(slmr_group, self.slmr_tu_action_vars, ACTIONS[2], *ACTIONS, command=save_setting)
-            self.slmr_tu_action.grid(row=0, column=1, sticky="we")
+            self.rstu_action = ttk.OptionMenu(rs_group, self.rstu_action_vars, self.settings['RSTU']['Interaction'], *ACTIONS,
+                                                    command= lambda x: modify_setting(self.rstu_action_vars, 'RSTU', 'Interaction'))
+            self.rstu_action.grid(row=0, column=1, sticky="we")
 
-            self.slmr_tu_type_vars = tk.StringVar(slmr_group)
-            self.slmr_tu_type_vars.set(TYPES[2])
+            self.rstu_type_vars = tk.StringVar(rs_group)
+            self.rstu_type_vars.set(self.settings['RSTU']['Type'])
 
-            self.slmr_tu_type = ttk.OptionMenu(slmr_group, self.slmr_tu_type_vars, TYPES[2], *TYPES, command=save_setting)
-            self.slmr_tu_type.grid(row=0, column=2, sticky="we")
+            self.rstu_type = ttk.OptionMenu(rs_group, self.rstu_type_vars, self.settings['RSTU']['Type'], *TYPES,
+                                                    command=lambda x: modify_setting(self.rstu_type_vars, 'RSTU', 'Type'))
+            self.rstu_type.grid(row=0, column=2, sticky="we")
 
-            slmr_td = tk.Label(slmr_group, anchor="w", text="Tilt Down:")
-            slmr_td.grid(row=1, column=0, sticky="we")
+            rstd_label = tk.Label(rs_group, anchor="w", text="Tilt Down:")
+            rstd_label.grid(row=1, column=0, sticky="we")
 
-            self.slmr_td_action_vars = tk.StringVar(slmr_group)
-            self.slmr_td_action_vars.set(ACTIONS[0])
+            self.rstd_action_vars = tk.StringVar(rs_group)
+            self.rstd_action_vars.set(self.settings['RSTD']['Interaction'])
 
-            self.slmr_td_action = ttk.OptionMenu(slmr_group, self.slmr_td_action_vars, ACTIONS[0], *ACTIONS, command=save_setting)
-            self.slmr_td_action.grid(row=1, column=1, sticky="we")
+            self.rstd_action = ttk.OptionMenu(rs_group, self.rstd_action_vars, self.settings['RSTD']['Interaction'], *ACTIONS,
+                                                    command= lambda x: modify_setting(self.rstd_action_vars, 'RSTD', 'Interaction'))
+            self.rstd_action.grid(row=1, column=1, sticky="we")
 
-            self.slmr_td_type_vars = tk.StringVar(slmr_group)
-            self.slmr_td_type_vars.set(TYPES[2])
+            self.rstd_type_vars = tk.StringVar(rs_group)
+            self.rstd_type_vars.set(self.settings['RSTD']['Type'])
 
-            self.slmr_td_type = ttk.OptionMenu(slmr_group, self.slmr_td_type_vars, TYPES[2], *TYPES, command=save_setting)
-            self.slmr_td_type.grid(row=1, column=2, sticky="we")
+            self.rstd_type = ttk.OptionMenu(rs_group, self.rstd_type_vars, self.settings['RSTD']['Type'], *TYPES,
+                                                    command=lambda x: modify_setting(self.rstd_type_vars, 'RSTD', 'Type'))
+            self.rstd_type.grid(row=1, column=2, sticky="we")
 
-            slmr_tl = tk.Label(slmr_group, anchor="w", text="Tilt Left:")
-            slmr_tl.grid(row=2, column=0, sticky="we")
+            rstl_label = tk.Label(rs_group, anchor="w", text="Tilt Left:")
+            rstl_label.grid(row=2, column=0, sticky="we")
 
-            self.slmr_tl_action_vars = tk.StringVar(slmr_group)
-            self.slmr_tl_action_vars.set(ACTIONS[0])
+            self.rstl_action_vars = tk.StringVar(rs_group)
+            self.rstl_action_vars.set(self.settings['RSTL']['Interaction'])
 
-            self.slmr_tl_action = ttk.OptionMenu(slmr_group, self.slmr_tl_action_vars, ACTIONS[0], *ACTIONS, command=save_setting)
-            self.slmr_tl_action.grid(row=2, column=1, sticky="we")
+            self.rstl_action = ttk.OptionMenu(rs_group, self.rstl_action_vars, self.settings['RSTL']['Interaction'], *ACTIONS,
+                                                    command= lambda x: modify_setting(self.rstl_action_vars, 'RSTL', 'Interaction'))
+            self.rstl_action.grid(row=2, column=1, sticky="we")
 
-            self.slmr_tl_type_vars = tk.StringVar(slmr_group)
-            self.slmr_tl_type_vars.set(TYPES[2])
+            self.rstl_type_vars = tk.StringVar(rs_group)
+            self.rstl_type_vars.set(self.settings['RSTL']['Type'])
 
-            self.slmr_tl_type = ttk.OptionMenu(slmr_group, self.slmr_tl_type_vars, TYPES[2], *TYPES, command=save_setting)
-            self.slmr_tl_type.grid(row=2, column=2, sticky="we")
+            self.rstl_type = ttk.OptionMenu(rs_group, self.rstl_type_vars, self.settings['RSTL']['Type'], *TYPES,
+                                                    command=lambda x: modify_setting(self.rstl_type_vars, 'RSTL', 'Type'))
+            self.rstl_type.grid(row=2, column=2, sticky="we")
 
-            slmr_tr = tk.Label(slmr_group, anchor="w", text="Tilt Right:")
-            slmr_tr.grid(row=3, column=0, sticky="we")
+            rstr_label = tk.Label(rs_group, anchor="w", text="Tilt Right:")
+            rstr_label.grid(row=3, column=0, sticky="we")
 
-            self.slmr_tr_action_vars = tk.StringVar(slmr_group)
-            self.slmr_tr_action_vars.set(ACTIONS[0])
+            self.rstr_action_vars = tk.StringVar(rs_group)
+            self.rstr_action_vars.set(self.settings['RSTR']['Interaction'])
 
-            self.slmr_tr_action = ttk.OptionMenu(slmr_group, self.slmr_tr_action_vars, ACTIONS[0], *ACTIONS, command=save_setting)
-            self.slmr_tr_action.grid(row=3, column=1, sticky="we")
+            self.rstr_action = ttk.OptionMenu(rs_group, self.rstr_action_vars, self.settings['RSTR']['Interaction'], *ACTIONS,
+                                                    command= lambda x: modify_setting(self.rstr_action_vars, 'RSTR', 'Interaction'))
+            self.rstr_action.grid(row=3, column=1, sticky="we")
 
-            self.slmr_tr_type_vars = tk.StringVar(slmr_group)
-            self.slmr_tr_type_vars.set(TYPES[2])
+            self.rstr_type_vars = tk.StringVar(rs_group)
+            self.rstr_type_vars.set(self.settings['RSTR']['Type'])
 
-            self.slmr_tr_type = ttk.OptionMenu(slmr_group, self.slmr_tr_type_vars, TYPES[2], *TYPES, command=save_setting)
-            self.slmr_tr_type.grid(row=3, column=2, sticky="we")
+            self.rstr_type = ttk.OptionMenu(rs_group, self.rstr_type_vars, self.settings['RSTR']['Type'], *TYPES,
+                                                    command=lambda x: modify_setting(self.rstr_type_vars, 'RSTR', 'Type'))
+            self.rstr_type.grid(row=3, column=2, sticky="we")
 
             tk.Frame(parent_frame, height=1, bg="black").grid(row=1, column=0, sticky="news", columnspan=3)
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Screen Top Actions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-            slm_top = tk.Frame(parent_frame)
-            slm_top.grid(row=2, column=0, sticky="nswe")
-            slm_top.rowconfigure(0, weight=1)
+            ts_frame = tk.Frame(parent_frame)
+            ts_frame.grid(row=2, column=0, sticky="nswe")
+            ts_frame.rowconfigure(0, weight=1)
+            ts_frame.columnconfigure(1, weight=1)
 
             self.icon_screen_top  = tk.PhotoImage(file = r"./server/sources/screen_top.png").subsample(3,3)
-            slmt_picture = tk.Label(slm_top, image=self.icon_screen_top)
-            slmt_picture.grid(row=0, column=0, sticky="we")
+            tsf_picture = tk.Label(ts_frame, image=self.icon_screen_top)
+            tsf_picture.grid(row=0, column=0, sticky="we")
 
-            slmt_group = tk.Frame(slm_top)
-            slmt_group.grid(row=0, column=1, sticky="we")
+            ts_group = tk.Frame(ts_frame)
+            ts_group.grid(row=0, column=1, sticky="we")
+            ts_group.columnconfigure(1, weight=1)
+            ts_group.columnconfigure(2, weight=1)
 
-            slmt_tu = tk.Label(slmt_group, anchor="w", text="Tilt Up:")
-            slmt_tu.grid(row=0, column=0, sticky="we")
+            tstu_label = tk.Label(ts_group, anchor="w", text="Tilt Up:")
+            tstu_label.grid(row=0, column=0, sticky="we")
 
-            self.slmt_tu_action_vars = tk.StringVar(slmt_group)
-            self.slmt_tu_action_vars.set(ACTIONS[2])
+            self.tstu_action_vars = tk.StringVar(ts_group)
+            self.tstu_action_vars.set(self.settings['TSTU']['Interaction'])
 
-            self.slmt_tu_action = ttk.OptionMenu(slmt_group, self.slmt_tu_action_vars, ACTIONS[2], *ACTIONS, command=save_setting)
-            self.slmt_tu_action.grid(row=0, column=1, sticky="we")
+            self.tstu_action = ttk.OptionMenu(ts_group, self.tstu_action_vars, self.settings['TSTU']['Interaction'], *ACTIONS,
+                                                    command= lambda x: modify_setting(self.tstu_action_vars, 'TSTU', 'Interaction'))
+            self.tstu_action.grid(row=0, column=1, sticky="we")
 
-            self.slmt_tu_type_vars = tk.StringVar(slmt_group)
-            self.slmt_tu_type_vars.set(TYPES[2])
+            self.tstu_type_vars = tk.StringVar(ts_group)
+            self.tstu_type_vars.set(self.settings['TSTU']['Type'])
 
-            self.slmt_tu_type = ttk.OptionMenu(slmt_group, self.slmt_tu_type_vars, TYPES[2], *TYPES, command=save_setting)
-            self.slmt_tu_type.grid(row=0, column=2, sticky="we")
+            self.tstu_type = ttk.OptionMenu(ts_group, self.tstu_type_vars, self.settings['TSTU']['Type'], *TYPES,
+                                                    command=lambda x: modify_setting(self.tstu_type_vars, 'TSTU', 'Type'))
+            self.tstu_type.grid(row=0, column=2, sticky="we")
 
-            slmt_td = tk.Label(slmt_group, anchor="w", text="Tilt Down:")
-            slmt_td.grid(row=1, column=0, sticky="we")
+            tstd_label = tk.Label(ts_group, anchor="w", text="Tilt Down:")
+            tstd_label.grid(row=1, column=0, sticky="we")
 
-            self.slmt_td_action_vars = tk.StringVar(slmt_group)
-            self.slmt_td_action_vars.set(ACTIONS[0])
+            self.tstd_action_vars = tk.StringVar(ts_group)
+            self.tstd_action_vars.set(self.settings['TSTD']['Interaction'])
 
-            self.slmt_td_action = ttk.OptionMenu(slmt_group, self.slmt_td_action_vars, ACTIONS[0], *ACTIONS, command=save_setting)
-            self.slmt_td_action.grid(row=1, column=1, sticky="we")
+            self.tstd_action = ttk.OptionMenu(ts_group, self.tstd_action_vars, self.settings['TSTD']['Interaction'], *ACTIONS,
+                                                    command= lambda x: modify_setting(self.tstd_action_vars, 'TSTD', 'Interaction'))
+            self.tstd_action.grid(row=1, column=1, sticky="we")
 
-            self.slmt_td_type_vars = tk.StringVar(slmt_group)
-            self.slmt_td_type_vars.set(TYPES[2])
+            self.tstd_type_vars = tk.StringVar(ts_group)
+            self.tstd_type_vars.set(self.settings['TSTD']['Type'])
 
-            self.slmt_td_type = ttk.OptionMenu(slmt_group, self.slmt_td_type_vars, TYPES[2], *TYPES, command=save_setting)
-            self.slmt_td_type.grid(row=1, column=2, sticky="we")
+            self.tstd_type = ttk.OptionMenu(ts_group, self.tstd_type_vars, self.settings['TSTD']['Type'], *TYPES,
+                                                    command=lambda x: modify_setting(self.tstd_type_vars, 'TSTD', 'Type'))
+            self.tstd_type.grid(row=1, column=2, sticky="we")
 
-            slmt_tl = tk.Label(slmt_group, anchor="w", text="Tilt Left:")
-            slmt_tl.grid(row=2, column=0, sticky="we")
+            tstl_label = tk.Label(ts_group, anchor="w", text="Tilt Left:")
+            tstl_label.grid(row=2, column=0, sticky="we")
 
-            self.slmt_tl_action_vars = tk.StringVar(slmt_group)
-            self.slmt_tl_action_vars.set(ACTIONS[0])
+            self.tstl_action_vars = tk.StringVar(ts_group)
+            self.tstl_action_vars.set(self.settings['TSTL']['Interaction'])
 
-            self.slmt_tl_action = ttk.OptionMenu(slmt_group, self.slmt_tl_action_vars, ACTIONS[0], *ACTIONS, command=save_setting)
-            self.slmt_tl_action.grid(row=2, column=1, sticky="we")
+            self.tstl_action = ttk.OptionMenu(ts_group, self.tstl_action_vars, self.settings['TSTL']['Interaction'], *ACTIONS,
+                                                    command= lambda x: modify_setting(self.tstl_action_vars, 'TSTL', 'Interaction'))
+            self.tstl_action.grid(row=2, column=1, sticky="we")
 
-            self.slmt_tl_type_vars = tk.StringVar(slmt_group)
-            self.slmt_tl_type_vars.set(TYPES[2])
+            self.tstl_type_vars = tk.StringVar(ts_group)
+            self.tstl_type_vars.set(self.settings['TSTL']['Type'])
 
-            self.slmt_tl_type = ttk.OptionMenu(slmt_group, self.slmt_tl_type_vars, TYPES[2], *TYPES, command=save_setting)
-            self.slmt_tl_type.grid(row=2, column=2, sticky="we")
+            self.tstl_type = ttk.OptionMenu(ts_group, self.tstl_type_vars, self.settings['TSTL']['Type'], *TYPES,
+                                                    command=lambda x: modify_setting(self.tstl_type_vars, 'TSTL', 'Type'))
+            self.tstl_type.grid(row=2, column=2, sticky="we")
 
-            slmt_tr = tk.Label(slmt_group, anchor="w", text="Tilt Right:")
-            slmt_tr.grid(row=3, column=0, sticky="we")
+            tstr_label = tk.Label(ts_group, anchor="w", text="Tilt Right:")
+            tstr_label.grid(row=3, column=0, sticky="we")
 
-            self.slmt_tr_action_vars = tk.StringVar(slmt_group)
-            self.slmt_tr_action_vars.set(ACTIONS[0])
+            self.tstr_action_vars = tk.StringVar(ts_group)
+            self.tstr_action_vars.set(self.settings['TSTR']['Interaction'])
 
-            self.slmt_tr_action = ttk.OptionMenu(slmt_group, self.slmt_tr_action_vars, ACTIONS[0], *ACTIONS, command=save_setting)
-            self.slmt_tr_action.grid(row=3, column=1, sticky="we")
+            self.tstr_action = ttk.OptionMenu(ts_group, self.tstr_action_vars, self.settings['TSTR']['Interaction'], *ACTIONS,
+                                                    command= lambda x: modify_setting(self.tstr_action_vars, 'TSTR', 'Interaction'))
+            self.tstr_action.grid(row=3, column=1, sticky="we")
 
-            self.slmt_tr_type_vars = tk.StringVar(slmt_group)
-            self.slmt_tr_type_vars.set(TYPES[2])
+            self.tstr_type_vars = tk.StringVar(ts_group)
+            self.tstr_type_vars.set(self.settings['TSTR']['Type'])
 
-            self.slmt_tr_type = ttk.OptionMenu(slmt_group, self.slmt_tr_type_vars, TYPES[2], *TYPES, command=save_setting)
-            self.slmt_tr_type.grid(row=3, column=2, sticky="we")
+            self.tstr_type = ttk.OptionMenu(ts_group, self.tstr_type_vars, self.settings['TSTR']['Type'], *TYPES,
+                                                    command=lambda x: modify_setting(self.tstr_type_vars, 'TSTR', 'Type'))
+            self.tstr_type.grid(row=3, column=2, sticky="we")
 
             tk.Frame(parent_frame, height=1, width=1, bg="black").grid(row=2, column=1, sticky="news")
+
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Screen Down Actions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-            slm_bottom = tk.Frame(parent_frame)
-            slm_bottom.grid(row=2, column=2, sticky="nswe")
-            slm_bottom.rowconfigure(0, weight=1)
+            bs_frame = tk.Frame(parent_frame)
+            bs_frame.grid(row=2, column=2, sticky="nswe")
+            bs_frame.rowconfigure(0, weight=1)
+            bs_frame.columnconfigure(1, weight=1)
 
             self.icon_screen_bottom  = tk.PhotoImage(file = r"./server/sources/screen_bottom.png").subsample(3,3)
-            slmb_picture = tk.Label(slm_bottom, image=self.icon_screen_bottom)
-            slmb_picture.grid(row=0, column=0, sticky="we")
+            bsf_picture = tk.Label(bs_frame, image=self.icon_screen_bottom)
+            bsf_picture.grid(row=0, column=0, sticky="we")
 
-            slmb_group = tk.Frame(slm_bottom)
-            slmb_group.grid(row=0, column=1, sticky="we")
+            bs_group = tk.Frame(bs_frame)
+            bs_group.grid(row=0, column=1, sticky="we")
+            bs_group.columnconfigure(1, weight=1)
+            bs_group.columnconfigure(2, weight=1)
 
-            slmb_tu = tk.Label(slmb_group, anchor="w", text="Tilt Up:")
-            slmb_tu.grid(row=0, column=0, sticky="we")
+            bstu_label = tk.Label(bs_group, anchor="w", text="Tilt Up:")
+            bstu_label.grid(row=0, column=0, sticky="we")
 
-            self.slmb_tu_action_vars = tk.StringVar(slmb_group)
-            self.slmb_tu_action_vars.set(ACTIONS[2])
+            self.bstu_action_vars = tk.StringVar(bs_group)
+            self.bstu_action_vars.set(self.settings['BSTU']['Interaction'])
 
-            self.slmb_tu_action = ttk.OptionMenu(slmb_group, self.slmb_tu_action_vars, ACTIONS[2], *ACTIONS, command=save_setting)
-            self.slmb_tu_action.grid(row=0, column=1, sticky="we")
+            self.bstu_action = ttk.OptionMenu(bs_group, self.bstu_action_vars, self.settings['BSTU']['Interaction'], *ACTIONS,
+                                                    command= lambda x: modify_setting(self.bstu_action_vars, 'BSTU', 'Interaction'))
+            self.bstu_action.grid(row=0, column=1, sticky="we")
 
-            self.slmb_tu_type_vars = tk.StringVar(slmb_group)
-            self.slmb_tu_type_vars.set(TYPES[2])
+            self.bstu_type_vars = tk.StringVar(bs_group)
+            self.bstu_type_vars.set(self.settings['BSTU']['Type'])
 
-            self.slmb_tu_type = ttk.OptionMenu(slmb_group, self.slmb_tu_type_vars, TYPES[2], *TYPES, command=save_setting)
-            self.slmb_tu_type.grid(row=0, column=2, sticky="we")
+            self.bstu_type = ttk.OptionMenu(bs_group, self.bstu_type_vars, self.settings['BSTU']['Type'], *TYPES,
+                                                    command=lambda x: modify_setting(self.bstu_type_vars, 'BSTU', 'Type'))
+            self.bstu_type.grid(row=0, column=2, sticky="we")
 
-            slmb_td = tk.Label(slmb_group, anchor="w", text="Tilt Down:")
-            slmb_td.grid(row=1, column=0, sticky="we")
+            bstd_label = tk.Label(bs_group, anchor="w", text="Tilt Down:")
+            bstd_label.grid(row=1, column=0, sticky="we")
 
-            self.slmb_td_action_vars = tk.StringVar(slmb_group)
-            self.slmb_td_action_vars.set(ACTIONS[0])
+            self.bstd_action_vars = tk.StringVar(bs_group)
+            self.bstd_action_vars.set(self.settings['BSTD']['Interaction'])
 
-            self.slmb_td_action = ttk.OptionMenu(slmb_group, self.slmb_td_action_vars, ACTIONS[0], *ACTIONS, command=save_setting)
-            self.slmb_td_action.grid(row=1, column=1, sticky="we")
+            self.bstd_action = ttk.OptionMenu(bs_group, self.bstd_action_vars, self.settings['BSTD']['Interaction'], *ACTIONS,
+                                                    command= lambda x: modify_setting(self.bstd_action_vars, 'BSTD', 'Interaction'))
+            self.bstd_action.grid(row=1, column=1, sticky="we")
 
-            self.slmb_td_type_vars = tk.StringVar(slmb_group)
-            self.slmb_td_type_vars.set(TYPES[2])
+            self.bstd_type_vars = tk.StringVar(bs_group)
+            self.bstd_type_vars.set(self.settings['BSTD']['Type'])
 
-            self.slmb_td_type = ttk.OptionMenu(slmb_group, self.slmb_td_type_vars, TYPES[2], *TYPES, command=save_setting)
-            self.slmb_td_type.grid(row=1, column=2, sticky="we")
+            self.bstd_type = ttk.OptionMenu(bs_group, self.bstd_type_vars, self.settings['BSTD']['Type'], *TYPES,
+                                                    command=lambda x: modify_setting(self.bstd_type_vars, 'BSTD', 'Type'))
+            self.bstd_type.grid(row=1, column=2, sticky="we")
 
-            slmb_tl = tk.Label(slmb_group, anchor="w", text="Tilt Left:")
-            slmb_tl.grid(row=2, column=0, sticky="we")
+            bstl_label = tk.Label(bs_group, anchor="w", text="Tilt Left:")
+            bstl_label.grid(row=2, column=0, sticky="we")
 
-            self.slmb_tl_action_vars = tk.StringVar(slmb_group)
-            self.slmb_tl_action_vars.set(ACTIONS[0])
+            self.bstl_action_vars = tk.StringVar(bs_group)
+            self.bstl_action_vars.set(self.settings['BSTL']['Interaction'])
 
-            self.slmb_tl_action = ttk.OptionMenu(slmb_group, self.slmb_tl_action_vars, ACTIONS[0], *ACTIONS, command=save_setting)
-            self.slmb_tl_action.grid(row=2, column=1, sticky="we")
+            self.bstl_action = ttk.OptionMenu(bs_group, self.bstl_action_vars, self.settings['BSTL']['Interaction'], *ACTIONS,
+                                                    command= lambda x: modify_setting(self.bstl_action_vars, 'BSTL', 'Interaction'))
+            self.bstl_action.grid(row=2, column=1, sticky="we")
 
-            self.slmb_tl_type_vars = tk.StringVar(slmb_group)
-            self.slmb_tl_type_vars.set(TYPES[2])
+            self.bstl_type_vars = tk.StringVar(bs_group)
+            self.bstl_type_vars.set(self.settings['BSTL']['Type'])
 
-            self.slmb_tl_type = ttk.OptionMenu(slmb_group, self.slmb_tl_type_vars, TYPES[2], *TYPES, command=save_setting)
-            self.slmb_tl_type.grid(row=2, column=2, sticky="we")
+            self.bstl_type = ttk.OptionMenu(bs_group, self.bstl_type_vars, self.settings['BSTL']['Type'], *TYPES,
+                                                    command=lambda x: modify_setting(self.bstl_type_vars, 'BSTL', 'Type'))
+            self.bstl_type.grid(row=2, column=2, sticky="we")
 
-            slmb_tr = tk.Label(slmb_group, anchor="w", text="Tilt Right:")
-            slmb_tr.grid(row=3, column=0, sticky="we")
+            bstr_label = tk.Label(bs_group, anchor="w", text="Tilt Right:")
+            bstr_label.grid(row=3, column=0, sticky="we")
 
-            self.slmb_tr_action_vars = tk.StringVar(slmb_group)
-            self.slmb_tr_action_vars.set(ACTIONS[0])
+            self.bstr_action_vars = tk.StringVar(bs_group)
+            self.bstr_action_vars.set(self.settings['BSTR']['Interaction'])
 
-            self.slmb_tr_action = ttk.OptionMenu(slmb_group, self.slmb_tr_action_vars, ACTIONS[0], *ACTIONS, command=save_setting)
-            self.slmb_tr_action.grid(row=3, column=1, sticky="we")
+            self.bstr_action = ttk.OptionMenu(bs_group, self.bstr_action_vars, self.settings['BSTR']['Interaction'], *ACTIONS,
+                                                    command= lambda x: modify_setting(self.bstr_action_vars, 'BSTR', 'Interaction'))
+            self.bstr_action.grid(row=3, column=1, sticky="we")
 
-            self.slmb_tr_type_vars = tk.StringVar(slmb_group)
-            self.slmb_tr_type_vars.set(TYPES[2])
+            self.bstr_type_vars = tk.StringVar(bs_group)
+            self.bstr_type_vars.set(self.settings['BSTR']['Type'])
 
-            self.slmb_tr_type = ttk.OptionMenu(slmb_group, self.slmb_tr_type_vars, TYPES[2], *TYPES, command=save_setting)
-            self.slmb_tr_type.grid(row=3, column=2, sticky="we")
+            self.bstr_type = ttk.OptionMenu(bs_group, self.bstr_type_vars, self.settings['BSTR']['Type'], *TYPES,
+                                                    command=lambda x: modify_setting(self.bstr_type_vars, 'BSTR', 'Type'))
+            self.bstr_type.grid(row=3, column=2, sticky="we")
 
-        def create_om_settings(parent_frame):
-            bbbtestlabel = tk.Label(parent_frame, text="Frame 2", bg="lightgreen")
-            bbbtestlabel.grid(row=0, column=0, sticky="nswe")
+            tk.Frame(parent_frame, height=1, bg="black").grid(row=3, column=0, sticky="news", columnspan=3)
 
-        def save_setting(*args):
-            print ("Implement function save_setting for option: " + self.slmr_tr_action_vars.get())
+        def modify_setting(*args):
+            self.settings[args[1]][args[2]] = args[0].get()
 
         # Settings for Screen layout mode
-        self.screen_layout_mode = tk.Frame(parent)
-        self.screen_layout_mode.grid(row=2, column=0, sticky="nswe")
-        self.screen_layout_mode.rowconfigure(0, weight=1)
-        self.screen_layout_mode.rowconfigure(2, weight=1)
-        self.screen_layout_mode.columnconfigure(0, weight=1)
-        self.screen_layout_mode.columnconfigure(2, weight=1)
-        create_slm_settings(self.screen_layout_mode)
+        self.screen_layout = tk.Frame(parent)
+        self.screen_layout.grid(row=0, column=0, sticky="nswe")
+        self.screen_layout.rowconfigure(0, weight=1)
+        self.screen_layout.rowconfigure(2, weight=1)
+        self.screen_layout.columnconfigure(0, weight=1)
+        self.screen_layout.columnconfigure(2, weight=1)
+        create_layout_settings(self.screen_layout)
 
-        # Settings for orientation mode
-        self.orientation_mode = tk.Frame(parent)
-        self.orientation_mode.grid(row=2, column=0, sticky="nswe")
-        self.orientation_mode.rowconfigure(0, weight=1)
-        self.orientation_mode.columnconfigure(0, weight=1)
-        create_om_settings(self.orientation_mode)
-
-        def show_frame(id):
-            if id==0:
-                self.screen_layout_mode.tkraise()
-                self.mode = 0
-            else:
-                self.orientation_mode.tkraise()
-                self.mode = 1
+        layout_btn_frame = tk.Frame(parent)
+        layout_btn_frame.grid(row=4, column=0, sticky="nswe", columnspan=3, pady=5)
+        layout_btn_frame.columnconfigure(0, weight=1)
+        self.save_settings_btn = ttk.Button(layout_btn_frame, text= "Save Settings", command= self.save_settings)
+        self.save_settings_btn.grid(row=0, column=0)
 
     def create_interaction_frame(self, parent):
         """
