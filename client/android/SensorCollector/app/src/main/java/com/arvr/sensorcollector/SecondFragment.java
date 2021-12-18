@@ -101,9 +101,6 @@ public class SecondFragment extends Fragment
 
             mStrBuilder.setLength(0);
 
-            // Get streaming status
-            boolean streamStatus = listener.getStreamStatus();
-
             if (gyroReady == true && rotationReady == true)
             {
                 double[] finalBuffer = new double[6];
@@ -119,22 +116,23 @@ public class SecondFragment extends Fragment
                 // Get which button is held pressed
                 String buttonName = listener.getButtonName();
 
-                addSensorToString(mStrBuilder, streamStatus, buttonName, CSV_ID_GYROSCOPE, CSV_ID_ROTATION, finalBuffer);
+                addSensorToString(mStrBuilder, buttonName, CSV_ID_GYROSCOPE, CSV_ID_ROTATION, finalBuffer);
                 mGyroBufferReady = false;
                 mRotationBufferReady = false;
+
+                mStrBuilder.insert(0,String.format(Locale.ENGLISH, "%s,", timeStamp));
+                mSensordata = mStrBuilder.toString();
+
+                // Get streaming status
+                boolean streamStatus = listener.getStreamStatus();
+
+                // Check if streaming is allowed
+                if(streamStatus)
+                {
+                    // Start a new thread for sending data over UDP
+                    new UDPThread(mSensordata).execute();
+                }
             }
-
-            mStrBuilder.insert(0,String.format(Locale.ENGLISH, "%s,", timeStamp));
-            mSensordata = mStrBuilder.toString();
-
-
-            // Check if streaming is allowed
-            if(streamStatus)
-            {
-                // Start a new thread for sending data over UDP
-                new UDPThread(mSensordata).execute();
-            }
-
         }
 
         @Override
@@ -351,15 +349,10 @@ public class SecondFragment extends Fragment
         //return conman.getNetworkInfo(ConnectivityManager.TYPE_WIFI).isConnectedOrConnecting();
     }
 
-    private static void addSensorToString(StringBuilder strbuilder, boolean streamStatus,
-                                          String buttonName, String sensorid1, String sensorid2,
+    private static void addSensorToString(StringBuilder strbuilder, String buttonName,
+                                          String sensorid1, String sensorid2,
                                           double ...values)
     {
-        String buttonInfo;
-        if(streamStatus){
-            buttonInfo = "PRESS";
-        }
-        else { buttonInfo = "RELEASE"; }
 
         if(values.length == 6)
         {
