@@ -52,8 +52,10 @@ public class SecondFragment extends Fragment
     private static final double NS2S = 1.0f / 1000000000.0f; // nanosec to sec
     private double[] mGyroBuffer = new double[3];
     private double[] mRotationBuffer = new double[3];
+    private double[] mAcceleroBuffer = new double[3];
     private boolean mGyroBufferReady = false;
     private boolean mRotationBufferReady = false;
+    private boolean mAcceleroBufferReady = false;
     private double mGyroTime = 0;
     private double mAccTime = 0;
     StringBuilder mStrBuilder = new StringBuilder(256);
@@ -91,26 +93,39 @@ public class SecondFragment extends Fragment
                 mRotationBuffer[2] = event.values[2];
                 mRotationBufferReady = true;
             }
+            else if(event.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
+            {
+                mAcceleroBuffer[0] = event.values[0];
+                mAcceleroBuffer[1] = event.values[1];
+                mAcceleroBuffer[2] = event.values[2];
+                mAcceleroBufferReady = true;
+
+            }
             else {
                 return;
             }
 
             boolean gyroReady = (mGyroBufferReady == true);
             boolean rotationReady = (mRotationBufferReady == true);
-
+            boolean acceleroReady = (mAcceleroBufferReady == true);
 
             mStrBuilder.setLength(0);
 
-            if (gyroReady == true && rotationReady == true)
+            if (gyroReady && rotationReady && acceleroReady)
             {
-                double[] finalBuffer = new double[6];
-                for(int i = 0; i < finalBuffer.length/2; i++)
+                double[] finalBuffer = new double[9];
+                int i = 0;
+                for(; i < finalBuffer.length/3; i++)
                 {
                     finalBuffer[i] = mGyroBuffer[i];
                 }
-                for(int i = finalBuffer.length/2; i < finalBuffer.length; i++)
+                for(;i < (finalBuffer.length/3) + 3; i++)
                 {
-                    finalBuffer[i] = mRotationBuffer[i-3];
+                    finalBuffer[i] = mAcceleroBuffer[i-3];
+                }
+                for(; i < finalBuffer.length; i++)
+                {
+                    finalBuffer[i] = mRotationBuffer[i-6];
                 }
 
                 // Get which button is held pressed
@@ -238,6 +253,9 @@ public class SecondFragment extends Fragment
             mSensor_Stream.registerListener(myhardwaresensorlistener,
                     mSensor_Stream.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR), mDelay);
 
+            mSensor_Stream.registerListener(myhardwaresensorlistener,
+                    mSensor_Stream.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), mDelay);
+
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -354,12 +372,16 @@ public class SecondFragment extends Fragment
                                           double ...values)
     {
 
-        if(values.length == 6)
+        if(values.length == 9)
         {
-            strbuilder.append(String.format(Locale.ENGLISH, "%s,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f",
-                    buttonName,
-                    values[0], values[1], values[2],
-                    values[3], values[4], values[5]));
+            strbuilder.append(String.format(Locale.ENGLISH,
+                    "%s,%7.3f,%7.3f,%7.3f," +
+                            "%7.3f,%7.3f,%7.3f," +
+                            "%7.3f,%7.3f,%7.3f,",
+                            buttonName,
+                            values[0], values[1], values[2],
+                            values[3], values[4], values[5],
+                            values[6], values[7], values[8]));
         }
 
 //        else if (values.length == 1)
