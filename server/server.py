@@ -65,6 +65,13 @@ class Server:
             self.settings['BSTL'] = {'Interaction' : 'Stop', 'Type' : 'Instant'}
             self.settings['BSTR'] = {'Interaction' : 'Stop', 'Type' : 'Instant'}
 
+    def save_settings(self):
+        """
+        Save settings from the application to a json file.
+        """
+        with open('./server/settings.json', 'w') as json_settings:
+            json.dump(self.settings, json_settings)
+
     def create_tabs_frame(self):
         self.tab_widget = ttk.Notebook(self.window, width=self.width, height=self.height)
         self.tab_widget.grid(row=0, column=0, sticky="news")
@@ -238,11 +245,12 @@ class Server:
             "Steps"
         ]
 
-        def create_slm_settings(parent_frame):
+        def create_layout_settings(parent_frame):
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Left Screen Actions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
             ls_frame = tk.Frame(parent_frame)
             ls_frame.grid(row=0, column=0, sticky="nswe")
             ls_frame.rowconfigure(0, weight=1)
+            ls_frame.columnconfigure(1, weight=1)
 
             self.icon_screen_left  = tk.PhotoImage(file = r"./server/sources/screen_left.png").subsample(3,3)
             lsf_picture = tk.Label(ls_frame, image=self.icon_screen_left)
@@ -250,6 +258,8 @@ class Server:
 
             ls_group = tk.Frame(ls_frame)
             ls_group.grid(row=0, column=1, sticky="we")
+            ls_group.columnconfigure(1, weight=1)
+            ls_group.columnconfigure(2, weight=1)
     
             lstu_label = tk.Label(ls_group, anchor="w", text="Tilt Up:")
             lstu_label.grid(row=0, column=0, sticky="we")
@@ -258,14 +268,14 @@ class Server:
             self.lstu_action_vars.set(self.settings['LSTU']['Interaction'])
 
             self.lstu_action = ttk.OptionMenu(ls_group, self.lstu_action_vars, self.settings['LSTU']['Interaction'], *ACTIONS, 
-                                                    command= lambda x: save_setting(self.lstu_action_vars, 'LSTU', 'Interaction'))
+                                                    command= lambda x: modify_setting(self.lstu_action_vars, 'LSTU', 'Interaction'))
             self.lstu_action.grid(row=0, column=1, sticky="we")
 
             self.lstu_type_vars = tk.StringVar(ls_group)
             self.lstu_type_vars.set(self.settings['LSTU']['Type'])
 
             self.lstu_type = ttk.OptionMenu(ls_group, self.lstu_type_vars, self.settings['LSTU']['Type'], *TYPES, 
-                                                    command=lambda x: save_setting(self.lstu_type_vars, 'LSTU', 'Type'))
+                                                    command=lambda x: modify_setting(self.lstu_type_vars, 'LSTU', 'Type'))
             self.lstu_type.grid(row=0, column=2, sticky="we")
 
             lstd_label = tk.Label(ls_group, anchor="w", text="Tilt Down:")
@@ -275,14 +285,14 @@ class Server:
             self.lstd_action_vars.set(self.settings['LSTD']['Interaction'])
 
             self.lstd_action = ttk.OptionMenu(ls_group, self.lstd_action_vars, self.settings['LSTD']['Interaction'], *ACTIONS, 
-                                                    command= lambda x: save_setting(self.lstd_action_vars, 'LSTD', 'Interaction'))
+                                                    command= lambda x: modify_setting(self.lstd_action_vars, 'LSTD', 'Interaction'))
             self.lstd_action.grid(row=1, column=1, sticky="we")
 
             self.lstd_type_vars = tk.StringVar(ls_group)
             self.lstd_type_vars.set(self.settings['LSTD']['Type'])
 
             self.lstd_type = ttk.OptionMenu(ls_group, self.lstd_type_vars, self.settings['LSTD']['Type'], *TYPES, 
-                                                    command=lambda x: save_setting(self.lstd_type_vars, 'LSTD', 'Type'))
+                                                    command=lambda x: modify_setting(self.lstd_type_vars, 'LSTD', 'Type'))
             self.lstd_type.grid(row=1, column=2, sticky="we")
 
             lstl_label = tk.Label(ls_group, anchor="w", text="Tilt Left:")
@@ -292,14 +302,14 @@ class Server:
             self.lstl_action_vars.set(self.settings['LSTL']['Interaction'])
 
             self.lstl_action = ttk.OptionMenu(ls_group, self.lstl_action_vars, self.settings['LSTL']['Interaction'], *ACTIONS, 
-                                                    command= lambda x: save_setting(self.lstl_action_vars, 'LSTL', 'Interaction'))
+                                                    command= lambda x: modify_setting(self.lstl_action_vars, 'LSTL', 'Interaction'))
             self.lstl_action.grid(row=2, column=1, sticky="we")
 
             self.lstl_type_vars = tk.StringVar(ls_group)
             self.lstl_type_vars.set(self.settings['LSTL']['Type'])
 
             self.lstl_type = ttk.OptionMenu(ls_group, self.lstl_type_vars, self.settings['LSTL']['Type'], *TYPES, 
-                                                    command=lambda x: save_setting(self.lstl_type_vars, 'LSTL', 'Type'))
+                                                    command=lambda x: modify_setting(self.lstl_type_vars, 'LSTL', 'Type'))
             self.lstl_type.grid(row=2, column=2, sticky="we")
 
             lstr_label = tk.Label(ls_group, anchor="w", text="Tilt Right:")
@@ -309,14 +319,14 @@ class Server:
             self.lstr_action_vars.set(self.settings['LSTR']['Interaction'])
 
             self.lstr_action = ttk.OptionMenu(ls_group, self.lstr_action_vars, self.settings['LSTR']['Interaction'], *ACTIONS, 
-                                                    command= lambda x: save_setting(self.lstr_action_vars, 'LSTR', 'Interaction'))
+                                                    command= lambda x: modify_setting(self.lstr_action_vars, 'LSTR', 'Interaction'))
             self.lstr_action.grid(row=3, column=1, sticky="we")
 
             self.lstr_type_vars = tk.StringVar(ls_group)
             self.lstr_type_vars.set(self.settings['LSTR']['Type'])
 
             self.lstr_type = ttk.OptionMenu(ls_group, self.lstr_type_vars, self.settings['LSTR']['Type'], *TYPES, 
-                                                    command=lambda x: save_setting(self.lstr_type_vars, 'LSTR', 'Type'))
+                                                    command=lambda x: modify_setting(self.lstr_type_vars, 'LSTR', 'Type'))
             self.lstr_type.grid(row=3, column=2, sticky="we")
 
             tk.Frame(parent_frame, height=1, bg="black").grid(row=0, column=1, sticky="news")
@@ -325,6 +335,7 @@ class Server:
             rs_frame = tk.Frame(parent_frame)
             rs_frame.grid(row=0, column=2, sticky="nswe")
             rs_frame.rowconfigure(0, weight=1)
+            rs_frame.columnconfigure(1, weight=1)
 
             self.icon_screen_right  = tk.PhotoImage(file = r"./server/sources/screen_right.png").subsample(3,3)
             rsf_picture = tk.Label(rs_frame, image=self.icon_screen_right)
@@ -332,6 +343,8 @@ class Server:
 
             rs_group = tk.Frame(rs_frame)
             rs_group.grid(row=0, column=1, sticky="we")
+            rs_group.columnconfigure(1, weight=1)
+            rs_group.columnconfigure(2, weight=1)
 
             rstu_label = tk.Label(rs_group, anchor="w", text="Tilt Up:")
             rstu_label.grid(row=0, column=0, sticky="we")
@@ -339,13 +352,15 @@ class Server:
             self.rstu_action_vars = tk.StringVar(rs_group)
             self.rstu_action_vars.set(self.settings['RSTU']['Interaction'])
 
-            self.rstu_action = ttk.OptionMenu(rs_group, self.rstu_action_vars, self.settings['RSTU']['Interaction'], *ACTIONS, command= lambda x: save_setting(self.rstu_action_vars, 'RSTU', 'Interaction'))
+            self.rstu_action = ttk.OptionMenu(rs_group, self.rstu_action_vars, self.settings['RSTU']['Interaction'], *ACTIONS,
+                                                    command= lambda x: modify_setting(self.rstu_action_vars, 'RSTU', 'Interaction'))
             self.rstu_action.grid(row=0, column=1, sticky="we")
 
             self.rstu_type_vars = tk.StringVar(rs_group)
             self.rstu_type_vars.set(self.settings['RSTU']['Type'])
 
-            self.rstu_type = ttk.OptionMenu(rs_group, self.rstu_type_vars, self.settings['RSTU']['Type'], *TYPES, command=lambda x: save_setting(self.rstu_type_vars, 'RSTU', 'Type'))
+            self.rstu_type = ttk.OptionMenu(rs_group, self.rstu_type_vars, self.settings['RSTU']['Type'], *TYPES,
+                                                    command=lambda x: modify_setting(self.rstu_type_vars, 'RSTU', 'Type'))
             self.rstu_type.grid(row=0, column=2, sticky="we")
 
             rstd_label = tk.Label(rs_group, anchor="w", text="Tilt Down:")
@@ -354,13 +369,15 @@ class Server:
             self.rstd_action_vars = tk.StringVar(rs_group)
             self.rstd_action_vars.set(self.settings['RSTD']['Interaction'])
 
-            self.rstd_action = ttk.OptionMenu(rs_group, self.rstd_action_vars, self.settings['RSTD']['Interaction'], *ACTIONS, command= lambda x: save_setting(self.rstd_action_vars, 'RSTD', 'Interaction'))
+            self.rstd_action = ttk.OptionMenu(rs_group, self.rstd_action_vars, self.settings['RSTD']['Interaction'], *ACTIONS,
+                                                    command= lambda x: modify_setting(self.rstd_action_vars, 'RSTD', 'Interaction'))
             self.rstd_action.grid(row=1, column=1, sticky="we")
 
             self.rstd_type_vars = tk.StringVar(rs_group)
             self.rstd_type_vars.set(self.settings['RSTD']['Type'])
 
-            self.rstd_type = ttk.OptionMenu(rs_group, self.rstd_type_vars, self.settings['RSTD']['Type'], *TYPES, command=lambda x: save_setting(self.rstd_type_vars, 'RSTD', 'Type'))
+            self.rstd_type = ttk.OptionMenu(rs_group, self.rstd_type_vars, self.settings['RSTD']['Type'], *TYPES,
+                                                    command=lambda x: modify_setting(self.rstd_type_vars, 'RSTD', 'Type'))
             self.rstd_type.grid(row=1, column=2, sticky="we")
 
             rstl_label = tk.Label(rs_group, anchor="w", text="Tilt Left:")
@@ -369,13 +386,15 @@ class Server:
             self.rstl_action_vars = tk.StringVar(rs_group)
             self.rstl_action_vars.set(self.settings['RSTL']['Interaction'])
 
-            self.rstl_action = ttk.OptionMenu(rs_group, self.rstl_action_vars, self.settings['RSTL']['Interaction'], *ACTIONS, command= lambda x: save_setting(self.rstl_action_vars, 'RSTL', 'Interaction'))
+            self.rstl_action = ttk.OptionMenu(rs_group, self.rstl_action_vars, self.settings['RSTL']['Interaction'], *ACTIONS,
+                                                    command= lambda x: modify_setting(self.rstl_action_vars, 'RSTL', 'Interaction'))
             self.rstl_action.grid(row=2, column=1, sticky="we")
 
             self.rstl_type_vars = tk.StringVar(rs_group)
             self.rstl_type_vars.set(self.settings['RSTL']['Type'])
 
-            self.rstl_type = ttk.OptionMenu(rs_group, self.rstl_type_vars, self.settings['RSTL']['Type'], *TYPES, command=lambda x: save_setting(self.rstl_type_vars, 'RSTL', 'Type'))
+            self.rstl_type = ttk.OptionMenu(rs_group, self.rstl_type_vars, self.settings['RSTL']['Type'], *TYPES,
+                                                    command=lambda x: modify_setting(self.rstl_type_vars, 'RSTL', 'Type'))
             self.rstl_type.grid(row=2, column=2, sticky="we")
 
             rstr_label = tk.Label(rs_group, anchor="w", text="Tilt Right:")
@@ -384,13 +403,15 @@ class Server:
             self.rstr_action_vars = tk.StringVar(rs_group)
             self.rstr_action_vars.set(self.settings['RSTR']['Interaction'])
 
-            self.rstr_action = ttk.OptionMenu(rs_group, self.rstr_action_vars, self.settings['RSTR']['Interaction'], *ACTIONS, command= lambda x: save_setting(self.rstr_action_vars, 'RSTR', 'Interaction'))
+            self.rstr_action = ttk.OptionMenu(rs_group, self.rstr_action_vars, self.settings['RSTR']['Interaction'], *ACTIONS,
+                                                    command= lambda x: modify_setting(self.rstr_action_vars, 'RSTR', 'Interaction'))
             self.rstr_action.grid(row=3, column=1, sticky="we")
 
             self.rstr_type_vars = tk.StringVar(rs_group)
             self.rstr_type_vars.set(self.settings['RSTR']['Type'])
 
-            self.rstr_type = ttk.OptionMenu(rs_group, self.rstr_type_vars, self.settings['RSTR']['Type'], *TYPES, command=lambda x: save_setting(self.rstr_type_vars, 'RSTR', 'Type'))
+            self.rstr_type = ttk.OptionMenu(rs_group, self.rstr_type_vars, self.settings['RSTR']['Type'], *TYPES,
+                                                    command=lambda x: modify_setting(self.rstr_type_vars, 'RSTR', 'Type'))
             self.rstr_type.grid(row=3, column=2, sticky="we")
 
             tk.Frame(parent_frame, height=1, bg="black").grid(row=1, column=0, sticky="news", columnspan=3)
@@ -398,6 +419,7 @@ class Server:
             ts_frame = tk.Frame(parent_frame)
             ts_frame.grid(row=2, column=0, sticky="nswe")
             ts_frame.rowconfigure(0, weight=1)
+            ts_frame.columnconfigure(1, weight=1)
 
             self.icon_screen_top  = tk.PhotoImage(file = r"./server/sources/screen_top.png").subsample(3,3)
             tsf_picture = tk.Label(ts_frame, image=self.icon_screen_top)
@@ -405,6 +427,8 @@ class Server:
 
             ts_group = tk.Frame(ts_frame)
             ts_group.grid(row=0, column=1, sticky="we")
+            ts_group.columnconfigure(1, weight=1)
+            ts_group.columnconfigure(2, weight=1)
 
             tstu_label = tk.Label(ts_group, anchor="w", text="Tilt Up:")
             tstu_label.grid(row=0, column=0, sticky="we")
@@ -412,13 +436,15 @@ class Server:
             self.tstu_action_vars = tk.StringVar(ts_group)
             self.tstu_action_vars.set(self.settings['TSTU']['Interaction'])
 
-            self.tstu_action = ttk.OptionMenu(ts_group, self.tstu_action_vars, self.settings['TSTU']['Interaction'], *ACTIONS, command= lambda x: save_setting(self.tstu_action_vars, 'TSTU', 'Interaction'))
+            self.tstu_action = ttk.OptionMenu(ts_group, self.tstu_action_vars, self.settings['TSTU']['Interaction'], *ACTIONS,
+                                                    command= lambda x: modify_setting(self.tstu_action_vars, 'TSTU', 'Interaction'))
             self.tstu_action.grid(row=0, column=1, sticky="we")
 
             self.tstu_type_vars = tk.StringVar(ts_group)
             self.tstu_type_vars.set(self.settings['TSTU']['Type'])
 
-            self.tstu_type = ttk.OptionMenu(ts_group, self.tstu_type_vars, self.settings['TSTU']['Type'], *TYPES, command=lambda x: save_setting(self.tstu_type_vars, 'TSTU', 'Type'))
+            self.tstu_type = ttk.OptionMenu(ts_group, self.tstu_type_vars, self.settings['TSTU']['Type'], *TYPES,
+                                                    command=lambda x: modify_setting(self.tstu_type_vars, 'TSTU', 'Type'))
             self.tstu_type.grid(row=0, column=2, sticky="we")
 
             tstd_label = tk.Label(ts_group, anchor="w", text="Tilt Down:")
@@ -427,13 +453,15 @@ class Server:
             self.tstd_action_vars = tk.StringVar(ts_group)
             self.tstd_action_vars.set(self.settings['TSTD']['Interaction'])
 
-            self.tstd_action = ttk.OptionMenu(ts_group, self.tstd_action_vars, self.settings['TSTD']['Interaction'], *ACTIONS, command= lambda x: save_setting(self.tstd_action_vars, 'TSTD', 'Interaction'))
+            self.tstd_action = ttk.OptionMenu(ts_group, self.tstd_action_vars, self.settings['TSTD']['Interaction'], *ACTIONS,
+                                                    command= lambda x: modify_setting(self.tstd_action_vars, 'TSTD', 'Interaction'))
             self.tstd_action.grid(row=1, column=1, sticky="we")
 
             self.tstd_type_vars = tk.StringVar(ts_group)
             self.tstd_type_vars.set(self.settings['TSTD']['Type'])
 
-            self.tstd_type = ttk.OptionMenu(ts_group, self.tstd_type_vars, self.settings['TSTD']['Type'], *TYPES, command=lambda x: save_setting(self.tstd_type_vars, 'TSTD', 'Type'))
+            self.tstd_type = ttk.OptionMenu(ts_group, self.tstd_type_vars, self.settings['TSTD']['Type'], *TYPES,
+                                                    command=lambda x: modify_setting(self.tstd_type_vars, 'TSTD', 'Type'))
             self.tstd_type.grid(row=1, column=2, sticky="we")
 
             tstl_label = tk.Label(ts_group, anchor="w", text="Tilt Left:")
@@ -442,13 +470,15 @@ class Server:
             self.tstl_action_vars = tk.StringVar(ts_group)
             self.tstl_action_vars.set(self.settings['TSTL']['Interaction'])
 
-            self.tstl_action = ttk.OptionMenu(ts_group, self.tstl_action_vars, self.settings['TSTL']['Interaction'], *ACTIONS, command= lambda x: save_setting(self.tstl_action_vars, 'TSTL', 'Interaction'))
+            self.tstl_action = ttk.OptionMenu(ts_group, self.tstl_action_vars, self.settings['TSTL']['Interaction'], *ACTIONS,
+                                                    command= lambda x: modify_setting(self.tstl_action_vars, 'TSTL', 'Interaction'))
             self.tstl_action.grid(row=2, column=1, sticky="we")
 
             self.tstl_type_vars = tk.StringVar(ts_group)
             self.tstl_type_vars.set(self.settings['TSTL']['Type'])
 
-            self.tstl_type = ttk.OptionMenu(ts_group, self.tstl_type_vars, self.settings['TSTL']['Type'], *TYPES, command=lambda x: save_setting(self.tstl_type_vars, 'TSTL', 'Type'))
+            self.tstl_type = ttk.OptionMenu(ts_group, self.tstl_type_vars, self.settings['TSTL']['Type'], *TYPES,
+                                                    command=lambda x: modify_setting(self.tstl_type_vars, 'TSTL', 'Type'))
             self.tstl_type.grid(row=2, column=2, sticky="we")
 
             tstr_label = tk.Label(ts_group, anchor="w", text="Tilt Right:")
@@ -457,13 +487,15 @@ class Server:
             self.tstr_action_vars = tk.StringVar(ts_group)
             self.tstr_action_vars.set(self.settings['TSTR']['Interaction'])
 
-            self.tstr_action = ttk.OptionMenu(ts_group, self.tstr_action_vars, self.settings['TSTR']['Interaction'], *ACTIONS, command= lambda x: save_setting(self.tstr_action_vars, 'TSTR', 'Interaction'))
+            self.tstr_action = ttk.OptionMenu(ts_group, self.tstr_action_vars, self.settings['TSTR']['Interaction'], *ACTIONS,
+                                                    command= lambda x: modify_setting(self.tstr_action_vars, 'TSTR', 'Interaction'))
             self.tstr_action.grid(row=3, column=1, sticky="we")
 
             self.tstr_type_vars = tk.StringVar(ts_group)
             self.tstr_type_vars.set(self.settings['TSTR']['Type'])
 
-            self.tstr_type = ttk.OptionMenu(ts_group, self.tstr_type_vars, self.settings['TSTR']['Type'], *TYPES, command=lambda x: save_setting(self.tstr_type_vars, 'TSTR', 'Type'))
+            self.tstr_type = ttk.OptionMenu(ts_group, self.tstr_type_vars, self.settings['TSTR']['Type'], *TYPES,
+                                                    command=lambda x: modify_setting(self.tstr_type_vars, 'TSTR', 'Type'))
             self.tstr_type.grid(row=3, column=2, sticky="we")
 
             tk.Frame(parent_frame, height=1, width=1, bg="black").grid(row=2, column=1, sticky="news")
@@ -472,6 +504,7 @@ class Server:
             bs_frame = tk.Frame(parent_frame)
             bs_frame.grid(row=2, column=2, sticky="nswe")
             bs_frame.rowconfigure(0, weight=1)
+            bs_frame.columnconfigure(1, weight=1)
 
             self.icon_screen_bottom  = tk.PhotoImage(file = r"./server/sources/screen_bottom.png").subsample(3,3)
             bsf_picture = tk.Label(bs_frame, image=self.icon_screen_bottom)
@@ -479,6 +512,8 @@ class Server:
 
             bs_group = tk.Frame(bs_frame)
             bs_group.grid(row=0, column=1, sticky="we")
+            bs_group.columnconfigure(1, weight=1)
+            bs_group.columnconfigure(2, weight=1)
 
             bstu_label = tk.Label(bs_group, anchor="w", text="Tilt Up:")
             bstu_label.grid(row=0, column=0, sticky="we")
@@ -486,13 +521,15 @@ class Server:
             self.bstu_action_vars = tk.StringVar(bs_group)
             self.bstu_action_vars.set(self.settings['BSTU']['Interaction'])
 
-            self.bstu_action = ttk.OptionMenu(bs_group, self.bstu_action_vars, self.settings['BSTU']['Interaction'], *ACTIONS, command= lambda x: save_setting(self.bstu_action_vars, 'BSTU', 'Interaction'))
+            self.bstu_action = ttk.OptionMenu(bs_group, self.bstu_action_vars, self.settings['BSTU']['Interaction'], *ACTIONS,
+                                                    command= lambda x: modify_setting(self.bstu_action_vars, 'BSTU', 'Interaction'))
             self.bstu_action.grid(row=0, column=1, sticky="we")
 
             self.bstu_type_vars = tk.StringVar(bs_group)
             self.bstu_type_vars.set(self.settings['BSTU']['Type'])
 
-            self.bstu_type = ttk.OptionMenu(bs_group, self.bstu_type_vars, self.settings['BSTU']['Type'], *TYPES, command=lambda x: save_setting(self.bstu_type_vars, 'BSTU', 'Type'))
+            self.bstu_type = ttk.OptionMenu(bs_group, self.bstu_type_vars, self.settings['BSTU']['Type'], *TYPES,
+                                                    command=lambda x: modify_setting(self.bstu_type_vars, 'BSTU', 'Type'))
             self.bstu_type.grid(row=0, column=2, sticky="we")
 
             bstd_label = tk.Label(bs_group, anchor="w", text="Tilt Down:")
@@ -501,13 +538,15 @@ class Server:
             self.bstd_action_vars = tk.StringVar(bs_group)
             self.bstd_action_vars.set(self.settings['BSTD']['Interaction'])
 
-            self.bstd_action = ttk.OptionMenu(bs_group, self.bstd_action_vars, self.settings['BSTD']['Interaction'], *ACTIONS, command= lambda x: save_setting(self.bstd_action_vars, 'BSTD', 'Interaction'))
+            self.bstd_action = ttk.OptionMenu(bs_group, self.bstd_action_vars, self.settings['BSTD']['Interaction'], *ACTIONS,
+                                                    command= lambda x: modify_setting(self.bstd_action_vars, 'BSTD', 'Interaction'))
             self.bstd_action.grid(row=1, column=1, sticky="we")
 
             self.bstd_type_vars = tk.StringVar(bs_group)
             self.bstd_type_vars.set(self.settings['BSTD']['Type'])
 
-            self.bstd_type = ttk.OptionMenu(bs_group, self.bstd_type_vars, self.settings['BSTD']['Type'], *TYPES, command=lambda x: save_setting(self.bstd_type_vars, 'BSTD', 'Type'))
+            self.bstd_type = ttk.OptionMenu(bs_group, self.bstd_type_vars, self.settings['BSTD']['Type'], *TYPES,
+                                                    command=lambda x: modify_setting(self.bstd_type_vars, 'BSTD', 'Type'))
             self.bstd_type.grid(row=1, column=2, sticky="we")
 
             bstl_label = tk.Label(bs_group, anchor="w", text="Tilt Left:")
@@ -516,13 +555,15 @@ class Server:
             self.bstl_action_vars = tk.StringVar(bs_group)
             self.bstl_action_vars.set(self.settings['BSTL']['Interaction'])
 
-            self.bstl_action = ttk.OptionMenu(bs_group, self.bstl_action_vars, self.settings['BSTL']['Interaction'], *ACTIONS, command= lambda x: save_setting(self.bstl_action_vars, 'BSTL', 'Interaction'))
+            self.bstl_action = ttk.OptionMenu(bs_group, self.bstl_action_vars, self.settings['BSTL']['Interaction'], *ACTIONS,
+                                                    command= lambda x: modify_setting(self.bstl_action_vars, 'BSTL', 'Interaction'))
             self.bstl_action.grid(row=2, column=1, sticky="we")
 
             self.bstl_type_vars = tk.StringVar(bs_group)
             self.bstl_type_vars.set(self.settings['BSTL']['Type'])
 
-            self.bstl_type = ttk.OptionMenu(bs_group, self.bstl_type_vars, self.settings['BSTL']['Type'], *TYPES, command=lambda x: save_setting(self.bstl_type_vars, 'BSTL', 'Type'))
+            self.bstl_type = ttk.OptionMenu(bs_group, self.bstl_type_vars, self.settings['BSTL']['Type'], *TYPES,
+                                                    command=lambda x: modify_setting(self.bstl_type_vars, 'BSTL', 'Type'))
             self.bstl_type.grid(row=2, column=2, sticky="we")
 
             bstr_label = tk.Label(bs_group, anchor="w", text="Tilt Right:")
@@ -531,27 +572,36 @@ class Server:
             self.bstr_action_vars = tk.StringVar(bs_group)
             self.bstr_action_vars.set(self.settings['BSTR']['Interaction'])
 
-            self.bstr_action = ttk.OptionMenu(bs_group, self.bstr_action_vars, self.settings['BSTR']['Interaction'], *ACTIONS, command= lambda x: save_setting(self.bstr_action_vars, 'BSTR', 'Interaction'))
+            self.bstr_action = ttk.OptionMenu(bs_group, self.bstr_action_vars, self.settings['BSTR']['Interaction'], *ACTIONS,
+                                                    command= lambda x: modify_setting(self.bstr_action_vars, 'BSTR', 'Interaction'))
             self.bstr_action.grid(row=3, column=1, sticky="we")
 
             self.bstr_type_vars = tk.StringVar(bs_group)
             self.bstr_type_vars.set(self.settings['BSTR']['Type'])
 
-            self.bstr_type = ttk.OptionMenu(bs_group, self.bstr_type_vars, self.settings['BSTR']['Type'], *TYPES, command=lambda x: save_setting(self.bstr_type_vars, 'BSTR', 'Type'))
+            self.bstr_type = ttk.OptionMenu(bs_group, self.bstr_type_vars, self.settings['BSTR']['Type'], *TYPES,
+                                                    command=lambda x: modify_setting(self.bstr_type_vars, 'BSTR', 'Type'))
             self.bstr_type.grid(row=3, column=2, sticky="we")
 
-        def save_setting(*args):
+            tk.Frame(parent_frame, height=1, bg="black").grid(row=3, column=0, sticky="news", columnspan=3)
+
+        def modify_setting(*args):
             self.settings[args[1]][args[2]] = args[0].get()
-            print(self.settings[args[1]][args[2]])
 
         # Settings for Screen layout mode
-        self.screen_layout_mode = tk.Frame(parent, bg="green")
-        self.screen_layout_mode.grid(row=0, column=0, sticky="nswe")
-        self.screen_layout_mode.rowconfigure(0, weight=1)
-        self.screen_layout_mode.rowconfigure(2, weight=1)
-        self.screen_layout_mode.columnconfigure(0, weight=1)
-        self.screen_layout_mode.columnconfigure(2, weight=1)
-        create_slm_settings(self.screen_layout_mode)
+        self.screen_layout = tk.Frame(parent)
+        self.screen_layout.grid(row=0, column=0, sticky="nswe")
+        self.screen_layout.rowconfigure(0, weight=1)
+        self.screen_layout.rowconfigure(2, weight=1)
+        self.screen_layout.columnconfigure(0, weight=1)
+        self.screen_layout.columnconfigure(2, weight=1)
+        create_layout_settings(self.screen_layout)
+
+        layout_btn_frame = tk.Frame(parent)
+        layout_btn_frame.grid(row=4, column=0, sticky="nswe", columnspan=3, pady=5)
+        layout_btn_frame.columnconfigure(0, weight=1)
+        self.save_settings_btn = ttk.Button(layout_btn_frame, text= "Save Settings", command= self.save_settings)
+        self.save_settings_btn.grid(row=0, column=0)
 
     def create_interaction_frame(self, parent):
         """
