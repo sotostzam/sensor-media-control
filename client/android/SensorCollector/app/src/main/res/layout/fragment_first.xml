@@ -16,7 +16,7 @@
         android:orientation="horizontal">
 
         <ImageButton
-            android:id="@+id/imageButton7"
+            android:id="@+id/imageButtonTop"
             android:layout_width="match_parent"
             android:layout_height="160dp"
             android:scaleType="fitCenter"
@@ -40,7 +40,7 @@
             android:orientation="horizontal">
 
             <ImageButton
-                android:id="@+id/imageButton5"
+                android:id="@+id/imageButtonLeft"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginTop="0dp"
@@ -57,7 +57,7 @@
             android:orientation="horizontal">
 
             <ImageButton
-                android:id="@+id/imageButton6"
+                android:id="@+id/imageButtonRight"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginTop="0dp"
@@ -77,7 +77,7 @@
         android:orientation="horizontal">
 
         <ImageButton
-            android:id="@+id/imageButton8"
+            android:id="@+id/imageButtonBottom"
             android:layout_width="match_parent"
             android:layout_height="160dp"
             android:layout_marginTop="0dp"

@@ -8,4 +8,5 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="holo_blue_light">@android:color/holo_blue_light</color>
+    <color name="blue_ppt">#5B9BD5</color>
 </resources>
