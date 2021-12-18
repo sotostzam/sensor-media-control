@@ -15,6 +15,7 @@ public class MainActivity extends AppCompatActivity
     ViewPager2 pager2;
     FragmentAdapter adapter;
     boolean streamFlag;
+    String buttonName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,12 +71,16 @@ public class MainActivity extends AppCompatActivity
      */
 
     @Override
-    public void onSendFunction(boolean streamFlag) {
+    public void onSendFunction(boolean streamFlag, String buttonName) {
         this.streamFlag = streamFlag;
+        this.buttonName = buttonName;
     }
 
     @Override
     public boolean getStreamStatus() {
         return this.streamFlag;
+    }
+    public String getButtonName() {
+        return this.buttonName;
     }
 }

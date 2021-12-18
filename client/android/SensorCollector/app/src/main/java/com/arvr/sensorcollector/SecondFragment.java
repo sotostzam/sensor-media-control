@@ -32,6 +32,8 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Locale;
 import java.util.Arrays.*;
 import java.util.Objects;
@@ -74,14 +76,13 @@ public class SecondFragment extends Fragment
         @Override
         public void onSensorChanged(SensorEvent event)
         {
-            double timestamp_sec = event.timestamp * NS2S;
+            String timeStamp = new SimpleDateFormat("HHmmss").format(Calendar.getInstance().getTime());
 
             if (event.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
                 mGyroBuffer[0] = event.values[0];
                 mGyroBuffer[1] = event.values[1];
                 mGyroBuffer[2] = event.values[2];
                 mGyroBufferReady = true;
-                mGyroTime = timestamp_sec;
             }
             else if (event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR)
             {
@@ -100,6 +101,9 @@ public class SecondFragment extends Fragment
 
             mStrBuilder.setLength(0);
 
+            // Get streaming status
+            boolean streamStatus = listener.getStreamStatus();
+
             if (gyroReady == true && rotationReady == true)
             {
                 double[] finalBuffer = new double[6];
@@ -112,16 +116,17 @@ public class SecondFragment extends Fragment
                     finalBuffer[i] = mRotationBuffer[i-3];
                 }
 
-                addSensorToString(mStrBuilder, CSV_ID_GYROSCOPE, CSV_ID_ROTATION, finalBuffer);
+                // Get which button is held pressed
+                String buttonName = listener.getButtonName();
+
+                addSensorToString(mStrBuilder, streamStatus, buttonName, CSV_ID_GYROSCOPE, CSV_ID_ROTATION, finalBuffer);
                 mGyroBufferReady = false;
                 mRotationBufferReady = false;
             }
 
-            // mStrBuilder.insert(0,String.format(Locale.ENGLISH, "%.5f", timestamp_sec));
+            mStrBuilder.insert(0,String.format(Locale.ENGLISH, "%s,", timeStamp));
             mSensordata = mStrBuilder.toString();
 
-            // Get streaming status
-            boolean streamStatus = listener.getStreamStatus();
 
             // Check if streaming is allowed
             if(streamStatus)
@@ -193,7 +198,10 @@ public class SecondFragment extends Fragment
     }
 
     public static interface FragmentTwoListener
-    { public boolean getStreamStatus(); }
+    {
+        public boolean getStreamStatus();
+        public String getButtonName();
+    }
 
 
 
@@ -343,14 +351,22 @@ public class SecondFragment extends Fragment
         //return conman.getNetworkInfo(ConnectivityManager.TYPE_WIFI).isConnectedOrConnecting();
     }
 
-    private static void addSensorToString(StringBuilder strbuilder,
-                                          String sensorid1, String sensorid2, double ...values)
+    private static void addSensorToString(StringBuilder strbuilder, boolean streamStatus,
+                                          String buttonName, String sensorid1, String sensorid2,
+                                          double ...values)
     {
+        String buttonInfo;
+        if(streamStatus){
+            buttonInfo = "PRESS";
+        }
+        else { buttonInfo = "RELEASE"; }
+
         if(values.length == 6)
         {
-            strbuilder.append(String.format(Locale.ENGLISH, "%s,%7.3f,%7.3f,%7.3f?%s,%7.3f,%7.3f,%7.3f",
-                    sensorid1, values[0], values[1], values[2],
-                    sensorid2, values[3], values[4], values[5]));
+            strbuilder.append(String.format(Locale.ENGLISH, "%s,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f",
+                    buttonName,
+                    values[0], values[1], values[2],
+                    values[3], values[4], values[5]));
         }
 
 //        else if (values.length == 1)

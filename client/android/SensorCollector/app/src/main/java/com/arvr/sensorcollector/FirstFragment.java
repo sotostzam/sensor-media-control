@@ -28,7 +28,7 @@ public class FirstFragment extends Fragment
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    public void customSetOnTouchListener(ImageButton imageButton)
+    public void customSetOnTouchListener(ImageButton imageButton, String buttonName)
     {
         imageButton.setOnTouchListener(new View.OnTouchListener() {
             @SuppressLint("ClickableViewAccessibility")
@@ -40,12 +40,12 @@ public class FirstFragment extends Fragment
                 {
                     imageButton.setColorFilter(getResources().getColor(android.R.color.holo_red_dark), PorterDuff.Mode.SRC_ATOP);
                     streamFlag = true;
-                    listener.onSendFunction(streamFlag);
+                    listener.onSendFunction(streamFlag, buttonName);
                 } else if (event.getAction() == MotionEvent.ACTION_UP)
                 {
                     imageButton.setColorFilter(getResources().getColor(R.color.blue_ppt), PorterDuff.Mode.SRC_ATOP);
                     streamFlag = false;
-                    listener.onSendFunction(streamFlag);
+                    listener.onSendFunction(streamFlag, buttonName);
                 }
                 return false;
             }
@@ -68,10 +68,10 @@ public class FirstFragment extends Fragment
 
         // Changing colour of image during runtime taken from:
         // https://stackoverflow.com/a/35286182/6475377
-        customSetOnTouchListener(mImageButtonTop);
-        customSetOnTouchListener(mImageButtonBottom);
-        customSetOnTouchListener(mImageButtonLeft);
-        customSetOnTouchListener(mImageButtonRight);
+        customSetOnTouchListener(mImageButtonTop, "TS");
+        customSetOnTouchListener(mImageButtonBottom, "BS");
+        customSetOnTouchListener(mImageButtonLeft, "LS");
+        customSetOnTouchListener(mImageButtonRight, "RS");
     }
 
     @Override
@@ -91,6 +91,6 @@ public class FirstFragment extends Fragment
     }
 
     public static interface FragmentOneListener{
-        public void onSendFunction(boolean streamFlag);
+        public void onSendFunction(boolean streamFlag, String buttonName);
     }
 }
