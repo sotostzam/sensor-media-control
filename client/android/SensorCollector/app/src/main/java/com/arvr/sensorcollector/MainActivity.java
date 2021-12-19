@@ -9,7 +9,7 @@ import android.os.Bundle;
 import com.google.android.material.tabs.TabLayout;
 
 public class MainActivity extends AppCompatActivity
-        implements FirstFragment.FragmentOneListener, SecondFragment.FragmentTwoListener {
+        implements NovelRemoteFragment.FragmentOneListener, SettingsFragment.FragmentTwoListener {
 
     TabLayout tabLayout;
     ViewPager2 pager2;
@@ -33,14 +33,14 @@ public class MainActivity extends AppCompatActivity
         pager2.setUserInputEnabled(false);
 
         tabLayout.addTab(tabLayout.newTab().setText("Remote 1"));
-        tabLayout.addTab(tabLayout.newTab().setText("Settings"));
         tabLayout.addTab(tabLayout.newTab().setText("Remote 2"));
+        tabLayout.addTab(tabLayout.newTab().setText("Settings"));
 
 
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                pager2.setCurrentItem(tab.getPosition());
+                pager2.setCurrentItem(tab.getPosition(), false);
 
             }
 

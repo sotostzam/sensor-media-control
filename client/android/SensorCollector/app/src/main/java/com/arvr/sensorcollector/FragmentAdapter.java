@@ -16,12 +16,12 @@ public class FragmentAdapter extends FragmentStateAdapter {
     public Fragment createFragment(int position) {
 
         if (position == 1) {
-            return new SecondFragment();
+            return new OldRemoteFragment();
         }
         else if (position == 2){
-            return new ThirdFragment();
+            return new SettingsFragment();
         }
-        return new FirstFragment();
+        return new NovelRemoteFragment();
     }
 
     @Override

@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/relativeLayout"
-    tools:context=".ThirdFragment">
+    android:id="@+id/relativeLayoutOldRemote"
+    tools:context=".OldRemoteFragment">
 
     <LinearLayout
         android:layout_width="match_parent"

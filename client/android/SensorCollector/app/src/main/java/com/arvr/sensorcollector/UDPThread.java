@@ -22,13 +22,13 @@ public class UDPThread extends AsyncTask<Void, Void, Void>
 
         try {
             bytes = msensordata.getBytes("UTF-8");
-            if (SecondFragment.mPacket == null || SecondFragment.mSocket == null)
+            if (SettingsFragment.mPacket == null || SettingsFragment.mSocket == null)
                 return null;
 
-            SecondFragment.mPacket.setData(bytes);
-            SecondFragment.mPacket.setLength(bytes.length);
+            SettingsFragment.mPacket.setData(bytes);
+            SettingsFragment.mPacket.setLength(bytes.length);
 
-            SecondFragment.mSocket.send(SecondFragment.mPacket);
+            SettingsFragment.mSocket.send(SettingsFragment.mPacket);
 
         } catch (IOException e) {
             e.printStackTrace();

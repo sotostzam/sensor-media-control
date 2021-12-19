@@ -3,7 +3,6 @@ package com.arvr.sensorcollector;
 
 import static android.content.Context.SENSOR_SERVICE;
 
-import android.app.Activity;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -20,7 +19,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -35,14 +33,11 @@ import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
-import java.util.Arrays.*;
-import java.util.Objects;
-import java.util.stream.DoubleStream;
 
 /**
  * A simple Fragment subclass.
  */
-public class SecondFragment extends Fragment
+public class SettingsFragment extends Fragment
 {
     private FragmentTwoListener listener;
 
@@ -72,6 +67,7 @@ public class SecondFragment extends Fragment
     private EditText mPort;
     private ProgressBar mProgessBar;
     private ToggleButton mToggleButton_Stream;
+
 
     public class My_Hardware_SensorListener implements SensorEventListener
     {
@@ -191,7 +187,7 @@ public class SecondFragment extends Fragment
 
 
 
-    public SecondFragment() {
+    public SettingsFragment() {
         // Required empty public constructor
     }
 
@@ -225,12 +221,11 @@ public class SecondFragment extends Fragment
         mPort = (EditText) view.findViewById(R.id.Edit_Port_Box);
         mProgessBar = (ProgressBar)view.findViewById(R.id.progressBar);
         mProgessBar.setVisibility(View.INVISIBLE);
-        mToggleButton_Stream = (ToggleButton)view.findViewById(R.id.toggleButton);
+        mToggleButton_Stream = (ToggleButton)view.findViewById(R.id.toggleButtonStream);
 
         mToggleButton_Stream.setOnCheckedChangeListener(new MyToggle_Button_Listener());
         mSensor_Stream = (SensorManager) requireActivity().getApplicationContext().getSystemService(SENSOR_SERVICE);
 
-        // or  (ImageView) view.findViewById(R.id.foo);
     }
 
     @Override
@@ -238,7 +233,7 @@ public class SecondFragment extends Fragment
                              Bundle savedInstanceState) {
 
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_second, container, false);
+        return inflater.inflate(R.layout.fragment_settings, container, false);
 
     }
 

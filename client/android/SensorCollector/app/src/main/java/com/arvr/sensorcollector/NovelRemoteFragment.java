@@ -12,18 +12,17 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageButton;
 
 /**
  * A simple Fragment subclass.
  */
-public class FirstFragment extends Fragment
+public class NovelRemoteFragment extends Fragment
 {
     private ImageButton mImageButtonTop, mImageButtonBottom, mImageButtonLeft, mImageButtonRight;
     private FragmentOneListener listener;
 
-    public FirstFragment() {
+    public NovelRemoteFragment() {
         // Required empty public constructor
     }
 
@@ -72,13 +71,14 @@ public class FirstFragment extends Fragment
         customSetOnTouchListener(mImageButtonBottom, "BS");
         customSetOnTouchListener(mImageButtonLeft, "LS");
         customSetOnTouchListener(mImageButtonRight, "RS");
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_first, container, false);
+        return inflater.inflate(R.layout.fragment_novel_remote, container, false);
     }
 
     @Override
