@@ -8,6 +8,8 @@ from ctypes import cast, POINTER
 from comtypes import CLSCTX_ALL
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 
+import keyboard
+
 class Server:
     """
     Main server class. It initializes the variables needed to display the graphical user interface
@@ -18,12 +20,28 @@ class Server:
         self.host = host
         self.port = port
 
-        self.pos_vector_y = 0
-
         self.settings = {}
         self.populate_settings()
+                
+        self.interaction_funcs = {"Not Used"    : self.not_used,
+                                  "Play/Pause"  : self.play_pause,
+                                  "Previous"    : self.previous,
+                                  "Next"        : self.next,
+                                  "Stop"        : self.stop,
+                                  "Volume +"    : self.increase_vol,
+                                  "Volume -"    : self.decrease_vol,
+                                  "Seek +"      : self.increase_seek,
+                                  "Seek -"      : self.decrease_seek,
+                                  "Scroll UP"   : self.scroll_up,
+                                  "Scroll DOWN" : self.scroll_down}
 
         self.active_status = False
+        self.test_status   = False
+
+        # Past values used for comparisons
+        self.gyroscope_history = [0, 0, 0]
+        self.accellerometer_history = [0, 0, 0]
+        self.rotation_history = [0, 0, 0]
 
         # Get default audio device using PyCAW
         self.devices = AudioUtilities.GetSpeakers()
@@ -50,22 +68,22 @@ class Server:
                 self.settings = json.load(json_file)
         except:
             print('No settings file found. Created file with default settings.')
-            self.settings['LSTU'] = {'Interaction' : 'Stop', 'Type' : 'Instant'}
-            self.settings['LSTD'] = {'Interaction' : 'Stop', 'Type' : 'Instant'}
-            self.settings['LSTL'] = {'Interaction' : 'Stop', 'Type' : 'Instant'}
-            self.settings['LSTR'] = {'Interaction' : 'Stop', 'Type' : 'Instant'}
-            self.settings['RSTU'] = {'Interaction' : 'Stop', 'Type' : 'Instant'}
-            self.settings['RSTD'] = {'Interaction' : 'Stop', 'Type' : 'Instant'}
-            self.settings['RSTL'] = {'Interaction' : 'Stop', 'Type' : 'Instant'}
-            self.settings['RSTR'] = {'Interaction' : 'Stop', 'Type' : 'Instant'}
-            self.settings['TSTU'] = {'Interaction' : 'Stop', 'Type' : 'Instant'}
-            self.settings['TSTD'] = {'Interaction' : 'Stop', 'Type' : 'Instant'}
-            self.settings['TSTL'] = {'Interaction' : 'Stop', 'Type' : 'Instant'}
-            self.settings['TSTR'] = {'Interaction' : 'Stop', 'Type' : 'Instant'}
-            self.settings['BSTU'] = {'Interaction' : 'Stop', 'Type' : 'Instant'}
-            self.settings['BSTD'] = {'Interaction' : 'Stop', 'Type' : 'Instant'}
-            self.settings['BSTL'] = {'Interaction' : 'Stop', 'Type' : 'Instant'}
-            self.settings['BSTR'] = {'Interaction' : 'Stop', 'Type' : 'Instant'}
+            self.settings['LSTU'] = {'Interaction' : 'Not Used', 'Type' : 'Normal'}
+            self.settings['LSTD'] = {'Interaction' : 'Not Used', 'Type' : 'Normal'}
+            self.settings['LSTL'] = {'Interaction' : 'Not Used', 'Type' : 'Normal'}
+            self.settings['LSTR'] = {'Interaction' : 'Not Used', 'Type' : 'Normal'}
+            self.settings['RSTU'] = {'Interaction' : 'Not Used', 'Type' : 'Normal'}
+            self.settings['RSTD'] = {'Interaction' : 'Not Used', 'Type' : 'Normal'}
+            self.settings['RSTL'] = {'Interaction' : 'Not Used', 'Type' : 'Normal'}
+            self.settings['RSTR'] = {'Interaction' : 'Not Used', 'Type' : 'Normal'}
+            self.settings['TSTU'] = {'Interaction' : 'Not Used', 'Type' : 'Normal'}
+            self.settings['TSTD'] = {'Interaction' : 'Not Used', 'Type' : 'Normal'}
+            self.settings['TSTL'] = {'Interaction' : 'Not Used', 'Type' : 'Normal'}
+            self.settings['TSTR'] = {'Interaction' : 'Not Used', 'Type' : 'Normal'}
+            self.settings['BSTU'] = {'Interaction' : 'Not Used', 'Type' : 'Normal'}
+            self.settings['BSTD'] = {'Interaction' : 'Not Used', 'Type' : 'Normal'}
+            self.settings['BSTL'] = {'Interaction' : 'Not Used', 'Type' : 'Normal'}
+            self.settings['BSTR'] = {'Interaction' : 'Not Used', 'Type' : 'Normal'}
 
     def save_settings(self):
         """
@@ -784,48 +802,107 @@ class Server:
                         continue
 
                     data = {}
-                    data['Timestep']     = message_string[0]
+                    data['Timestep']     = float(message_string[0])
                     data['Action']       = message_string[1]
-                    data['Gyroscope']    = {'x': message_string[2], 'y': message_string[3], 'z':  message_string[4]}
-                    data['Acceleration'] = {'x': message_string[5], 'y': message_string[6], 'z':  message_string[7]}
-                    data['Rotation']     = {'x': message_string[8], 'y': message_string[9], 'z':  message_string[10]}
+                    data['Gyroscope']    = {'x': float(message_string[2]), 'y': float(message_string[3]), 'z':  float(message_string[4])}
+                    data['Acceleration'] = {'x': float(message_string[5]), 'y': float(message_string[6]), 'z':  float(message_string[7])}
+                    data['Rotation']     = {'x': float(message_string[8]), 'y': float(message_string[9]), 'z':  float(message_string[10])}
 
-                    old_vector = self.pos_vector_y
+                    self.gyro_x.set(str(data['Gyroscope']['x']))
+                    self.gyro_y.set(str(data['Gyroscope']['y']))
+                    self.gyro_z.set(str(data['Gyroscope']['z']))
 
-                    self.gyro_x.set(data['Gyroscope']['x'])
-                    self.gyro_y.set(data['Gyroscope']['y'])
-                    self.gyro_z.set(data['Gyroscope']['z'])
+                    self.acceleration_x.set(str(data['Acceleration']['x']))
+                    self.acceleration_y.set(str(data['Acceleration']['y']))
+                    self.acceleration_z.set(str(data['Acceleration']['z']))
 
-                    self.acceleration_x.set(data['Acceleration']['x'])
-                    self.acceleration_y.set(data['Acceleration']['y'])
-                    self.acceleration_z.set(data['Acceleration']['z'])
-
-                    self.rotation_x.set(data['Rotation']['x'])
-                    self.rotation_y.set(data['Rotation']['y'])
-                    self.rotation_z.set(data['Rotation']['z'])
+                    self.rotation_x.set(str(data['Rotation']['x']))
+                    self.rotation_y.set(str(data['Rotation']['y']))
+                    self.rotation_z.set(str(data['Rotation']['z']))
 
                     self.current_action_var.set(data['Action'])
 
-                    self.pos_vector_y = float(data['Acceleration']['y'])
-
-                    if self.pos_vector_y - old_vector > 0:
-                        self.increase_vol(self.pos_vector_y)
+                    self.execute_command(data)
    
             except (KeyboardInterrupt, SystemExit):
                 raise traceback.print_exc()
 
-    def increase_vol(self, vol):
+    def execute_command(self, data):
+        current_interaction = data['Action'] + self.get_tilt_kind(data['Gyroscope'], data['Acceleration'], data['Rotation'])
+
+        if self.active_status:
+            if self.settings[current_interaction]['Type'] != 'Disabled':
+                self.interaction_funcs[self.settings[current_interaction]['Interaction']](self.settings[current_interaction]['Type'])
+            else:
+                self.interaction_funcs[self.settings[current_interaction]['Interaction']]
+        elif self.test_status:
+            pass
+        else:
+            pass
+
+    def get_tilt_kind(self, gyro_data, acc_data, rot_data):
+        tilt = ""
+        if rot_data['x']-self.rotation_history[0] > rot_data['y']-self.rotation_history[1]:
+            if rot_data['x']-self.rotation_history[0] > 0:
+                tilt = "TU"
+            else:
+                tilt = "TL"
+        else:
+            if rot_data['y']-self.rotation_history[1] > 0:
+                tilt = "TR"
+            else:
+                tilt = "TD"
+
+        self.gyroscope_history = [gyro_data['x'], gyro_data['y'], gyro_data['z']]
+        self.accelerometer_history = [acc_data['x'], acc_data['y'], acc_data['z']]
+        self.rotation_history = [rot_data['x'], rot_data['y'], rot_data['z']]
+        return tilt
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Action Functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+    def not_used(self, arg):
+        pass
+
+    def play_pause(self, arg):
+        keyboard.send("space", do_press=True, do_release=True)
+
+    def previous(self, arg):
+        keyboard.send("left", do_press=True, do_release=True)
+
+    def next(self, arg):
+        keyboard.send("right", do_press=True, do_release=True)
+
+    def stop(self, arg):
+        pass
+
+    def increase_vol(self, mode):
         """
         Increase System's volume by specific ammount.
-
-        Todo:
-            * Make this work with Db
-            * Find ways to make this constant, incremental and exponential
         """
         # Get current volume
-        set_volume = min(1.0, max(0.0, vol))
+        # set_volume = min(1.0, max(0.0, mode))
         currentVolumeDb = self.volume.GetMasterVolumeLevel()
-        self.volume.SetMasterVolumeLevel(currentVolumeDb - 1.0, None)
+        self.volume.SetMasterVolumeLevel(currentVolumeDb + 2.0, None)
+
+    def decrease_vol(self, mode):
+        """
+        Increase System's volume by specific ammount.
+        """
+        # Get current volume
+        # set_volume = min(1.0, max(0.0, mode))
+        currentVolumeDb = self.volume.GetMasterVolumeLevel()
+        self.volume.SetMasterVolumeLevel(currentVolumeDb - 2.0, None)
+
+    def increase_seek(self, arg):
+        pass
+
+    def decrease_seek(self, arg):
+        pass
+
+    def scroll_up(self, arg):
+        keyboard.send("up", do_press=True, do_release=True)
+
+    def scroll_down(self, arg):
+        keyboard.send("down", do_press=True, do_release=True)
 
     def create_udp_stream(self):
         """
