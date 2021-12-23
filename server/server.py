@@ -23,6 +23,8 @@ class Server:
         self.settings = {}
         self.populate_settings()
 
+        self.active_status = False
+
         # Get default audio device using PyCAW
         self.devices = AudioUtilities.GetSpeakers()
         self.interface = self.devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
@@ -104,26 +106,45 @@ class Server:
 
     def create_general(self, parent):
 
+        def toggle_activation():
+            if self.active_status:
+                self.active_status = False
+                self.active_btn.config(text="Enable Interaction")
+            else:
+                self.active_status = True
+                self.active_btn.config(text="Disable Interaction")
+
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Connection Information ~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         status_frame = tk.Frame(parent)
         status_frame.grid(row=0, column=0, sticky="we", padx=0)
+        status_frame.columnconfigure(0, weight=1)
+        status_frame.columnconfigure(1, weight=1)
 
-        conn_info = tk.Label(status_frame, text="Connection", font=("Courier", 24), anchor="w",)
+        conn_info_frame = tk.Frame(status_frame)
+        conn_info_frame.grid(row=0, column=0, sticky="we", padx=0)
+
+        conn_info = tk.Label(conn_info_frame, text="Connection", font=("Courier", 24), anchor="w",)
         conn_info.grid(row=0, column=0, sticky="we", columnspan=2)
 
-        status_label = tk.Label(status_frame, text="Status:")
+        status_label = tk.Label(conn_info_frame, text="Status:")
         status_label.grid(row=1, column=0, sticky="we")
         self.status_var = tk.StringVar()
         self.status_var.set("Not Connected")
-        self.label_status_var = tk.Label(status_frame, textvariable=self.status_var, fg="Red")
+        self.label_status_var = tk.Label(conn_info_frame, textvariable=self.status_var, fg="Red")
         self.label_status_var.grid(row=1, column=1, sticky="we", padx=25)
 
-        client_label = tk.Label(status_frame, text="Client:")
+        client_label = tk.Label(conn_info_frame, text="Client:")
         client_label.grid(row=2, column=0, sticky="we")
         self.client_var = tk.StringVar()
         self.client_var.set("Not Connected")
-        self.label_client_var = tk.Label(status_frame, textvariable=self.client_var, fg="Red")
+        self.label_client_var = tk.Label(conn_info_frame, textvariable=self.client_var, fg="Red")
         self.label_client_var.grid(row=2, column=1, sticky="we", padx=25)
+
+        active_info_frame = tk.Frame(status_frame)
+        active_info_frame.grid(row=0, column=1, sticky="we", padx=0)
+
+        self.active_btn = ttk.Button(active_info_frame, text= "Enable Interaction", command= toggle_activation)
+        self.active_btn.grid(row=0, column=0, ipadx=10, ipady=10)
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Sensor Data Information ~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
         information_grid = tk.Frame(parent)
@@ -757,20 +778,17 @@ class Server:
                         self.client_var.set(address[0])
                         connected = True
 
-                    print(message_string)
-
                     message_string = message_string.replace(' ','').split(",")
 
                     if len(message_string) != 12:
-                        print(len(message_string))
                         continue
 
                     data = {}
-                    data['Timestep'] = message_string[0]
-                    data['Action'] = message_string[1]
-                    data['Gyroscope'] = {'x': message_string[2], 'y': message_string[3], 'z':  message_string[4]}
+                    data['Timestep']     = message_string[0]
+                    data['Action']       = message_string[1]
+                    data['Gyroscope']    = {'x': message_string[2], 'y': message_string[3], 'z':  message_string[4]}
                     data['Acceleration'] = {'x': message_string[5], 'y': message_string[6], 'z':  message_string[7]}
-                    data['Rotation'] = {'x': message_string[8], 'y': message_string[9], 'z':  message_string[10]}
+                    data['Rotation']     = {'x': message_string[8], 'y': message_string[9], 'z':  message_string[10]}
 
                     old_vector = self.pos_vector_y
 
