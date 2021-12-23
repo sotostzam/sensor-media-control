@@ -161,29 +161,29 @@ class Server:
         label_gyro_z.grid(row=2, column=1, sticky="we", padx=25)
 
         # Positional Data
-        position_data_frame = tk.Frame(information_grid)
-        position_data_frame.grid(row=1, column=1, sticky="we", padx=0)
+        acceleration_data_frame = tk.Frame(information_grid)
+        acceleration_data_frame.grid(row=1, column=1, sticky="we", padx=0)
 
-        position_data_x_label = tk.Label(position_data_frame, text="Acceleration x:")
-        position_data_x_label.grid(row=0, column=0, sticky="we")
-        self.position_x = tk.StringVar()
-        self.position_x.set("N/A")
-        label_position_x = tk.Label(position_data_frame, textvariable=self.position_x)
-        label_position_x.grid(row=0, column=1, sticky="we", padx=25)
+        acceleration_data_x_label = tk.Label(acceleration_data_frame, text="Acceleration x:")
+        acceleration_data_x_label.grid(row=0, column=0, sticky="we")
+        self.acceleration_x = tk.StringVar()
+        self.acceleration_x.set("N/A")
+        label_acceleration_x = tk.Label(acceleration_data_frame, textvariable=self.acceleration_x)
+        label_acceleration_x.grid(row=0, column=1, sticky="we", padx=25)
 
-        position_data_y_label = tk.Label(position_data_frame, text="Acceleration y:")
-        position_data_y_label.grid(row=1, column=0, sticky="we")
-        self.position_y = tk.StringVar()
-        self.position_y.set("N/A")
-        label_position_y = tk.Label(position_data_frame, textvariable=self.position_y)
-        label_position_y.grid(row=1, column=1, sticky="we", padx=25)
+        acceleration_data_y_label = tk.Label(acceleration_data_frame, text="Acceleration y:")
+        acceleration_data_y_label.grid(row=1, column=0, sticky="we")
+        self.acceleration_y = tk.StringVar()
+        self.acceleration_y.set("N/A")
+        label_acceleration_y = tk.Label(acceleration_data_frame, textvariable=self.acceleration_y)
+        label_acceleration_y.grid(row=1, column=1, sticky="we", padx=25)
 
-        position_data_z_label = tk.Label(position_data_frame, text="Acceleration z:")
-        position_data_z_label.grid(row=2, column=0, sticky="we")
-        self.position_z = tk.StringVar()
-        self.position_z.set("N/A")
-        label_position_z = tk.Label(position_data_frame, textvariable=self.position_z)
-        label_position_z.grid(row=2, column=1, sticky="we", padx=25)
+        acceleration_data_z_label = tk.Label(acceleration_data_frame, text="Acceleration z:")
+        acceleration_data_z_label.grid(row=2, column=0, sticky="we")
+        self.acceleration_z = tk.StringVar()
+        self.acceleration_z.set("N/A")
+        label_acceleration_z = tk.Label(acceleration_data_frame, textvariable=self.acceleration_z)
+        label_acceleration_z.grid(row=2, column=1, sticky="we", padx=25)
 
         # Rotational Data
         rotation_data_frame = tk.Frame(information_grid)
@@ -211,18 +211,18 @@ class Server:
         label_rotation_z.grid(row=2, column=1, sticky="we", padx=25)
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Phone's Modes ~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-        modes_frame = tk.Frame(parent)
-        modes_frame.grid(row=2, column=0, sticky="nswe", padx=0)
+        action_frame = tk.Frame(parent)
+        action_frame.grid(row=2, column=0, sticky="nswe", padx=0)
 
-        modes = tk.Label(modes_frame, text="Mode Data", font=("Courier", 24), anchor="w",)
-        modes.grid(row=0, column=0, sticky="we", columnspan=2)
+        action_label = tk.Label(action_frame, text="Action Data", font=("Courier", 24), anchor="w",)
+        action_label.grid(row=0, column=0, sticky="we", columnspan=2)
 
-        mode_data_label = tk.Label(modes_frame, text="Current Mode:")
-        mode_data_label.grid(row=1, column=0, sticky="we")
-        self.mode_var = tk.StringVar()
-        self.mode_var.set("N/A")
-        label_mode = tk.Label(modes_frame, textvariable=self.mode_var)
-        label_mode.grid(row=1, column=1, sticky="we", padx=25)
+        action_data_label = tk.Label(action_frame, text="Current Action:")
+        action_data_label.grid(row=1, column=0, sticky="we")
+        self.current_action_var = tk.StringVar()
+        self.current_action_var.set("N/A")
+        label_action = tk.Label(action_frame, textvariable=self.current_action_var)
+        label_action.grid(row=1, column=1, sticky="we", padx=25)
 
     def create_settings(self, parent):
 
@@ -757,25 +757,38 @@ class Server:
                         self.client_var.set(address[0])
                         connected = True
 
-                    message_string = message_string.replace(' ','').split("?")
+                    print(message_string)
+
+                    message_string = message_string.replace(' ','').split(",")
+
+                    if len(message_string) != 12:
+                        print(len(message_string))
+                        continue
 
                     data = {}
-
-                    for item in message_string:
-                        temp_item = item.split(",")
-                        data[temp_item[0]] = {'x': temp_item[1], 'y': temp_item[2], 'z': temp_item[3]}
+                    data['Timestep'] = message_string[0]
+                    data['Action'] = message_string[1]
+                    data['Gyroscope'] = {'x': message_string[2], 'y': message_string[3], 'z':  message_string[4]}
+                    data['Acceleration'] = {'x': message_string[5], 'y': message_string[6], 'z':  message_string[7]}
+                    data['Rotation'] = {'x': message_string[8], 'y': message_string[9], 'z':  message_string[10]}
 
                     old_vector = self.pos_vector_y
 
-                    self.gyro_x.set(data['G']['x'])
-                    self.gyro_y.set(data['G']['y'])
-                    self.gyro_z.set(data['G']['z'])
+                    self.gyro_x.set(data['Gyroscope']['x'])
+                    self.gyro_y.set(data['Gyroscope']['y'])
+                    self.gyro_z.set(data['Gyroscope']['z'])
 
-                    self.position_x.set(data['R']['x'])
-                    self.position_y.set(data['R']['y'])
-                    self.position_z.set(data['R']['z'])
+                    self.acceleration_x.set(data['Acceleration']['x'])
+                    self.acceleration_y.set(data['Acceleration']['y'])
+                    self.acceleration_z.set(data['Acceleration']['z'])
 
-                    self.pos_vector_y = float(data['R']['y'])
+                    self.rotation_x.set(data['Rotation']['x'])
+                    self.rotation_y.set(data['Rotation']['y'])
+                    self.rotation_z.set(data['Rotation']['z'])
+
+                    self.current_action_var.set(data['Action'])
+
+                    self.pos_vector_y = float(data['Acceleration']['y'])
 
                     if self.pos_vector_y - old_vector > 0:
                         self.increase_vol(self.pos_vector_y)
