@@ -9,6 +9,8 @@ from comtypes import CLSCTX_ALL
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 
 import keyboard
+import random
+import time
 
 class Server:
     """
@@ -55,14 +57,14 @@ class Server:
         self.test_status   = False
 
         # Past values used for comparisons
-        self.gyroscope_history = [0, 0, 0]
+        self.gyroscope_history      = [0, 0, 0]
         self.accellerometer_history = [0, 0, 0]
-        self.rotation_history = [0, 0, 0]
+        self.rotation_history       = [0, 0, 0]
 
         # Get default audio device using PyCAW
-        self.devices = AudioUtilities.GetSpeakers()
+        self.devices   = AudioUtilities.GetSpeakers()
         self.interface = self.devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
-        self.volume = cast(self.interface, POINTER(IAudioEndpointVolume))
+        self.volume    = cast(self.interface, POINTER(IAudioEndpointVolume))
 
         # Window and canvas initialization parameters
         self.width  = 700
@@ -687,8 +689,8 @@ class Server:
         interaction_choice_2 = tk.Radiobutton(interaction_selection_choice, variable=interaction_mode, value=2, tristatevalue=0, text="Interactive Test")
         interaction_choice_2.grid(row=1, column=1, sticky="w")
 
-        interaction_start = ttk.Button(interaction_selection, text= "Start")
-        interaction_start.grid(row=0, column=2)
+        interaction_start = ttk.Button(interaction_selection, text= "Start", command= lambda: threading.Thread(target=self.start_experiment).start())
+        interaction_start.grid(row=0, column=2, ipady=10)
 
         tk.Frame(parent, height=1, bg="black").grid(row=1, column=0, sticky="news")
 
@@ -712,37 +714,45 @@ class Server:
         def test():
             print("It works!")
 
-        self.photo_play  = tk.PhotoImage(file = r"./server/sources/play.png").subsample(7,7)
-        self.photo_next  = tk.PhotoImage(file = r"./server/sources/next.png").subsample(7,7)
-        self.photo_prev  = tk.PhotoImage(file = r"./server/sources/previous.png").subsample(7,7)
-        self.photo_stop  = tk.PhotoImage(file = r"./server/sources/stop.png").subsample(7,7)
-        self.red_btn     = tk.PhotoImage(file = r"./server/sources/red_btn.png").subsample(7,7)
-        self.green_btn   = tk.PhotoImage(file = r"./server/sources/green_btn.png").subsample(7,7)
-        self.blue_btn    = tk.PhotoImage(file = r"./server/sources/blue_btn.png").subsample(7,7)
+        self.photo_play = tk.PhotoImage(file = r"./server/sources/play.png").subsample(7,7)
+        self.photo_next = tk.PhotoImage(file = r"./server/sources/next.png").subsample(7,7)
+        self.photo_prev = tk.PhotoImage(file = r"./server/sources/previous.png").subsample(7,7)
+        self.photo_stop = tk.PhotoImage(file = r"./server/sources/stop.png").subsample(7,7)
+        self.red_btn    = tk.PhotoImage(file = r"./server/sources/red_btn.png").subsample(7,7)
+        self.green_btn  = tk.PhotoImage(file = r"./server/sources/green_btn.png").subsample(7,7)
+        self.blue_btn   = tk.PhotoImage(file = r"./server/sources/blue_btn.png").subsample(7,7)
 
-        self.interaction_button = ttk.Button(interaction_test_buttons, text= "Play/Pause", image=self.photo_play, compound=tk.LEFT, command= test)
-        self.interaction_button.grid(row=0, column=1, sticky="we")
-        self.interaction_button["state"] = "disabled"
-
-        self.interaction_button_next = ttk.Button(interaction_test_buttons, text= "Next", image=self.photo_next, compound=tk.LEFT, command= test)
-        self.interaction_button_next.grid(row=1, column=2, sticky="we")
-
-        self.interaction_button_prev = ttk.Button(interaction_test_buttons, text= "Previous", image=self.photo_prev, compound=tk.LEFT, command= test)
-        self.interaction_button_prev.grid(row=1, column=0, sticky="we")
+        self.interaction_widgets = {}
         
-        self.interaction_button_stop = ttk.Button(interaction_test_buttons, text= "Stop", image=self.photo_stop, compound=tk.LEFT, command= test)
-        self.interaction_button_stop.grid(row=2, column=1, sticky="we")
+        self.interaction_widgets = {'play_pause': ttk.Button(interaction_test_buttons, text= "Play/Pause", image=self.photo_play, compound=tk.LEFT, command= test)}
+        self.interaction_widgets['play_pause'].grid(row=0, column=1, sticky="we")
+        self.interaction_widgets['play_pause']["state"] = "disabled"
+
+        self.interaction_widgets['next'] = ttk.Button(interaction_test_buttons, text= "Next", image=self.photo_next, compound=tk.LEFT, command= test)
+        self.interaction_widgets['next'].grid(row=1, column=2, sticky="we")
+        self.interaction_widgets['next']["state"] = "disabled"
+
+        self.interaction_widgets['prev'] = ttk.Button(interaction_test_buttons, text= "Previous", image=self.photo_prev, compound=tk.LEFT, command= test)
+        self.interaction_widgets['prev'].grid(row=1, column=0, sticky="we")
+        self.interaction_widgets['prev']["state"] = "disabled"
+        
+        self.interaction_widgets['stop'] = ttk.Button(interaction_test_buttons, text= "Stop", image=self.photo_stop, compound=tk.LEFT, command= test)
+        self.interaction_widgets['stop'].grid(row=2, column=1, sticky="we")
+        self.interaction_widgets['stop']["state"] = "disabled"
 
         tk.Frame(interaction_test, height=1, bg="black").grid(row=3, column=0, sticky="we")
 
-        self.interaction_button_1 = ttk.Button(interaction_test_buttons, text= "Button 1", image=self.red_btn, compound=tk.LEFT, command= test)
-        self.interaction_button_1.grid(row=4, column=0, sticky="we")
+        self.interaction_widgets['btn1'] = ttk.Button(interaction_test_buttons, text= "Button 1", image=self.red_btn, compound=tk.LEFT, command= test)
+        self.interaction_widgets['btn1'].grid(row=4, column=0, sticky="we")
+        self.interaction_widgets['btn1']["state"] = "disabled"
 
-        self.interaction_button_2 = ttk.Button(interaction_test_buttons, text= "Button 2", image=self.green_btn, compound=tk.LEFT, command= test)
-        self.interaction_button_2.grid(row=4, column=1, sticky="we")
+        self.interaction_widgets['btn2'] = ttk.Button(interaction_test_buttons, text= "Button 2", image=self.green_btn, compound=tk.LEFT, command= test)
+        self.interaction_widgets['btn2'].grid(row=4, column=1, sticky="we")
+        self.interaction_widgets['btn2']["state"] = "disabled"
 
-        self.interaction_button_3 = ttk.Button(interaction_test_buttons, text= "Button 3", image=self.blue_btn, compound=tk.LEFT, command= test)
-        self.interaction_button_3.grid(row=4, column=2, sticky="we")  
+        self.interaction_widgets['btn3'] = ttk.Button(interaction_test_buttons, text= "Button 3", image=self.blue_btn, compound=tk.LEFT, command= test)
+        self.interaction_widgets['btn3'].grid(row=4, column=2, sticky="we")
+        self.interaction_widgets['btn3']["state"] = "disabled"
 
         tk.Frame(interaction_test, height=1, bg="black").grid(row=0, column=1, sticky="ns")
 
@@ -762,14 +772,16 @@ class Server:
         self.test_volume_user_lb = tk.Label(interaction_test_scales_upper, text="Volume Input")
         self.test_volume_user_lb.grid(row=0, column=0, sticky="news")
 
-        self.test_volume_user = ttk.Scale(interaction_test_scales_upper, from_=0, to=100, orient="vertical")
-        self.test_volume_user.grid(row=1, column=0, sticky="news")
+        self.interaction_widgets['volume_user'] = ttk.Scale(interaction_test_scales_upper, from_=0, to=100, orient="vertical")
+        self.interaction_widgets['volume_user'].grid(row=1, column=0, sticky="news")
+        self.interaction_widgets['volume_user']["state"] = "disabled"
 
         self.test_volume_required_lb = tk.Label(interaction_test_scales_upper, text="Volume Required")
         self.test_volume_required_lb.grid(row=0, column=1, sticky="news")
 
-        self.test_volume_required = ttk.Scale(interaction_test_scales_upper, from_=0, to=100, orient="vertical")
-        self.test_volume_required.grid(row=1, column=1, sticky="news")
+        self.interaction_widgets['volume_required'] = ttk.Scale(interaction_test_scales_upper, from_=0, to=100, orient="vertical")
+        self.interaction_widgets['volume_required'].grid(row=1, column=1, sticky="news")
+        self.interaction_widgets['volume_required']["state"] = "disabled"
 
         tk.Frame(interaction_test_scales, height=1, bg="black").grid(row=1, column=0, sticky="news")
 
@@ -784,14 +796,23 @@ class Server:
         self.test_seek_user_lb = tk.Label(interaction_test_scales_lower, anchor="w", text="Seek Input")
         self.test_seek_user_lb.grid(row=0, column=0, sticky="news")
 
-        self.test_seek_user = ttk.Scale(interaction_test_scales_lower, from_=0, to=100)
-        self.test_seek_user.grid(row=1, column=0, sticky="news")
+        self.interaction_widgets['seek_user'] = ttk.Scale(interaction_test_scales_lower, from_=0, to=100)
+        self.interaction_widgets['seek_user'].grid(row=1, column=0, sticky="news")
+        self.interaction_widgets['seek_user']["state"] = "disabled"
 
         self.test_seek_required_lb = tk.Label(interaction_test_scales_lower, anchor="w", text="Seek Required")
         self.test_seek_required_lb.grid(row=2, column=0, sticky="news")
 
-        self.test_seek_required = ttk.Scale(interaction_test_scales_lower, from_=0, to=100)
-        self.test_seek_required.grid(row=3, column=0, sticky="news")
+        self.interaction_widgets['seek_required'] = ttk.Scale(interaction_test_scales_lower, from_=0, to=100)
+        self.interaction_widgets['seek_required'].grid(row=3, column=0, sticky="news")
+        self.interaction_widgets['seek_required']["state"] = "disabled"
+
+    def start_experiment(self):
+        for _ in range(0, 10):
+            _, widget = random.choice(list(self.interaction_widgets.items()))
+            widget["state"] = "enabled"
+            time.sleep(1)
+            widget["state"] = "disabled"
 
     def get_data(self):
         """
@@ -839,8 +860,6 @@ class Server:
                     self.rotation_y.set(str(data['Rotation']['y']))
                     self.rotation_z.set(str(data['Rotation']['z']))
 
-                    self.current_action_var.set(data['Action'])
-
                     self.execute_command(data)
    
             except (KeyboardInterrupt, SystemExit):
@@ -848,6 +867,7 @@ class Server:
 
     def execute_command(self, data):
         current_interaction = data['Action'] + self.get_tilt_kind(data['Gyroscope'], data['Acceleration'], data['Rotation'])
+        self.current_action_var.set(current_interaction)
 
         if self.active_status:
             if self.interaction_funcs[self.settings[current_interaction]['Interaction']][1]:
@@ -872,9 +892,9 @@ class Server:
             else:
                 tilt = "TU"
 
-        self.gyroscope_history = [gyro_data['x'], gyro_data['y'], gyro_data['z']]
-        self.accelerometer_history = [acc_data['x'], acc_data['y'], acc_data['z']]
-        self.rotation_history = [rot_data['x'], rot_data['y'], rot_data['z']]
+        self.gyroscope_history     = [gyro_data['x'], gyro_data['y'], gyro_data['z']]
+        self.accelerometer_history = [ acc_data['x'],  acc_data['y'],  acc_data['z']]
+        self.rotation_history      = [ rot_data['x'],  rot_data['y'],  rot_data['z']]
         return tilt
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Action Functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
