@@ -26,6 +26,16 @@ public class NovelRemoteFragment extends Fragment
         // Required empty public constructor
     }
 
+
+    /**
+    * Custom function which gets called on any of the 4 buttons' press.
+     * Function is responsible for detecting press and release action of the user and set
+     * variables accordingly to be read by the settings fragment.
+     * The variables sent to the other fragment are "streamFlag", which tells whether the
+     * button is held pressed or not, and the name of the button held pressed "buttonName".
+    * @param imageButton The specific button pressed (ImageButton)
+    * @param buttonName Name of the button (String)
+    */
     @SuppressLint("ClickableViewAccessibility")
     public void customSetOnTouchListener(ImageButton imageButton, String buttonName)
     {
