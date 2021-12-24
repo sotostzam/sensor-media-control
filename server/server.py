@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from tkinter.messagebox import showinfo
 import socket, traceback
 import threading
 import json
@@ -56,8 +57,9 @@ class Server:
                                   "Scroll DOWN" : [self.scroll_down,   True],
                                   "Mute"        : [self.mute,          False]}
 
-        self.active_status = False
-        self.test_status   = False
+        self.active_status         = False
+        self.test_status           = False
+        self.experiment_info_shown = False
 
         self.last_action_timestep = 0
         self.last_action          = ''
@@ -144,7 +146,31 @@ class Server:
 
         self.tab_widget.add(self.general_frame, text='General')
         self.tab_widget.add(self.settings_frame, text='Settings')
-        self.tab_widget.add(self.interaction_frame, text='Interaction Testing')
+        self.tab_widget.add(self.interaction_frame, text='Interaction Testing')         
+
+        def popup_bonus():
+            win = tk.Toplevel()
+            win.wm_title("Experiments Information")
+
+            l1 = tk.Label(win, text="The experiments consist of two modes as follows:")
+            l1.grid(row=0, column=0)
+
+            l2 = tk.Label(win, text="1) Speed mode: Compares the speed between the different approaches by holding the phone at all times")
+            l2.grid(row=1, column=0)
+
+            l3 = tk.Label(win, text="1) Interactive mode: Compares the speed in a more natural way, like having to pick up the phone each time between each action")
+            l3.grid(row=2, column=0)
+
+            b = ttk.Button(win, text="Got It", command=win.destroy)
+            b.grid(row=3, column=0)
+
+        def on_tab_change(event):
+            tab = event.widget.tab('current')['text']
+            if tab == 'Interaction Testing' and not self.experiment_info_shown:
+                popup_bonus()
+                self.experiment_info_shown = True
+
+        self.tab_widget.bind('<<NotebookTabChanged>>', on_tab_change)
 
     def create_general(self, parent):
 
@@ -667,7 +693,7 @@ class Server:
         layout_btn_frame.grid(row=4, column=0, sticky="nswe", columnspan=3, pady=5)
         layout_btn_frame.columnconfigure(0, weight=1)
         self.save_settings_btn = ttk.Button(layout_btn_frame, text= "Save Settings", command= self.save_settings)
-        self.save_settings_btn.grid(row=0, column=0)
+        self.save_settings_btn.grid(row=0, column=0, ipadx=10, ipady=5)
 
     def create_interaction_frame(self, parent):
         """
@@ -681,6 +707,7 @@ class Server:
         interaction_selection.grid_columnconfigure(0, weight=1)
         interaction_selection.grid_columnconfigure(1, weight=1)
         interaction_selection.grid_columnconfigure(2, weight=1)
+        interaction_selection.grid_columnconfigure(3, weight=2)
 
         interaction_selection_explanation = tk.Message(interaction_selection, width=180 ,text="Please select the type of interaction tests: ")
         interaction_selection_explanation.grid(row=0, column=0, sticky="nswe")
@@ -695,8 +722,22 @@ class Server:
         interaction_choice_2 = tk.Radiobutton(interaction_selection_choice, variable=self.interaction_mode, value=2, tristatevalue=0, text="Interactive Test")
         interaction_choice_2.grid(row=1, column=1, sticky="w")
 
-        interaction_start = ttk.Button(interaction_selection, text= "Start", command= lambda: threading.Thread(target=self.start_experiment).start())
+        interaction_start = ttk.Button(interaction_selection, text= "Start", command= lambda: threading.Thread(target=self.start_experiment, daemon=True).start())
         interaction_start.grid(row=0, column=2, ipady=10)
+
+        experiments_progress = tk.Frame(interaction_selection)
+        experiments_progress.grid(row=0, column=3, sticky="nswe")
+        experiments_progress.grid_columnconfigure(0, weight=1)
+        experiments_progress.grid_rowconfigure(0, weight=1)
+        experiments_progress.grid_rowconfigure(1, weight=1)
+
+        self.experiments_progress_bar = ttk.Progressbar(experiments_progress, orient = tk.HORIZONTAL, length = 150, mode = 'determinate')
+        self.experiments_progress_bar.grid(row=0, column=0)
+
+        self.progress_value = tk.StringVar()
+        self.progress_value.set("Tests: 0/10")
+        progress_value_label = tk.Label(experiments_progress, textvariable=self.progress_value)
+        progress_value_label.grid(row=2, column=0, sticky="we", padx=25)
 
         tk.Frame(parent, height=1, bg="black").grid(row=1, column=0, sticky="news")
 
@@ -716,9 +757,6 @@ class Server:
         interaction_test_buttons.grid_rowconfigure(2, weight=1)
         interaction_test_buttons.grid_rowconfigure(3, weight=1)
         interaction_test_buttons.grid_rowconfigure(4, weight=1)
-
-        def test():
-            print("It works!")
 
         self.photo_play = tk.PhotoImage(file = r"./server/sources/play.png").subsample(7,7)
         self.photo_next = tk.PhotoImage(file = r"./server/sources/next.png").subsample(7,7)
@@ -745,8 +783,6 @@ class Server:
         self.interaction_widgets[self.ACTIONS[4]] = ttk.Button(interaction_test_buttons, text= self.ACTIONS[4], image=self.photo_stop, compound=tk.LEFT)
         self.interaction_widgets[self.ACTIONS[4]].grid(row=2, column=1, sticky="we")
         self.interaction_widgets[self.ACTIONS[4]]["state"] = "disabled"
-
-        tk.Frame(interaction_test, height=1, bg="black").grid(row=3, column=0, sticky="we")
 
         self.interaction_widgets[self.ACTIONS[11]] = ttk.Button(interaction_test_buttons, text= self.ACTIONS[11], image=self.red_btn, compound=tk.LEFT)
         self.interaction_widgets[self.ACTIONS[11]].grid(row=4, column=0, sticky="we")
@@ -819,14 +855,16 @@ class Server:
         - Speed test:       Compares the speed between the different approaches by holding the phone at all times
         - Interactive test: Compares the speed in a more natural way, like having to pick up the phone each time between each action
 
-        Each experiment required 10 different random actions to be matched within some time limit.
+        Each experiment requires 10 different random actions to be matched within some time limit.
         """
 
         self.test_status = True
         mistakes = correct_answers = 0
         experiment_results = []
+        self.experiments_progress_bar['value'] = 0
 
-        for _ in range(0, 10):
+        for i in range(0, 10):
+            self.progress_value.set("Tests: " + str(i+1) + "/10")
             interaction, widget = random.choice(list(self.interaction_widgets.items()))
             widget["state"] = "enabled"
             start = time.time()
@@ -855,6 +893,7 @@ class Server:
             result = end-start
             experiment_results.append((interaction, round(result,3), found, self.interaction_mode.get()))
             widget["state"] = "disabled"
+            self.experiments_progress_bar['value'] += 10
 
         self.test_status = False
         print('Correct answers:', correct_answers, 'Mistakes:', mistakes)
