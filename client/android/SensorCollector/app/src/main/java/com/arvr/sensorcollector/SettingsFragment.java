@@ -238,7 +238,6 @@ public class SettingsFragment extends Fragment
     }
 
 
-
     public boolean start_Hardware_Sensors()
     {
         try {
@@ -258,7 +257,6 @@ public class SettingsFragment extends Fragment
 
         return true;
     }
-
 
 
     private boolean start_UDP_Stream()
@@ -309,6 +307,7 @@ public class SettingsFragment extends Fragment
 
     }
 
+
     private boolean startStreaming()
     {
 
@@ -343,6 +342,7 @@ public class SettingsFragment extends Fragment
         return true;
     }
 
+
     private boolean isOnWifi() {
         // ConnectivityManager conman = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
         // assert conman != null;
@@ -361,6 +361,7 @@ public class SettingsFragment extends Fragment
 
         //return conman.getNetworkInfo(ConnectivityManager.TYPE_WIFI).isConnectedOrConnecting();
     }
+
 
     private static void addSensorToString(StringBuilder strbuilder, String buttonName,
                                           String sensorid1, String sensorid2,

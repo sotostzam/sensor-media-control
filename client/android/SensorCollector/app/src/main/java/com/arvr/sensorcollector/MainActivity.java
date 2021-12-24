@@ -66,8 +66,12 @@ public class MainActivity extends AppCompatActivity
 
     /*
      The MainActivity controls the communication between the 2 fragments.
-     onSendFunction() is used by the 1st fragment to send the value of streamStatus,
-     and getStreamStatus() is used by the 2nd fragment to get the value of this boolean variable.
+     onSendFunction() is used by the NovelRemoteFragment fragment to send the value of streamStatus
+     and buttonName.
+     getStreamStatus() and getButtonName() are used by the SettingsFragment to get these values.
+     Communication happens via the listeners (interfaces) FragmentOneListener (of fragment
+     NovelRemoteFragment) and FragmentOneListener (of fragment SettingsFragment), whose methods are
+     overridden below.
      */
 
     @Override
