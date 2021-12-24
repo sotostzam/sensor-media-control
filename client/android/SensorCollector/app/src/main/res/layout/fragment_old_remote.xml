@@ -2,78 +2,234 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/relativeLayoutOldRemote"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/relativeLayoutOldRemote"
     tools:context=".OldRemoteFragment">
 
     <LinearLayout
+        android:id="@+id/firstRowLinearLayout"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_height="100dp"
         android:layout_alignParentStart="true"
         android:orientation="horizontal"
-        android:id="@+id/blankLinearLayout">
+        android:layout_marginTop="32dp"
+        android:scaleX="0.7"
+        android:scaleY="0.7">
+
+        <LinearLayout
+            android:id="@+id/blankLinearLayout1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/volumeUpLinearLayout"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/volumeUpButton"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@android:color/transparent"
+                android:scaleType="fitCenter"
+                android:scaleX="0.9"
+                android:scaleY="0.9"
+                android:src="@android:drawable/arrow_up_float"
+                app:tint="@android:color/holo_blue_light" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/blankLinearLayout2"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+        </LinearLayout>
+
     </LinearLayout>
 
-
     <LinearLayout
-        android:id="@+id/firstLinearLayout"
+        android:id="@+id/secondRowLinearLayout"
         android:layout_width="match_parent"
-        android:layout_height="90dp"
-        android:layout_below="@+id/blankLinearLayout"
-        android:layout_alignParentStart="true"
-        android:gravity="center"
-        android:orientation="horizontal">
-
-        <ImageButton
-            android:id="@+id/playButton"
-            android:layout_width="100dp"
-            android:layout_height="60dp"
-            android:src="@android:drawable/ic_media_play"
-            app:tint="@android:color/holo_blue_light" />
-
-        <ImageButton
-            android:id="@+id/pauseButton"
-            android:layout_width="100dp"
-            android:layout_height="60dp"
-            android:src="@android:drawable/ic_media_pause"
-            app:tint="@android:color/holo_blue_light" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="100dp"
+        android:layout_below="@+id/firstRowLinearLayout"
         android:layout_alignParentStart="true"
         android:orientation="horizontal"
-        android:layout_below="@+id/firstLinearLayout"
-        android:id="@+id/blankLinearLayoutTwo">
+        android:scaleX="0.8"
+        android:scaleY="0.9">
+
+        <LinearLayout
+            android:id="@+id/rewindLinearLayout"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/rewindButton"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="0dp"
+                android:scaleType="fitCenter"
+                android:background="@android:color/transparent"
+                android:src="@android:drawable/ic_media_rew"
+                app:tint="@android:color/holo_blue_light" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/blankLinearLayout"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/fastForwardLinearLayout"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/fastForwardButton"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="0dp"
+                android:scaleType="fitCenter"
+                android:background="@android:color/transparent"
+                android:src="@android:drawable/ic_media_ff"
+                app:tint="@android:color/holo_blue_light" />
+        </LinearLayout>
+
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/secondLinearLayout"
+        android:id="@+id/thirdRowLinearLayout"
         android:layout_width="match_parent"
-        android:layout_height="90dp"
+        android:layout_height="100dp"
+        android:layout_below="@+id/secondRowLinearLayout"
         android:layout_alignParentStart="true"
-        android:layout_below="@+id/blankLinearLayoutTwo"
-        android:gravity="center"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:scaleX="0.7"
+        android:scaleY="0.7">
 
-        <ImageButton
-            android:id="@+id/rewindButton"
-            android:layout_width="100dp"
-            android:layout_height="60dp"
-            android:src="@android:drawable/ic_media_rew"
-            app:tint="@android:color/holo_blue_light" />
+        <LinearLayout
+            android:id="@+id/blankLinearLayout4"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+        </LinearLayout>
 
-        <ImageButton
-            android:id="@+id/fastforwardButton"
-            android:layout_width="100dp"
-            android:layout_height="60dp"
-            android:src="@android:drawable/ic_media_ff"
-            app:tint="@android:color/holo_blue_light" />
+        <LinearLayout
+            android:id="@+id/volumeDownLinearLayout"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/volumeDownButton"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@android:color/transparent"
+                android:scaleType="fitCenter"
+                android:scaleX="0.9"
+                android:scaleY="0.9"
+                android:src="@android:drawable/arrow_down_float"
+                app:tint="@android:color/holo_blue_light" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/blankLinearLayout5"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:id="@+id/FourthRowLinearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_below="@+id/thirdRowLinearLayout"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="100dp"
+        android:orientation="horizontal"
+        android:scaleX="0.8"
+        android:scaleY="0.8">
+
+        <LinearLayout
+            android:id="@+id/playLinearLayout"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+            <ImageButton
+                android:id="@+id/playButton"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="0dp"
+                android:scaleType="fitCenter"
+                android:background="@android:color/transparent"
+                android:src="@android:drawable/ic_media_play"
+                app:tint="@android:color/holo_blue_light" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/pauseLinearLayout"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+            <ImageButton
+                android:id="@+id/pauseButton"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="0dp"
+                android:scaleType="fitCenter"
+                android:background="@android:color/transparent"
+                android:src="@android:drawable/ic_media_pause"
+                app:tint="@android:color/holo_blue_light" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/blankLinearLayout8"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/muteLinearLayout"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/muteButton"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitCenter"
+                android:background="@android:color/transparent"
+                android:src="@android:drawable/ic_lock_silent_mode"
+                app:tint="@android:color/holo_blue_light"/>
+        </LinearLayout>
 
     </LinearLayout>
 
 
 </RelativeLayout>
+

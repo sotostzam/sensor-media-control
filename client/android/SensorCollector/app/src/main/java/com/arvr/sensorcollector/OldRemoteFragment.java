@@ -1,6 +1,7 @@
 package com.arvr.sensorcollector;
 
 import android.graphics.PorterDuff;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
@@ -18,6 +19,8 @@ import android.widget.ImageButton;
 public class OldRemoteFragment extends Fragment {
 
     private ImageButton mPlayButton, mPauseButton, mRewindButton, mFastforwardButton;
+    private ImageButton mVolumeUpButton, mVolumeDownButton, mMuteButton;
+    final boolean[] mute = {false};
 
 
     public OldRemoteFragment() {
@@ -37,7 +40,12 @@ public class OldRemoteFragment extends Fragment {
         mPlayButton = (ImageButton) view.findViewById(R.id.playButton);
         mPauseButton = (ImageButton) view.findViewById(R.id.pauseButton);
         mRewindButton = (ImageButton) view.findViewById(R.id.rewindButton);
-        mFastforwardButton = (ImageButton) view.findViewById(R.id.fastforwardButton);
+        mFastforwardButton = (ImageButton) view.findViewById(R.id.fastForwardButton);
+        mVolumeUpButton = (ImageButton) view.findViewById(R.id.volumeUpButton);
+        mVolumeDownButton = (ImageButton) view.findViewById(R.id.volumeDownButton);
+        mMuteButton = (ImageButton) view.findViewById(R.id.muteButton);
+
+
 
         mPlayButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -94,6 +102,58 @@ public class OldRemoteFragment extends Fragment {
                 } else if (event.getAction() == MotionEvent.ACTION_UP)
                 {
                     mFastforwardButton.setColorFilter(getResources().getColor(android.R.color.holo_blue_light), PorterDuff.Mode.SRC_ATOP);
+                }
+                return false;
+            }
+        });
+
+        mVolumeUpButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN)
+                {
+                    mVolumeUpButton.setColorFilter(getResources().getColor(android.R.color.holo_red_dark), PorterDuff.Mode.SRC_ATOP);
+
+                } else if (event.getAction() == MotionEvent.ACTION_UP)
+                {
+                    mVolumeUpButton.setColorFilter(getResources().getColor(android.R.color.holo_blue_light), PorterDuff.Mode.SRC_ATOP);
+                }
+                return false;
+            }
+        });
+
+        mVolumeDownButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN)
+                {
+                    mVolumeDownButton.setColorFilter(getResources().getColor(android.R.color.holo_red_dark), PorterDuff.Mode.SRC_ATOP);
+
+                } else if (event.getAction() == MotionEvent.ACTION_UP)
+                {
+                    mVolumeDownButton.setColorFilter(getResources().getColor(android.R.color.holo_blue_light), PorterDuff.Mode.SRC_ATOP);
+                }
+                return false;
+            }
+        });
+
+        mMuteButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+
+                if (event.getAction() == MotionEvent.ACTION_UP)
+                {
+                    if(!mute[0])
+                    {
+                        mMuteButton.setColorFilter(getResources().getColor(android.R.color.holo_red_dark), PorterDuff.Mode.SRC_ATOP);
+                        mute[0] = true;
+                    }
+                    else
+                    {
+                        mMuteButton.setColorFilter(getResources().getColor(android.R.color.holo_blue_light), PorterDuff.Mode.SRC_ATOP);
+                        mute[0] = false;
+                    }
+
                 }
                 return false;
             }
