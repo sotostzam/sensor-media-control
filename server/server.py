@@ -11,6 +11,7 @@ from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 import keyboard
 import random
 import time
+import csv
 
 class Server:
     """
@@ -35,7 +36,8 @@ class Server:
                         "Seek +",
                         "Seek -",
                         "Scroll UP",
-                        "Scroll DOWN"]
+                        "Scroll DOWN",
+                        "Mute"]
 
         self.TYPES = ["Constant",
                       "Incremental",
@@ -51,10 +53,14 @@ class Server:
                                   "Seek +"      : [self.increase_seek, True],
                                   "Seek -"      : [self.decrease_seek, True],
                                   "Scroll UP"   : [self.scroll_up,     True],
-                                  "Scroll DOWN" : [self.scroll_down,   True]}
+                                  "Scroll DOWN" : [self.scroll_down,   True],
+                                  "Mute"        : [self.mute,          False]}
 
         self.active_status = False
         self.test_status   = False
+
+        self.last_action_timestep = 0
+        self.last_action          = ''
 
         # Past values used for comparisons
         self.gyroscope_history      = [0, 0, 0]
@@ -683,10 +689,10 @@ class Server:
         interaction_selection_choice = tk.Frame(interaction_selection)
         interaction_selection_choice.grid(row=0, column=1, sticky="nswe")
 
-        interaction_mode = tk.IntVar(value=1)
-        interaction_choice_1 = tk.Radiobutton(interaction_selection_choice, variable=interaction_mode, value=1, tristatevalue=0, text="Speed Test")
+        self.interaction_mode = tk.IntVar(value=1)
+        interaction_choice_1 = tk.Radiobutton(interaction_selection_choice, variable=self.interaction_mode, value=1, tristatevalue=0, text="Speed Test")
         interaction_choice_1.grid(row=0, column=1, sticky="w")
-        interaction_choice_2 = tk.Radiobutton(interaction_selection_choice, variable=interaction_mode, value=2, tristatevalue=0, text="Interactive Test")
+        interaction_choice_2 = tk.Radiobutton(interaction_selection_choice, variable=self.interaction_mode, value=2, tristatevalue=0, text="Interactive Test")
         interaction_choice_2.grid(row=1, column=1, sticky="w")
 
         interaction_start = ttk.Button(interaction_selection, text= "Start", command= lambda: threading.Thread(target=self.start_experiment).start())
@@ -724,33 +730,33 @@ class Server:
 
         self.interaction_widgets = {}
         
-        self.interaction_widgets = {'play_pause': ttk.Button(interaction_test_buttons, text= "Play/Pause", image=self.photo_play, compound=tk.LEFT, command= test)}
-        self.interaction_widgets['play_pause'].grid(row=0, column=1, sticky="we")
-        self.interaction_widgets['play_pause']["state"] = "disabled"
+        self.interaction_widgets = {self.ACTIONS[1]: ttk.Button(interaction_test_buttons, text= self.ACTIONS[1], image=self.photo_play, compound=tk.LEFT)}
+        self.interaction_widgets[self.ACTIONS[1]].grid(row=0, column=1, sticky="we")
+        self.interaction_widgets[self.ACTIONS[1]]["state"] = "disabled"
 
-        self.interaction_widgets['next'] = ttk.Button(interaction_test_buttons, text= "Next", image=self.photo_next, compound=tk.LEFT, command= test)
-        self.interaction_widgets['next'].grid(row=1, column=2, sticky="we")
-        self.interaction_widgets['next']["state"] = "disabled"
+        self.interaction_widgets[self.ACTIONS[3]] = ttk.Button(interaction_test_buttons, text= self.ACTIONS[3], image=self.photo_next, compound=tk.LEFT)
+        self.interaction_widgets[self.ACTIONS[3]].grid(row=1, column=2, sticky="we")
+        self.interaction_widgets[self.ACTIONS[3]]["state"] = "disabled"
 
-        self.interaction_widgets['prev'] = ttk.Button(interaction_test_buttons, text= "Previous", image=self.photo_prev, compound=tk.LEFT, command= test)
-        self.interaction_widgets['prev'].grid(row=1, column=0, sticky="we")
-        self.interaction_widgets['prev']["state"] = "disabled"
+        self.interaction_widgets[self.ACTIONS[2]] = ttk.Button(interaction_test_buttons, text= self.ACTIONS[2], image=self.photo_prev, compound=tk.LEFT)
+        self.interaction_widgets[self.ACTIONS[2]].grid(row=1, column=0, sticky="we")
+        self.interaction_widgets[self.ACTIONS[2]]["state"] = "disabled"
         
-        self.interaction_widgets['stop'] = ttk.Button(interaction_test_buttons, text= "Stop", image=self.photo_stop, compound=tk.LEFT, command= test)
-        self.interaction_widgets['stop'].grid(row=2, column=1, sticky="we")
-        self.interaction_widgets['stop']["state"] = "disabled"
+        self.interaction_widgets[self.ACTIONS[4]] = ttk.Button(interaction_test_buttons, text= self.ACTIONS[4], image=self.photo_stop, compound=tk.LEFT)
+        self.interaction_widgets[self.ACTIONS[4]].grid(row=2, column=1, sticky="we")
+        self.interaction_widgets[self.ACTIONS[4]]["state"] = "disabled"
 
         tk.Frame(interaction_test, height=1, bg="black").grid(row=3, column=0, sticky="we")
 
-        self.interaction_widgets['btn1'] = ttk.Button(interaction_test_buttons, text= "Button 1", image=self.red_btn, compound=tk.LEFT, command= test)
-        self.interaction_widgets['btn1'].grid(row=4, column=0, sticky="we")
-        self.interaction_widgets['btn1']["state"] = "disabled"
+        self.interaction_widgets[self.ACTIONS[11]] = ttk.Button(interaction_test_buttons, text= self.ACTIONS[11], image=self.red_btn, compound=tk.LEFT)
+        self.interaction_widgets[self.ACTIONS[11]].grid(row=4, column=0, sticky="we")
+        self.interaction_widgets[self.ACTIONS[11]]["state"] = "disabled"
 
-        self.interaction_widgets['btn2'] = ttk.Button(interaction_test_buttons, text= "Button 2", image=self.green_btn, compound=tk.LEFT, command= test)
+        self.interaction_widgets['btn2'] = ttk.Button(interaction_test_buttons, text= "Button 2", image=self.green_btn, compound=tk.LEFT)
         self.interaction_widgets['btn2'].grid(row=4, column=1, sticky="we")
         self.interaction_widgets['btn2']["state"] = "disabled"
 
-        self.interaction_widgets['btn3'] = ttk.Button(interaction_test_buttons, text= "Button 3", image=self.blue_btn, compound=tk.LEFT, command= test)
+        self.interaction_widgets['btn3'] = ttk.Button(interaction_test_buttons, text= "Button 3", image=self.blue_btn, compound=tk.LEFT)
         self.interaction_widgets['btn3'].grid(row=4, column=2, sticky="we")
         self.interaction_widgets['btn3']["state"] = "disabled"
 
@@ -772,9 +778,9 @@ class Server:
         self.test_volume_user_lb = tk.Label(interaction_test_scales_upper, text="Volume Input")
         self.test_volume_user_lb.grid(row=0, column=0, sticky="news")
 
-        self.interaction_widgets['volume_user'] = ttk.Scale(interaction_test_scales_upper, from_=0, to=100, orient="vertical")
-        self.interaction_widgets['volume_user'].grid(row=1, column=0, sticky="news")
-        self.interaction_widgets['volume_user']["state"] = "disabled"
+        self.experiment_volume_user = ttk.Scale(interaction_test_scales_upper, from_=0, to=100, orient="vertical")
+        self.experiment_volume_user.grid(row=1, column=0, sticky="news")
+        self.experiment_volume_user["state"] = "disabled"
 
         self.test_volume_required_lb = tk.Label(interaction_test_scales_upper, text="Volume Required")
         self.test_volume_required_lb.grid(row=0, column=1, sticky="news")
@@ -796,9 +802,9 @@ class Server:
         self.test_seek_user_lb = tk.Label(interaction_test_scales_lower, anchor="w", text="Seek Input")
         self.test_seek_user_lb.grid(row=0, column=0, sticky="news")
 
-        self.interaction_widgets['seek_user'] = ttk.Scale(interaction_test_scales_lower, from_=0, to=100)
-        self.interaction_widgets['seek_user'].grid(row=1, column=0, sticky="news")
-        self.interaction_widgets['seek_user']["state"] = "disabled"
+        self.experiment_seek_user = ttk.Scale(interaction_test_scales_lower, from_=0, to=100)
+        self.experiment_seek_user.grid(row=1, column=0, sticky="news")
+        self.experiment_seek_user["state"] = "disabled"
 
         self.test_seek_required_lb = tk.Label(interaction_test_scales_lower, anchor="w", text="Seek Required")
         self.test_seek_required_lb.grid(row=2, column=0, sticky="news")
@@ -808,11 +814,57 @@ class Server:
         self.interaction_widgets['seek_required']["state"] = "disabled"
 
     def start_experiment(self):
+        """
+        Starts an experiment cycle consisting of two separate test cases:
+        - Speed test:       Compares the speed between the different approaches by holding the phone at all times
+        - Interactive test: Compares the speed in a more natural way, like having to pick up the phone each time between each action
+
+        Each experiment required 10 different random actions to be matched within some time limit.
+        """
+
+        self.test_status = True
+        mistakes = correct_answers = 0
+        experiment_results = []
+
         for _ in range(0, 10):
-            _, widget = random.choice(list(self.interaction_widgets.items()))
+            interaction, widget = random.choice(list(self.interaction_widgets.items()))
             widget["state"] = "enabled"
-            time.sleep(1)
+            start = time.time()
+
+            terminate = False
+            found = False
+
+            while not terminate and (time.time()-start) <= 3:
+                if self.last_action == '':
+                    pass
+                else:
+                    print('Required:', interaction, '| Got:', self.settings[self.last_action]['Interaction'])
+                    if self.settings[self.last_action]['Interaction'] == interaction:
+                        correct_answers += 1
+                        self.last_action = ''
+                        found = True
+                        break
+                    else:
+                        self.last_action = ''
+                time.sleep(0.1)
+
+            if not found:
+                mistakes += 1
+
+            end = time.time()
+            result = end-start
+            experiment_results.append((interaction, round(result,3), found, self.interaction_mode.get()))
             widget["state"] = "disabled"
+
+        self.test_status = False
+        print('Correct answers:', correct_answers, 'Mistakes:', mistakes)
+
+        filename = 'experiments/' + time.strftime("%Y%m%d%H%M%S") + '_experiment.csv'
+
+        with open(filename,'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(['Required Action', 'Time', 'Correct', 'Mode'])
+            writer.writerows(experiment_results)
 
     def get_data(self):
         """
@@ -875,7 +927,8 @@ class Server:
             else:
                 self.interaction_funcs[self.settings[current_interaction]['Interaction']][0]()
         elif self.test_status:
-            pass
+            self.last_action_timestep = data['Timestep']
+            self.last_action          = current_interaction
         else:
             pass
 
@@ -942,6 +995,9 @@ class Server:
 
     def scroll_down(self, arg):
         keyboard.send("down", do_press=True, do_release=True)
+
+    def mute(self):
+        pass
 
     def create_udp_stream(self):
         """

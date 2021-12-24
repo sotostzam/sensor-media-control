@@ -1,2 +1,3 @@
 .vscode
 /server/settings.json
+/experiments/*
