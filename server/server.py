@@ -821,16 +821,16 @@ class Server:
         self.test_volume_user_lb = tk.Label(interaction_test_scales_upper, text="Volume Input")
         self.test_volume_user_lb.grid(row=0, column=0, sticky="news")
 
-        self.experiment_volume_user = ttk.Scale(interaction_test_scales_upper, from_=0, to=100, orient="vertical")
+        self.experiment_volume_user = ttk.Scale(interaction_test_scales_upper, from_=100, to=0, orient="vertical")
         self.experiment_volume_user.grid(row=1, column=0, sticky="news")
         self.experiment_volume_user["state"] = "disabled"
 
         self.test_volume_required_lb = tk.Label(interaction_test_scales_upper, text="Volume Required")
         self.test_volume_required_lb.grid(row=0, column=1, sticky="news")
 
-        self.interaction_widgets['volume_required'] = ttk.Scale(interaction_test_scales_upper, from_=0, to=100, orient="vertical")
-        self.interaction_widgets['volume_required'].grid(row=1, column=1, sticky="news")
-        self.interaction_widgets['volume_required']["state"] = "disabled"
+        self.interaction_widgets['Volume'] = ttk.Scale(interaction_test_scales_upper, from_=100, to=0, orient="vertical")
+        self.interaction_widgets['Volume'].grid(row=1, column=1, sticky="news")
+        self.interaction_widgets['Volume']["state"] = "disabled"
 
         tk.Frame(interaction_test_scales, height=1, bg="black").grid(row=1, column=0, sticky="news")
 
@@ -852,9 +852,9 @@ class Server:
         self.test_seek_required_lb = tk.Label(interaction_test_scales_lower, anchor="w", text="Seek Required")
         self.test_seek_required_lb.grid(row=2, column=0, sticky="news")
 
-        self.interaction_widgets['seek_required'] = ttk.Scale(interaction_test_scales_lower, from_=0, to=100)
-        self.interaction_widgets['seek_required'].grid(row=3, column=0, sticky="news")
-        self.interaction_widgets['seek_required']["state"] = "disabled"
+        self.interaction_widgets['Seek'] = ttk.Scale(interaction_test_scales_lower, from_=0, to=100)
+        self.interaction_widgets['Seek'].grid(row=3, column=0, sticky="news")
+        self.interaction_widgets['Seek']["state"] = "disabled"
 
     def start_experiment(self):
         """
@@ -874,6 +874,13 @@ class Server:
             self.progress_value.set("Tests completed: " + str(i+1) + "/10")
             interaction, widget = random.choice(list(self.interaction_widgets.items()))
             widget["state"] = "enabled"
+            if interaction == "Volume" or interaction == "Seek":
+                if interaction == "Volume":
+                    self.experiment_volume_user["state"] = "enabled"
+                else:
+                    self.experiment_seek_user["state"] = "enabled"
+                widget.set(random.randint(0, 100))
+
             start = time.time()
 
             terminate = False
@@ -881,16 +888,27 @@ class Server:
 
             while not terminate and (time.time()-start) <= 3:
                 if self.last_action == '':
-                    pass
-                else:
-                    print('Required:', interaction, '| Got:', self.settings[self.last_action]['Interaction'])
-                    if self.settings[self.last_action]['Interaction'] == interaction:
+                    continue
+                print('[Debug] Required:', interaction, '| Got:', self.settings[self.last_action]['Interaction'])
+                if interaction == "Volume":
+                    if self.experiment_volume_user.get() >= self.interaction_widgets['Volume'].get()-10 and self.experiment_volume_user.get() <= self.interaction_widgets['Volume'].get()+10:
                         correct_answers += 1
                         self.last_action = ''
                         found = True
                         break
-                    else:
+                elif interaction == "Seek":
+                    if self.experiment_seek_user.get() >= self.interaction_widgets['Seek'].get()-10 and self.experiment_seek_user.get() <= self.interaction_widgets['Seek'].get()+10:
+                        correct_answers += 1
                         self.last_action = ''
+                        found = True
+                        break
+                elif self.settings[self.last_action]['Interaction'] == interaction:
+                    correct_answers += 1
+                    self.last_action = ''
+                    found = True
+                    break
+                else:
+                    self.last_action = ''
                 time.sleep(0.1)
 
             if not found:
@@ -900,10 +918,12 @@ class Server:
             result = end-start
             experiment_results.append((interaction, round(result,3), found, self.interaction_mode.get()))
             widget["state"] = "disabled"
+            if self.experiment_volume_user["state"] == "enabled": self.experiment_volume_user["state"] = "disabled"
+            if self.experiment_seek_user["state"]   == "enabled": self.experiment_seek_user["state"]   = "disabled"
             self.experiments_progress_bar['value'] += 10
 
         self.test_status = False
-        print('Correct answers:', correct_answers, 'Mistakes:', mistakes)
+        print('[Debug] Correct answers:', correct_answers, 'Mistakes:', mistakes)
 
         filename = 'experiments/' + time.strftime("%Y%m%d%H%M%S") + '_experiment.csv'
 
@@ -978,6 +998,16 @@ class Server:
         elif self.test_status:
             self.last_action_timestep = data['Timestep']
             self.last_action          = current_interaction
+            if self.experiment_volume_user["state"] == "enabled":
+                if (self.settings[current_interaction]['Interaction']) == "Volume -":
+                    self.experiment_volume_user.set(self.experiment_volume_user.get()-10)
+                elif (self.settings[current_interaction]['Interaction']) == "Volume +":
+                    self.experiment_volume_user.set(self.experiment_volume_user.get()+10)
+            elif self.experiment_seek_user["state"] == "enabled":
+                if (self.settings[current_interaction]['Interaction']) == "Seek -":
+                    self.experiment_seek_user.set(self.experiment_seek_user.get()-10)
+                elif (self.settings[current_interaction]['Interaction']) == "Seek +":
+                    self.experiment_seek_user.set(self.experiment_seek_user.get()+10)
         else:
             pass
 
