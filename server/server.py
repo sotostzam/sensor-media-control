@@ -1,6 +1,5 @@
 import tkinter as tk
 from tkinter import ttk
-from tkinter.messagebox import showinfo
 import socket, traceback
 import threading
 import json
@@ -148,26 +147,39 @@ class Server:
         self.tab_widget.add(self.settings_frame, text='Settings')
         self.tab_widget.add(self.interaction_frame, text='Interaction Testing')         
 
-        def popup_bonus():
-            win = tk.Toplevel()
-            win.wm_title("Experiments Information")
+        def experiments_popup():
+            popup_window = tk.Toplevel()
+            popup_window.wm_title("Experiments Information")
+            popup_window.resizable(False, False)
 
-            l1 = tk.Label(win, text="The experiments consist of two modes as follows:")
-            l1.grid(row=0, column=0)
+            popup_master_frame = tk.Frame(popup_window)
+            popup_master_frame.grid(padx=20)
 
-            l2 = tk.Label(win, text="1) Speed mode: Compares the speed between the different approaches by holding the phone at all times")
-            l2.grid(row=1, column=0)
+            popup_master_label = tk.Message(popup_master_frame, width=300, text="The experiments consist of two modes as follows:")
+            popup_master_label.grid(row=0, column=0, sticky="w", pady=10)
 
-            l3 = tk.Label(win, text="1) Interactive mode: Compares the speed in a more natural way, like having to pick up the phone each time between each action")
-            l3.grid(row=2, column=0)
+            popup_modes_group = tk.Frame(popup_master_frame)
+            popup_modes_group.grid(row=1, column=0, sticky="w")
 
-            b = ttk.Button(win, text="Got It", command=win.destroy)
-            b.grid(row=3, column=0)
+            mode_1 = tk.Label(popup_modes_group, text="Speed mode:", font='Helvetica 10 bold')
+            mode_1.grid(row=0, column=0, sticky="w")
+
+            mode_1_explanation = tk.Message(popup_modes_group, width=300, text="Compares the speed between the different approaches by holding the phone at all times.")
+            mode_1_explanation.grid(row=0, column=1, sticky="w")
+
+            mode_2 = tk.Label(popup_modes_group, text="Interactive mode:", font='Helvetica 10 bold')
+            mode_2.grid(row=1, column=0, sticky="w")
+
+            mode_2 = tk.Message(popup_modes_group, width=300, text="Compares the speed in a more natural way, like having to pick up the phone each time between each action.")
+            mode_2.grid(row=1, column=1, sticky="w")
+
+            confirm_button = ttk.Button(popup_master_frame, text="Got It", command=popup_window.destroy)
+            confirm_button.grid(row=2, column=0, pady=20)
 
         def on_tab_change(event):
             tab = event.widget.tab('current')['text']
             if tab == 'Interaction Testing' and not self.experiment_info_shown:
-                popup_bonus()
+                experiments_popup()
                 self.experiment_info_shown = True
 
         self.tab_widget.bind('<<NotebookTabChanged>>', on_tab_change)
@@ -717,9 +729,9 @@ class Server:
         interaction_selection_choice.grid(row=0, column=1, sticky="nswe")
 
         self.interaction_mode = tk.IntVar(value=1)
-        interaction_choice_1 = tk.Radiobutton(interaction_selection_choice, variable=self.interaction_mode, value=1, tristatevalue=0, text="Speed Test")
+        interaction_choice_1 = tk.Radiobutton(interaction_selection_choice, variable=self.interaction_mode, value=1, tristatevalue=0, text="Speed Mode")
         interaction_choice_1.grid(row=0, column=1, sticky="w")
-        interaction_choice_2 = tk.Radiobutton(interaction_selection_choice, variable=self.interaction_mode, value=2, tristatevalue=0, text="Interactive Test")
+        interaction_choice_2 = tk.Radiobutton(interaction_selection_choice, variable=self.interaction_mode, value=2, tristatevalue=0, text="Interactive Mode")
         interaction_choice_2.grid(row=1, column=1, sticky="w")
 
         interaction_start = ttk.Button(interaction_selection, text= "Start", command= lambda: threading.Thread(target=self.start_experiment, daemon=True).start())
@@ -735,7 +747,7 @@ class Server:
         self.experiments_progress_bar.grid(row=0, column=0)
 
         self.progress_value = tk.StringVar()
-        self.progress_value.set("Tests: 0/10")
+        self.progress_value.set("Tests completed: 0/10")
         progress_value_label = tk.Label(experiments_progress, textvariable=self.progress_value)
         progress_value_label.grid(row=2, column=0, sticky="we", padx=25)
 
@@ -864,7 +876,7 @@ class Server:
         self.experiments_progress_bar['value'] = 0
 
         for i in range(0, 10):
-            self.progress_value.set("Tests: " + str(i+1) + "/10")
+            self.progress_value.set("Tests completed: " + str(i+1) + "/10")
             interaction, widget = random.choice(list(self.interaction_widgets.items()))
             widget["state"] = "enabled"
             start = time.time()
