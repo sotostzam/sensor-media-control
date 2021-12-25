@@ -26,35 +26,22 @@ class Server:
         self.settings = {}
         self.populate_settings()
 
-        self.ACTIONS = ["Not Used",
-                        "Play/Pause",
-                        "Previous",
-                        "Next",
-                        "Stop",
-                        "Volume +",
-                        "Volume -",
-                        "Seek +",
-                        "Seek -",
-                        "Scroll UP",
-                        "Scroll DOWN",
-                        "Mute"]
+        self.ACTIONS = {"Not Used"    : {"function": self.not_used,      "has_params": False},
+                        "Play/Pause"  : {"function": self.play_pause,    "has_params": False},
+                        "Previous"    : {"function": self.previous,      "has_params": False},
+                        "Next"        : {"function": self.next,          "has_params": False},
+                        "Stop"        : {"function": self.stop,          "has_params": False},
+                        "Volume +"    : {"function": self.increase_vol,  "has_params": True},
+                        "Volume -"    : {"function": self.decrease_vol,  "has_params": True},
+                        "Seek +"      : {"function": self.increase_seek, "has_params": True},
+                        "Seek -"      : {"function": self.decrease_seek, "has_params": True},
+                        "Scroll UP"   : {"function": self.scroll_up,     "has_params": True},
+                        "Scroll DOWN" : {"function": self.scroll_down,   "has_params": True},
+                        "Mute"        : {"function": self.mute,          "has_params": False}}
 
         self.TYPES = ["Constant",
                       "Incremental",
                       "Steps"]
-
-        self.interaction_funcs = {"Not Used"    : [self.not_used,      False],
-                                  "Play/Pause"  : [self.play_pause,    False],
-                                  "Previous"    : [self.previous,      False],
-                                  "Next"        : [self.next,          False],
-                                  "Stop"        : [self.stop,          False],
-                                  "Volume +"    : [self.increase_vol,  True],
-                                  "Volume -"    : [self.decrease_vol,  True],
-                                  "Seek +"      : [self.increase_seek, True],
-                                  "Seek -"      : [self.decrease_seek, True],
-                                  "Scroll UP"   : [self.scroll_up,     True],
-                                  "Scroll DOWN" : [self.scroll_down,   True],
-                                  "Mute"        : [self.mute,          False]}
 
         self.active_status         = False
         self.test_status           = False
@@ -170,7 +157,8 @@ class Server:
             mode_2 = tk.Label(popup_modes_group, text="Interactive mode:", font='Helvetica 10 bold')
             mode_2.grid(row=1, column=0, sticky="w")
 
-            mode_2 = tk.Message(popup_modes_group, width=300, text="Compares the speed in a more natural way, like having to pick up the phone each time between each action.")
+            mode_2 = tk.Message(popup_modes_group, width=300, text="Compares the speed in a more natural way, like having to pick up the phone each time between " +
+                                                                   "each action. After each matched action, please let the phone down.")
             mode_2.grid(row=1, column=1, sticky="w")
 
             confirm_button = ttk.Button(popup_master_frame, text="Got It", command=popup_window.destroy)
@@ -206,24 +194,30 @@ class Server:
         conn_info = tk.Label(conn_info_frame, text="Connection", font=("Courier", 24), anchor="w",)
         conn_info.grid(row=0, column=0, sticky="we", columnspan=2)
 
+        server_label = tk.Label(conn_info_frame, text="Server:")
+        server_label.grid(row=1, column=0, sticky="we")
+        current_ip_address = [ip for ip in socket.gethostbyname_ex(socket.gethostname())[2] if not ip.startswith("127.")][:1]
+        label_server_var = tk.Label(conn_info_frame, text=str(current_ip_address[0]))
+        label_server_var.grid(row=1, column=1, sticky="w", padx=25)
+
         status_label = tk.Label(conn_info_frame, text="Status:")
-        status_label.grid(row=1, column=0, sticky="we")
+        status_label.grid(row=2, column=0, sticky="we")
         self.status_var = tk.StringVar()
         self.status_var.set("Not Connected")
         self.label_status_var = tk.Label(conn_info_frame, textvariable=self.status_var, fg="Red")
-        self.label_status_var.grid(row=1, column=1, sticky="we", padx=25)
+        self.label_status_var.grid(row=2, column=1, sticky="w", padx=25)
 
         client_label = tk.Label(conn_info_frame, text="Client:")
-        client_label.grid(row=2, column=0, sticky="we")
+        client_label.grid(row=3, column=0, sticky="we")
         self.client_var = tk.StringVar()
         self.client_var.set("Not Connected")
         self.label_client_var = tk.Label(conn_info_frame, textvariable=self.client_var, fg="Red")
-        self.label_client_var.grid(row=2, column=1, sticky="we", padx=25)
+        self.label_client_var.grid(row=3, column=1, sticky="w", padx=25)
 
         active_info_frame = tk.Frame(status_frame)
         active_info_frame.grid(row=0, column=1, sticky="we", padx=0)
 
-        self.active_btn = ttk.Button(active_info_frame, text= "Enable Interaction", command= toggle_activation)
+        self.active_btn = ttk.Button(active_info_frame, text= "Enable Interaction", command = toggle_activation)
         self.active_btn.grid(row=0, column=0, ipadx=10, ipady=10)
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Sensor Data Information ~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -351,7 +345,7 @@ class Server:
             self.lstu_action_vars = tk.StringVar(ls_group)
             self.lstu_action_vars.set(self.settings['LSTU']['Interaction'])
 
-            self.settings_widgets['LSTU'] = {'action': ttk.OptionMenu(ls_group, self.lstu_action_vars, self.settings['LSTU']['Interaction'], *self.ACTIONS, 
+            self.settings_widgets['LSTU'] = {'action': ttk.OptionMenu(ls_group, self.lstu_action_vars, self.settings['LSTU']['Interaction'], *list(self.ACTIONS), 
                                                                     command= lambda x: modify_setting(self.lstu_action_vars, 'LSTU', 'Interaction'))}
             self.settings_widgets['LSTU']['action'].grid(row=0, column=1, sticky="we")
 
@@ -361,7 +355,7 @@ class Server:
             self.settings_widgets['LSTU']['type'] = ttk.OptionMenu(ls_group, self.lstu_type_vars, self.settings['LSTU']['Type'], *self.TYPES, 
                                                                     command=lambda x: modify_setting(self.lstu_type_vars, 'LSTU', 'Type'))
             self.settings_widgets['LSTU']['type'].grid(row=0, column=2, sticky="we")
-            if self.interaction_funcs[self.settings['LSTU']['Interaction']][1] is False: self.settings_widgets['LSTU']['type'].configure(state="disabled")
+            if self.ACTIONS[self.settings['LSTU']['Interaction']]['has_params'] is False: self.settings_widgets['LSTU']['type'].configure(state="disabled")
 
             lstd_label = tk.Label(ls_group, anchor="w", text="Tilt Down:")
             lstd_label.grid(row=1, column=0, sticky="we")
@@ -369,7 +363,7 @@ class Server:
             self.lstd_action_vars = tk.StringVar(ls_group)
             self.lstd_action_vars.set(self.settings['LSTD']['Interaction'])
 
-            self.settings_widgets['LSTD'] = {'action': ttk.OptionMenu(ls_group, self.lstd_action_vars, self.settings['LSTD']['Interaction'], *self.ACTIONS, 
+            self.settings_widgets['LSTD'] = {'action': ttk.OptionMenu(ls_group, self.lstd_action_vars, self.settings['LSTD']['Interaction'], *list(self.ACTIONS), 
                                                                     command= lambda x: modify_setting(self.lstd_action_vars, 'LSTD', 'Interaction'))}
             self.settings_widgets['LSTD']['action'].grid(row=1, column=1, sticky="we")
 
@@ -379,7 +373,7 @@ class Server:
             self.settings_widgets['LSTD'] = {'type': ttk.OptionMenu(ls_group, self.lstd_type_vars, self.settings['LSTD']['Type'], *self.TYPES, 
                                                                     command=lambda x: modify_setting(self.lstd_type_vars, 'LSTD', 'Type'))}
             self.settings_widgets['LSTD']['type'].grid(row=1, column=2, sticky="we")
-            if self.interaction_funcs[self.settings['LSTD']['Interaction']][1] is False: self.settings_widgets['LSTD']['type'].configure(state="disabled")
+            if self.ACTIONS[self.settings['LSTD']['Interaction']]['has_params'] is False: self.settings_widgets['LSTD']['type'].configure(state="disabled")
 
             lstl_label = tk.Label(ls_group, anchor="w", text="Tilt Left:")
             lstl_label.grid(row=2, column=0, sticky="we")
@@ -387,7 +381,7 @@ class Server:
             self.lstl_action_vars = tk.StringVar(ls_group)
             self.lstl_action_vars.set(self.settings['LSTL']['Interaction'])
 
-            self.settings_widgets['LSTL'] = {'action': ttk.OptionMenu(ls_group, self.lstl_action_vars, self.settings['LSTL']['Interaction'], *self.ACTIONS, 
+            self.settings_widgets['LSTL'] = {'action': ttk.OptionMenu(ls_group, self.lstl_action_vars, self.settings['LSTL']['Interaction'], *list(self.ACTIONS), 
                                                                     command= lambda x: modify_setting(self.lstl_action_vars, 'LSTL', 'Interaction'))}
             self.settings_widgets['LSTL']['action'].grid(row=2, column=1, sticky="we")
 
@@ -397,7 +391,7 @@ class Server:
             self.settings_widgets['LSTL'] = {'type': ttk.OptionMenu(ls_group, self.lstl_type_vars, self.settings['LSTL']['Type'], *self.TYPES, 
                                                                     command=lambda x: modify_setting(self.lstl_type_vars, 'LSTL', 'Type'))}
             self.settings_widgets['LSTL']['type'].grid(row=2, column=2, sticky="we")
-            if self.interaction_funcs[self.settings['LSTL']['Interaction']][1] is False: self.settings_widgets['LSTL']['type'].configure(state="disabled")
+            if self.ACTIONS[self.settings['LSTL']['Interaction']]['has_params'] is False: self.settings_widgets['LSTL']['type'].configure(state="disabled")
 
             lstr_label = tk.Label(ls_group, anchor="w", text="Tilt Right:")
             lstr_label.grid(row=3, column=0, sticky="we")
@@ -405,7 +399,7 @@ class Server:
             self.lstr_action_vars = tk.StringVar(ls_group)
             self.lstr_action_vars.set(self.settings['LSTR']['Interaction'])
 
-            self.settings_widgets['LSTR'] = {'action': ttk.OptionMenu(ls_group, self.lstr_action_vars, self.settings['LSTR']['Interaction'], *self.ACTIONS, 
+            self.settings_widgets['LSTR'] = {'action': ttk.OptionMenu(ls_group, self.lstr_action_vars, self.settings['LSTR']['Interaction'], *list(self.ACTIONS), 
                                                                     command= lambda x: modify_setting(self.lstr_action_vars, 'LSTR', 'Interaction'))}
             self.settings_widgets['LSTR']['action'].grid(row=3, column=1, sticky="we")
 
@@ -415,7 +409,7 @@ class Server:
             self.settings_widgets['LSTR'] = {'type': ttk.OptionMenu(ls_group, self.lstr_type_vars, self.settings['LSTR']['Type'], *self.TYPES, 
                                                                     command=lambda x: modify_setting(self.lstr_type_vars, 'LSTR', 'Type'))}
             self.settings_widgets['LSTR']['type'].grid(row=3, column=2, sticky="we")
-            if self.interaction_funcs[self.settings['LSTR']['Interaction']][1] is False: self.settings_widgets['LSTR']['type'].configure(state="disabled")
+            if self.ACTIONS[self.settings['LSTR']['Interaction']]['has_params'] is False: self.settings_widgets['LSTR']['type'].configure(state="disabled")
 
             tk.Frame(parent_frame, height=1, bg="black").grid(row=0, column=1, sticky="news")
 
@@ -440,7 +434,7 @@ class Server:
             self.rstu_action_vars = tk.StringVar(rs_group)
             self.rstu_action_vars.set(self.settings['RSTU']['Interaction'])
 
-            self.settings_widgets['RSTU'] = {'action': ttk.OptionMenu(rs_group, self.rstu_action_vars, self.settings['RSTU']['Interaction'], *self.ACTIONS,
+            self.settings_widgets['RSTU'] = {'action': ttk.OptionMenu(rs_group, self.rstu_action_vars, self.settings['RSTU']['Interaction'], *list(self.ACTIONS),
                                                                     command= lambda x: modify_setting(self.rstu_action_vars, 'RSTU', 'Interaction'))}
             self.settings_widgets['RSTU']['action'].grid(row=0, column=1, sticky="we")
 
@@ -450,7 +444,7 @@ class Server:
             self.settings_widgets['RSTU']['type'] = ttk.OptionMenu(rs_group, self.rstu_type_vars, self.settings['RSTU']['Type'], *self.TYPES,
                                                                     command=lambda x: modify_setting(self.rstu_type_vars, 'RSTU', 'Type'))
             self.settings_widgets['RSTU']['type'].grid(row=0, column=2, sticky="we")
-            if self.interaction_funcs[self.settings['RSTU']['Interaction']][1] is False: self.settings_widgets['RSTU']['type'].configure(state="disabled")
+            if self.ACTIONS[self.settings['RSTU']['Interaction']]['has_params'] is False: self.settings_widgets['RSTU']['type'].configure(state="disabled")
 
             rstd_label = tk.Label(rs_group, anchor="w", text="Tilt Down:")
             rstd_label.grid(row=1, column=0, sticky="we")
@@ -458,7 +452,7 @@ class Server:
             self.rstd_action_vars = tk.StringVar(rs_group)
             self.rstd_action_vars.set(self.settings['RSTD']['Interaction'])
 
-            self.settings_widgets['RSTD'] = {'action': ttk.OptionMenu(rs_group, self.rstd_action_vars, self.settings['RSTD']['Interaction'], *self.ACTIONS,
+            self.settings_widgets['RSTD'] = {'action': ttk.OptionMenu(rs_group, self.rstd_action_vars, self.settings['RSTD']['Interaction'], *list(self.ACTIONS),
                                                                     command= lambda x: modify_setting(self.rstd_action_vars, 'RSTD', 'Interaction'))}
             self.settings_widgets['RSTD']['action'].grid(row=1, column=1, sticky="we")
 
@@ -468,7 +462,7 @@ class Server:
             self.settings_widgets['RSTD']['type'] = ttk.OptionMenu(rs_group, self.rstd_type_vars, self.settings['RSTD']['Type'], *self.TYPES,
                                                                     command=lambda x: modify_setting(self.rstd_type_vars, 'RSTD', 'Type'))
             self.settings_widgets['RSTD']['type'].grid(row=1, column=2, sticky="we")
-            if self.interaction_funcs[self.settings['RSTD']['Interaction']][1] is False: self.settings_widgets['RSTD']['type'].configure(state="disabled")
+            if self.ACTIONS[self.settings['RSTD']['Interaction']]['has_params'] is False: self.settings_widgets['RSTD']['type'].configure(state="disabled")
 
             rstl_label = tk.Label(rs_group, anchor="w", text="Tilt Left:")
             rstl_label.grid(row=2, column=0, sticky="we")
@@ -476,7 +470,7 @@ class Server:
             self.rstl_action_vars = tk.StringVar(rs_group)
             self.rstl_action_vars.set(self.settings['RSTL']['Interaction'])
 
-            self.settings_widgets['RSTL'] = {'action': ttk.OptionMenu(rs_group, self.rstl_action_vars, self.settings['RSTL']['Interaction'], *self.ACTIONS,
+            self.settings_widgets['RSTL'] = {'action': ttk.OptionMenu(rs_group, self.rstl_action_vars, self.settings['RSTL']['Interaction'], *list(self.ACTIONS),
                                                                     command= lambda x: modify_setting(self.rstl_action_vars, 'RSTL', 'Interaction'))}
             self.settings_widgets['RSTL']['action'].grid(row=2, column=1, sticky="we")
 
@@ -486,7 +480,7 @@ class Server:
             self.settings_widgets['RSTL']['type'] = ttk.OptionMenu(rs_group, self.rstl_type_vars, self.settings['RSTL']['Type'], *self.TYPES,
                                                                     command=lambda x: modify_setting(self.rstl_type_vars, 'RSTL', 'Type'))
             self.settings_widgets['RSTL']['type'].grid(row=2, column=2, sticky="we")
-            if self.interaction_funcs[self.settings['RSTL']['Interaction']][1] is False: self.settings_widgets['RSTL']['type'].configure(state="disabled")
+            if self.ACTIONS[self.settings['RSTL']['Interaction']]['has_params'] is False: self.settings_widgets['RSTL']['type'].configure(state="disabled")
 
             rstr_label = tk.Label(rs_group, anchor="w", text="Tilt Right:")
             rstr_label.grid(row=3, column=0, sticky="we")
@@ -494,7 +488,7 @@ class Server:
             self.rstr_action_vars = tk.StringVar(rs_group)
             self.rstr_action_vars.set(self.settings['RSTR']['Interaction'])
 
-            self.settings_widgets['RSTR'] = {'action': ttk.OptionMenu(rs_group, self.rstr_action_vars, self.settings['RSTR']['Interaction'], *self.ACTIONS,
+            self.settings_widgets['RSTR'] = {'action': ttk.OptionMenu(rs_group, self.rstr_action_vars, self.settings['RSTR']['Interaction'], *list(self.ACTIONS),
                                                                     command= lambda x: modify_setting(self.rstr_action_vars, 'RSTR', 'Interaction'))}
             self.settings_widgets['RSTR']['action'].grid(row=3, column=1, sticky="we")
 
@@ -504,7 +498,7 @@ class Server:
             self.settings_widgets['RSTR']['type'] = ttk.OptionMenu(rs_group, self.rstr_type_vars, self.settings['RSTR']['Type'], *self.TYPES,
                                                                     command=lambda x: modify_setting(self.rstr_type_vars, 'RSTR', 'Type'))
             self.settings_widgets['RSTR']['type'].grid(row=3, column=2, sticky="we")
-            if self.interaction_funcs[self.settings['RSTR']['Interaction']][1] is False: self.settings_widgets['RSTR']['type'].configure(state="disabled")
+            if self.ACTIONS[self.settings['RSTR']['Interaction']]['has_params'] is False: self.settings_widgets['RSTR']['type'].configure(state="disabled")
 
             tk.Frame(parent_frame, height=1, bg="black").grid(row=1, column=0, sticky="news", columnspan=3)
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Screen Top Actions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -528,7 +522,7 @@ class Server:
             self.tstu_action_vars = tk.StringVar(ts_group)
             self.tstu_action_vars.set(self.settings['TSTU']['Interaction'])
 
-            self.settings_widgets['TSTU'] = {'action': ttk.OptionMenu(ts_group, self.tstu_action_vars, self.settings['TSTU']['Interaction'], *self.ACTIONS,
+            self.settings_widgets['TSTU'] = {'action': ttk.OptionMenu(ts_group, self.tstu_action_vars, self.settings['TSTU']['Interaction'], *list(self.ACTIONS),
                                                                     command= lambda x: modify_setting(self.tstu_action_vars, 'TSTU', 'Interaction'))}
             self.settings_widgets['TSTU']['action'].grid(row=0, column=1, sticky="we")
 
@@ -538,7 +532,7 @@ class Server:
             self.settings_widgets['TSTU']['type'] = ttk.OptionMenu(ts_group, self.tstu_type_vars, self.settings['TSTU']['Type'], *self.TYPES,
                                                                     command=lambda x: modify_setting(self.tstu_type_vars, 'TSTU', 'Type'))
             self.settings_widgets['TSTU']['type'].grid(row=0, column=2, sticky="we")
-            if self.interaction_funcs[self.settings['TSTU']['Interaction']][1] is False: self.settings_widgets['TSTU']['type'].configure(state="disabled")
+            if self.ACTIONS[self.settings['TSTU']['Interaction']]['has_params'] is False: self.settings_widgets['TSTU']['type'].configure(state="disabled")
 
             tstd_label = tk.Label(ts_group, anchor="w", text="Tilt Down:")
             tstd_label.grid(row=1, column=0, sticky="we")
@@ -546,7 +540,7 @@ class Server:
             self.tstd_action_vars = tk.StringVar(ts_group)
             self.tstd_action_vars.set(self.settings['TSTD']['Interaction'])
 
-            self.settings_widgets['TSTD'] = {'action': ttk.OptionMenu(ts_group, self.tstd_action_vars, self.settings['TSTD']['Interaction'], *self.ACTIONS,
+            self.settings_widgets['TSTD'] = {'action': ttk.OptionMenu(ts_group, self.tstd_action_vars, self.settings['TSTD']['Interaction'], *list(self.ACTIONS),
                                                                     command= lambda x: modify_setting(self.tstd_action_vars, 'TSTD', 'Interaction'))}
             self.settings_widgets['TSTD']['action'].grid(row=1, column=1, sticky="we")
 
@@ -556,7 +550,7 @@ class Server:
             self.settings_widgets['TSTD']['type'] = ttk.OptionMenu(ts_group, self.tstd_type_vars, self.settings['TSTD']['Type'], *self.TYPES,
                                                                     command=lambda x: modify_setting(self.tstd_type_vars, 'TSTD', 'Type'))
             self.settings_widgets['TSTD']['type'].grid(row=1, column=2, sticky="we")
-            if self.interaction_funcs[self.settings['TSTD']['Interaction']][1] is False: self.settings_widgets['TSTD']['type'].configure(state="disabled")
+            if self.ACTIONS[self.settings['TSTD']['Interaction']]['has_params'] is False: self.settings_widgets['TSTD']['type'].configure(state="disabled")
 
             tstl_label = tk.Label(ts_group, anchor="w", text="Tilt Left:")
             tstl_label.grid(row=2, column=0, sticky="we")
@@ -564,7 +558,7 @@ class Server:
             self.tstl_action_vars = tk.StringVar(ts_group)
             self.tstl_action_vars.set(self.settings['TSTL']['Interaction'])
 
-            self.settings_widgets['TSTL'] = {'action': ttk.OptionMenu(ts_group, self.tstl_action_vars, self.settings['TSTL']['Interaction'], *self.ACTIONS,
+            self.settings_widgets['TSTL'] = {'action': ttk.OptionMenu(ts_group, self.tstl_action_vars, self.settings['TSTL']['Interaction'], *list(self.ACTIONS),
                                                                     command= lambda x: modify_setting(self.tstl_action_vars, 'TSTL', 'Interaction'))}
             self.settings_widgets['TSTL']['action'].grid(row=2, column=1, sticky="we")
 
@@ -574,7 +568,7 @@ class Server:
             self.settings_widgets['TSTL']['type'] = ttk.OptionMenu(ts_group, self.tstl_type_vars, self.settings['TSTL']['Type'], *self.TYPES,
                                                                     command=lambda x: modify_setting(self.tstl_type_vars, 'TSTL', 'Type'))
             self.settings_widgets['TSTL']['type'].grid(row=2, column=2, sticky="we")
-            if self.interaction_funcs[self.settings['TSTL']['Interaction']][1] is False: self.settings_widgets['TSTL']['type'].configure(state="disabled")
+            if self.ACTIONS[self.settings['TSTL']['Interaction']]['has_params'] is False: self.settings_widgets['TSTL']['type'].configure(state="disabled")
 
             tstr_label = tk.Label(ts_group, anchor="w", text="Tilt Right:")
             tstr_label.grid(row=3, column=0, sticky="we")
@@ -582,7 +576,7 @@ class Server:
             self.tstr_action_vars = tk.StringVar(ts_group)
             self.tstr_action_vars.set(self.settings['TSTR']['Interaction'])
 
-            self.settings_widgets['TSTR'] = {'action': ttk.OptionMenu(ts_group, self.tstr_action_vars, self.settings['TSTR']['Interaction'], *self.ACTIONS,
+            self.settings_widgets['TSTR'] = {'action': ttk.OptionMenu(ts_group, self.tstr_action_vars, self.settings['TSTR']['Interaction'], *list(self.ACTIONS),
                                                                     command= lambda x: modify_setting(self.tstr_action_vars, 'TSTR', 'Interaction'))}
             self.settings_widgets['TSTR']['action'].grid(row=3, column=1, sticky="we")
 
@@ -592,7 +586,7 @@ class Server:
             self.settings_widgets['TSTR']['type'] = ttk.OptionMenu(ts_group, self.tstr_type_vars, self.settings['TSTR']['Type'], *self.TYPES,
                                                                     command=lambda x: modify_setting(self.tstr_type_vars, 'TSTR', 'Type'))
             self.settings_widgets['TSTR']['type'].grid(row=3, column=2, sticky="we")
-            if self.interaction_funcs[self.settings['TSTR']['Interaction']][1] is False: self.settings_widgets['TSTR']['type'].configure(state="disabled")
+            if self.ACTIONS[self.settings['TSTR']['Interaction']]['has_params'] is False: self.settings_widgets['TSTR']['type'].configure(state="disabled")
 
             tk.Frame(parent_frame, height=1, width=1, bg="black").grid(row=2, column=1, sticky="news")
 
@@ -617,7 +611,7 @@ class Server:
             self.bstu_action_vars = tk.StringVar(bs_group)
             self.bstu_action_vars.set(self.settings['BSTU']['Interaction'])
 
-            self.settings_widgets['BSTU'] = {'action': ttk.OptionMenu(bs_group, self.bstu_action_vars, self.settings['BSTU']['Interaction'], *self.ACTIONS,
+            self.settings_widgets['BSTU'] = {'action': ttk.OptionMenu(bs_group, self.bstu_action_vars, self.settings['BSTU']['Interaction'], *list(self.ACTIONS),
                                                                     command= lambda x: modify_setting(self.bstu_action_vars, 'BSTU', 'Interaction'))}
             self.settings_widgets['BSTU']['action'].grid(row=0, column=1, sticky="we")
 
@@ -627,7 +621,7 @@ class Server:
             self.settings_widgets['BSTU']['type'] = ttk.OptionMenu(bs_group, self.bstu_type_vars, self.settings['BSTU']['Type'], *self.TYPES,
                                                                     command=lambda x: modify_setting(self.bstu_type_vars, 'BSTU', 'Type'))
             self.settings_widgets['BSTU']['type'].grid(row=0, column=2, sticky="we")
-            if self.interaction_funcs[self.settings['BSTU']['Interaction']][1] is False: self.settings_widgets['BSTU']['type'].configure(state="disabled")
+            if self.ACTIONS[self.settings['BSTU']['Interaction']]['has_params'] is False: self.settings_widgets['BSTU']['type'].configure(state="disabled")
 
             bstd_label = tk.Label(bs_group, anchor="w", text="Tilt Down:")
             bstd_label.grid(row=1, column=0, sticky="we")
@@ -635,7 +629,7 @@ class Server:
             self.bstd_action_vars = tk.StringVar(bs_group)
             self.bstd_action_vars.set(self.settings['BSTD']['Interaction'])
 
-            self.settings_widgets['BSTD'] = {'action': ttk.OptionMenu(bs_group, self.bstd_action_vars, self.settings['BSTD']['Interaction'], *self.ACTIONS,
+            self.settings_widgets['BSTD'] = {'action': ttk.OptionMenu(bs_group, self.bstd_action_vars, self.settings['BSTD']['Interaction'], *list(self.ACTIONS),
                                                                     command= lambda x: modify_setting(self.bstd_action_vars, 'BSTD', 'Interaction'))}
             self.settings_widgets['BSTD']['action'].grid(row=1, column=1, sticky="we")
 
@@ -645,7 +639,7 @@ class Server:
             self.settings_widgets['BSTD']['type'] = ttk.OptionMenu(bs_group, self.bstd_type_vars, self.settings['BSTD']['Type'], *self.TYPES,
                                                                     command=lambda x: modify_setting(self.bstd_type_vars, 'BSTD', 'Type'))
             self.settings_widgets['BSTD']['type'].grid(row=1, column=2, sticky="we")
-            if self.interaction_funcs[self.settings['BSTD']['Interaction']][1] is False: self.settings_widgets['BSTD']['type'].configure(state="disabled")
+            if self.ACTIONS[self.settings['BSTD']['Interaction']]['has_params'] is False: self.settings_widgets['BSTD']['type'].configure(state="disabled")
 
             bstl_label = tk.Label(bs_group, anchor="w", text="Tilt Left:")
             bstl_label.grid(row=2, column=0, sticky="we")
@@ -653,7 +647,7 @@ class Server:
             self.bstl_action_vars = tk.StringVar(bs_group)
             self.bstl_action_vars.set(self.settings['BSTL']['Interaction'])
 
-            self.settings_widgets['BSTL'] = {'action': ttk.OptionMenu(bs_group, self.bstl_action_vars, self.settings['BSTL']['Interaction'], *self.ACTIONS,
+            self.settings_widgets['BSTL'] = {'action': ttk.OptionMenu(bs_group, self.bstl_action_vars, self.settings['BSTL']['Interaction'], *list(self.ACTIONS),
                                                                     command= lambda x: modify_setting(self.bstl_action_vars, 'BSTL', 'Interaction'))}
             self.settings_widgets['BSTL']['action'].grid(row=2, column=1, sticky="we")
 
@@ -663,7 +657,7 @@ class Server:
             self.settings_widgets['BSTL']['type'] = ttk.OptionMenu(bs_group, self.bstl_type_vars, self.settings['BSTL']['Type'], *self.TYPES,
                                                                     command=lambda x: modify_setting(self.bstl_type_vars, 'BSTL', 'Type'))
             self.settings_widgets['BSTL']['type'].grid(row=2, column=2, sticky="we")
-            if self.interaction_funcs[self.settings['BSTL']['Interaction']][1] is False: self.settings_widgets['BSTL']['type'].configure(state="disabled")
+            if self.ACTIONS[self.settings['BSTL']['Interaction']]['has_params'] is False: self.settings_widgets['BSTL']['type'].configure(state="disabled")
 
             bstr_label = tk.Label(bs_group, anchor="w", text="Tilt Right:")
             bstr_label.grid(row=3, column=0, sticky="we")
@@ -671,7 +665,7 @@ class Server:
             self.bstr_action_vars = tk.StringVar(bs_group)
             self.bstr_action_vars.set(self.settings['BSTR']['Interaction'])
 
-            self.settings_widgets['BSTR'] = {'action': ttk.OptionMenu(bs_group, self.bstr_action_vars, self.settings['BSTR']['Interaction'], *self.ACTIONS,
+            self.settings_widgets['BSTR'] = {'action': ttk.OptionMenu(bs_group, self.bstr_action_vars, self.settings['BSTR']['Interaction'], *list(self.ACTIONS),
                                                                     command= lambda x: modify_setting(self.bstr_action_vars, 'BSTR', 'Interaction'))}
             self.settings_widgets['BSTR']['action'].grid(row=3, column=1, sticky="we")
 
@@ -681,13 +675,13 @@ class Server:
             self.settings_widgets['BSTR']['type'] = ttk.OptionMenu(bs_group, self.bstr_type_vars, self.settings['BSTR']['Type'], *self.TYPES,
                                                     command=lambda x: modify_setting(self.bstr_type_vars, 'BSTR', 'Type'))
             self.settings_widgets['BSTR']['type'].grid(row=3, column=2, sticky="we")
-            if self.interaction_funcs[self.settings['BSTR']['Interaction']][1] is False: self.settings_widgets['BSTR']['type'].configure(state="disabled")
+            if self.ACTIONS[self.settings['BSTR']['Interaction']]['has_params'] is False: self.settings_widgets['BSTR']['type'].configure(state="disabled")
 
             tk.Frame(parent_frame, height=1, bg="black").grid(row=3, column=0, sticky="news", columnspan=3)
 
         def modify_setting(*args):
             self.settings[args[1]][args[2]] = args[0].get()
-            if self.interaction_funcs[self.settings[args[1]]['Interaction']][1] is False:
+            if self.ACTIONS[self.settings[args[1]]['Interaction']]['has_params'] is False:
                 self.settings_widgets[args[1]]['type'].configure(state="disabled")
             else:
                 self.settings_widgets[args[1]]['type'].configure(state="enabled")
@@ -779,26 +773,27 @@ class Server:
         self.blue_btn   = tk.PhotoImage(file = r"./server/sources/blue_btn.png").subsample(7,7)
 
         self.interaction_widgets = {}
+        actions = list(self.ACTIONS)
         
-        self.interaction_widgets = {self.ACTIONS[1]: ttk.Button(interaction_test_buttons, text= self.ACTIONS[1], image=self.photo_play, compound=tk.LEFT)}
-        self.interaction_widgets[self.ACTIONS[1]].grid(row=0, column=1, sticky="we")
-        self.interaction_widgets[self.ACTIONS[1]]["state"] = "disabled"
+        self.interaction_widgets = {actions[1]: ttk.Button(interaction_test_buttons, text= actions[1], image=self.photo_play, compound=tk.LEFT)}
+        self.interaction_widgets[actions[1]].grid(row=0, column=1, sticky="we")
+        self.interaction_widgets[actions[1]]["state"] = "disabled"
 
-        self.interaction_widgets[self.ACTIONS[3]] = ttk.Button(interaction_test_buttons, text= self.ACTIONS[3], image=self.photo_next, compound=tk.LEFT)
-        self.interaction_widgets[self.ACTIONS[3]].grid(row=1, column=2, sticky="we")
-        self.interaction_widgets[self.ACTIONS[3]]["state"] = "disabled"
+        self.interaction_widgets[actions[3]] = ttk.Button(interaction_test_buttons, text= actions[3], image=self.photo_next, compound=tk.LEFT)
+        self.interaction_widgets[actions[3]].grid(row=1, column=2, sticky="we")
+        self.interaction_widgets[actions[3]]["state"] = "disabled"
 
-        self.interaction_widgets[self.ACTIONS[2]] = ttk.Button(interaction_test_buttons, text= self.ACTIONS[2], image=self.photo_prev, compound=tk.LEFT)
-        self.interaction_widgets[self.ACTIONS[2]].grid(row=1, column=0, sticky="we")
-        self.interaction_widgets[self.ACTIONS[2]]["state"] = "disabled"
+        self.interaction_widgets[actions[2]] = ttk.Button(interaction_test_buttons, text= actions[2], image=self.photo_prev, compound=tk.LEFT)
+        self.interaction_widgets[actions[2]].grid(row=1, column=0, sticky="we")
+        self.interaction_widgets[actions[2]]["state"] = "disabled"
         
-        self.interaction_widgets[self.ACTIONS[4]] = ttk.Button(interaction_test_buttons, text= self.ACTIONS[4], image=self.photo_stop, compound=tk.LEFT)
-        self.interaction_widgets[self.ACTIONS[4]].grid(row=2, column=1, sticky="we")
-        self.interaction_widgets[self.ACTIONS[4]]["state"] = "disabled"
+        self.interaction_widgets[actions[4]] = ttk.Button(interaction_test_buttons, text= actions[4], image=self.photo_stop, compound=tk.LEFT)
+        self.interaction_widgets[actions[4]].grid(row=2, column=1, sticky="we")
+        self.interaction_widgets[actions[4]]["state"] = "disabled"
 
-        self.interaction_widgets[self.ACTIONS[11]] = ttk.Button(interaction_test_buttons, text= self.ACTIONS[11], image=self.red_btn, compound=tk.LEFT)
-        self.interaction_widgets[self.ACTIONS[11]].grid(row=4, column=0, sticky="we")
-        self.interaction_widgets[self.ACTIONS[11]]["state"] = "disabled"
+        self.interaction_widgets[actions[11]] = ttk.Button(interaction_test_buttons, text= actions[11], image=self.red_btn, compound=tk.LEFT)
+        self.interaction_widgets[actions[11]].grid(row=4, column=0, sticky="we")
+        self.interaction_widgets[actions[11]]["state"] = "disabled"
 
         self.interaction_widgets['btn2'] = ttk.Button(interaction_test_buttons, text= "Button 2", image=self.green_btn, compound=tk.LEFT)
         self.interaction_widgets['btn2'].grid(row=4, column=1, sticky="we")
@@ -951,32 +946,35 @@ class Server:
                     data['Acceleration'] = {'x': float(message_string[5]), 'y': float(message_string[6]), 'z':  float(message_string[7])}
                     data['Rotation']     = {'x': float(message_string[8]), 'y': float(message_string[9]), 'z':  float(message_string[10])}
 
-                    self.gyro_x.set(str(data['Gyroscope']['x']))
-                    self.gyro_y.set(str(data['Gyroscope']['y']))
-                    self.gyro_z.set(str(data['Gyroscope']['z']))
-
-                    self.acceleration_x.set(str(data['Acceleration']['x']))
-                    self.acceleration_y.set(str(data['Acceleration']['y']))
-                    self.acceleration_z.set(str(data['Acceleration']['z']))
-
-                    self.rotation_x.set(str(data['Rotation']['x']))
-                    self.rotation_y.set(str(data['Rotation']['y']))
-                    self.rotation_z.set(str(data['Rotation']['z']))
-
+                    self.update_sensor_data(data)
                     self.execute_command(data)
    
             except (KeyboardInterrupt, SystemExit):
                 raise traceback.print_exc()
+
+    def update_sensor_data(self, data):
+        if not self.active_status and not self.test_status:
+            self.gyro_x.set(str(data['Gyroscope']['x']))
+            self.gyro_y.set(str(data['Gyroscope']['y']))
+            self.gyro_z.set(str(data['Gyroscope']['z']))
+
+            self.acceleration_x.set(str(data['Acceleration']['x']))
+            self.acceleration_y.set(str(data['Acceleration']['y']))
+            self.acceleration_z.set(str(data['Acceleration']['z']))
+
+            self.rotation_x.set(str(data['Rotation']['x']))
+            self.rotation_y.set(str(data['Rotation']['y']))
+            self.rotation_z.set(str(data['Rotation']['z']))
 
     def execute_command(self, data):
         current_interaction = data['Action'] + self.get_tilt_kind(data['Gyroscope'], data['Acceleration'], data['Rotation'])
         self.current_action_var.set(current_interaction)
 
         if self.active_status:
-            if self.interaction_funcs[self.settings[current_interaction]['Interaction']][1]:
-                self.interaction_funcs[self.settings[current_interaction]['Interaction']][0](self.settings[current_interaction]['Type'])
+            if self.ACTIONS[self.settings[current_interaction]['Interaction']]['has_params']:
+                self.ACTIONS[self.settings[current_interaction]['Interaction']]['function'](self.settings[current_interaction]['Type'])
             else:
-                self.interaction_funcs[self.settings[current_interaction]['Interaction']][0]()
+                self.ACTIONS[self.settings[current_interaction]['Interaction']]['function']()
         elif self.test_status:
             self.last_action_timestep = data['Timestep']
             self.last_action          = current_interaction
