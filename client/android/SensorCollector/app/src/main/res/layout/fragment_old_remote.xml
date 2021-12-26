@@ -37,10 +37,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@android:color/transparent"
+                android:rotation="-90"
                 android:scaleType="fitCenter"
-                android:scaleX="0.8"
-                android:scaleY="0.9"
-                android:src="@android:drawable/arrow_up_float"
+                android:src="@android:drawable/ic_media_play"
                 app:tint="@android:color/holo_blue_light" />
         </LinearLayout>
 
@@ -87,8 +86,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:orientation="horizontal">
-        </LinearLayout>
+            android:orientation="horizontal"/>
 
         <LinearLayout
             android:id="@+id/fastForwardLinearLayout"
@@ -140,10 +138,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@android:color/transparent"
+                android:rotation="90"
                 android:scaleType="fitCenter"
-                android:scaleX="0.8"
-                android:scaleY="0.9"
-                android:src="@android:drawable/arrow_down_float"
+                android:src="@android:drawable/ic_media_play"
                 app:tint="@android:color/holo_blue_light" />
         </LinearLayout>
 
