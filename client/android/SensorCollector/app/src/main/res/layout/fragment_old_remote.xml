@@ -38,7 +38,7 @@
                 android:layout_height="match_parent"
                 android:background="@android:color/transparent"
                 android:scaleType="fitCenter"
-                android:scaleX="0.9"
+                android:scaleX="0.8"
                 android:scaleY="0.9"
                 android:src="@android:drawable/arrow_up_float"
                 app:tint="@android:color/holo_blue_light" />
@@ -141,7 +141,7 @@
                 android:layout_height="match_parent"
                 android:background="@android:color/transparent"
                 android:scaleType="fitCenter"
-                android:scaleX="0.9"
+                android:scaleX="0.8"
                 android:scaleY="0.9"
                 android:src="@android:drawable/arrow_down_float"
                 app:tint="@android:color/holo_blue_light" />
@@ -187,20 +187,11 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/pauseLinearLayout"
+            android:id="@+id/blankLinearLayout7"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:orientation="horizontal">
-            <ImageButton
-                android:id="@+id/pauseButton"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginTop="0dp"
-                android:scaleType="fitCenter"
-                android:background="@android:color/transparent"
-                android:src="@android:drawable/ic_media_pause"
-                app:tint="@android:color/holo_blue_light" />
         </LinearLayout>
 
         <LinearLayout
@@ -222,10 +213,12 @@
                 android:id="@+id/muteButton"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:scaleType="fitCenter"
                 android:background="@android:color/transparent"
+                android:scaleType="fitCenter"
+                android:scaleX="0.9"
+                android:scaleY="0.9"
                 android:src="@android:drawable/ic_lock_silent_mode"
-                app:tint="@android:color/holo_blue_light"/>
+                app:tint="@android:color/holo_blue_light" />
         </LinearLayout>
 
     </LinearLayout>

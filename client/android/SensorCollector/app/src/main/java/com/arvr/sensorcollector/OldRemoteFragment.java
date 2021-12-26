@@ -21,6 +21,7 @@ public class OldRemoteFragment extends Fragment {
     private ImageButton mPlayButton, mPauseButton, mRewindButton, mFastforwardButton;
     private ImageButton mVolumeUpButton, mVolumeDownButton, mMuteButton;
     final boolean[] mute = {false};
+    final boolean[] play = {false};
 
 
     public OldRemoteFragment() {
@@ -38,7 +39,6 @@ public class OldRemoteFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
     {
         mPlayButton = (ImageButton) view.findViewById(R.id.playButton);
-        mPauseButton = (ImageButton) view.findViewById(R.id.pauseButton);
         mRewindButton = (ImageButton) view.findViewById(R.id.rewindButton);
         mFastforwardButton = (ImageButton) view.findViewById(R.id.fastForwardButton);
         mVolumeUpButton = (ImageButton) view.findViewById(R.id.volumeUpButton);
@@ -53,29 +53,27 @@ public class OldRemoteFragment extends Fragment {
                 if (event.getAction() == MotionEvent.ACTION_DOWN)
                 {
                     mPlayButton.setColorFilter(getResources().getColor(android.R.color.holo_red_dark), PorterDuff.Mode.SRC_ATOP);
+                }
 
-                } else if (event.getAction() == MotionEvent.ACTION_UP)
+                if (event.getAction() == MotionEvent.ACTION_UP)
                 {
                     mPlayButton.setColorFilter(getResources().getColor(android.R.color.holo_blue_light), PorterDuff.Mode.SRC_ATOP);
+                    if(!play[0])
+                    {
+                        mPlayButton.setImageResource(android.R.drawable.ic_media_pause);
+                        play[0] = true;
+                    }
+                    else
+                    {
+                        mPlayButton.setImageResource(android.R.drawable.ic_media_play);
+                        play[0] = false;
+                    }
+
                 }
                 return false;
             }
         });
 
-        mPauseButton.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (event.getAction() == MotionEvent.ACTION_DOWN)
-                {
-                    mPauseButton.setColorFilter(getResources().getColor(android.R.color.holo_red_dark), PorterDuff.Mode.SRC_ATOP);
-
-                } else if (event.getAction() == MotionEvent.ACTION_UP)
-                {
-                    mPauseButton.setColorFilter(getResources().getColor(android.R.color.holo_blue_light), PorterDuff.Mode.SRC_ATOP);
-                }
-                return false;
-            }
-        });
 
         mRewindButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
