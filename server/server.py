@@ -47,13 +47,8 @@ class Server:
         self.test_status           = False
         self.experiment_info_shown = False
 
-        self.last_action_timestep = 0
-        self.last_action          = ''
-
-        # Past values used for comparisons
-        self.gyroscope_history      = [0, 0, 0]
-        self.accellerometer_history = [0, 0, 0]
-        self.rotation_history       = [0, 0, 0]
+        self.last_action_timestep  = 0
+        self.last_action           = ''
 
         # Get default audio device using PyCAW
         self.devices   = AudioUtilities.GetSpeakers()
@@ -312,10 +307,10 @@ class Server:
         action_label = tk.Label(action_frame, text="Action Data", font=("Courier", 24), anchor="w",)
         action_label.grid(row=0, column=0, sticky="we", columnspan=2)
 
-        action_data_label = tk.Label(action_frame, text="Current Action:")
+        action_data_label = tk.Label(action_frame, text="Active action:")
         action_data_label.grid(row=1, column=0, sticky="we")
         self.current_action_var = tk.StringVar()
-        self.current_action_var.set("N/A")
+        self.current_action_var.set("None")
         label_action = tk.Label(action_frame, textvariable=self.current_action_var)
         label_action.grid(row=1, column=1, sticky="we", padx=25)
 
@@ -723,13 +718,13 @@ class Server:
         interaction_selection_choice.grid(row=0, column=1, sticky="nswe")
 
         self.interaction_mode = tk.IntVar(value=1)
-        interaction_choice_1 = tk.Radiobutton(interaction_selection_choice, variable=self.interaction_mode, value=1, tristatevalue=0, text="Speed Mode")
-        interaction_choice_1.grid(row=0, column=1, sticky="w")
-        interaction_choice_2 = tk.Radiobutton(interaction_selection_choice, variable=self.interaction_mode, value=2, tristatevalue=0, text="Interactive Mode")
-        interaction_choice_2.grid(row=1, column=1, sticky="w")
+        self.interaction_choice_1 = tk.Radiobutton(interaction_selection_choice, variable=self.interaction_mode, value=1, tristatevalue=0, text="Speed Mode")
+        self.interaction_choice_1.grid(row=0, column=1, sticky="w")
+        self.interaction_choice_2 = tk.Radiobutton(interaction_selection_choice, variable=self.interaction_mode, value=2, tristatevalue=0, text="Interactive Mode")
+        self.interaction_choice_2.grid(row=1, column=1, sticky="w")
 
-        interaction_start = ttk.Button(interaction_selection, text= "Start", command= lambda: threading.Thread(target=self.start_experiment, daemon=True).start())
-        interaction_start.grid(row=0, column=2, ipady=10)
+        self.interaction_start = ttk.Button(interaction_selection, text= "Start", command= lambda: threading.Thread(target=self.start_experiment, daemon=True).start())
+        self.interaction_start.grid(row=0, column=2, ipady=10)
 
         experiments_progress = tk.Frame(interaction_selection)
         experiments_progress.grid(row=0, column=3, sticky="nswe")
@@ -870,6 +865,11 @@ class Server:
         experiment_results = []
         self.experiments_progress_bar['value'] = 0
 
+        # Disable experimental controls to prevent unwanted behavior
+        self.interaction_start["state"]    = "disabled"
+        self.interaction_choice_1["state"] = "disabled"
+        self.interaction_choice_2["state"] = "disabled"
+
         for i in range(0, 10):
             self.progress_value.set("Tests completed: " + str(i+1) + "/10")
             interaction, widget = random.choice(list(self.interaction_widgets.items()))
@@ -922,15 +922,43 @@ class Server:
             if self.experiment_seek_user["state"]   == "enabled": self.experiment_seek_user["state"]   = "disabled"
             self.experiments_progress_bar['value'] += 10
 
+            # Check if mode is interactive thus allowing time for the device to be put down
+            if self.interaction_mode.get() == 2:
+                time.sleep(3)
+
         self.test_status = False
+        
+        # Re-enable experimental controls after experiment ended
+        self.interaction_start["state"]    = "enabled"
+        self.interaction_choice_1["state"] = "normal"
+        self.interaction_choice_2["state"] = "normal"
+
         print('[Debug] Correct answers:', correct_answers, 'Mistakes:', mistakes)
 
         filename = 'experiments/' + time.strftime("%Y%m%d%H%M%S") + '_experiment.csv'
-
         with open(filename,'w', newline='') as f:
             writer = csv.writer(f)
             writer.writerow(['Required Action', 'Time', 'Correct', 'Mode'])
             writer.writerows(experiment_results)
+
+    def action_controller(self):
+        while True:
+            if self.connected:
+                if time.time()-self.received_time_history >= 0.23:
+                    self.active_interaction = ''
+                    self.action_compensation = 0
+                    self.current_action_var.set('None')
+
+                if time.time()-self.received_time_history >= 1:
+                    self.status_var.set("Waiting for Data")
+                
+                if time.time()-self.received_time_history >= 60:
+                    self.connected = False
+                    self.label_status_var.config(fg='red')
+                    self.label_client_var.config(fg='red')
+                    self.status_var.set("Not connected")
+                    self.client_var.set("Not connected")
+            time.sleep(0.1)
 
     def get_data(self):
         """
@@ -939,7 +967,17 @@ class Server:
         - type `G`: Gyroscope sensor values in x,y,z
         - type `R`: Rotation vector sensor values in x,y,z
         """
-        connected = False
+        self.connected = False
+        self.received_time_history = 0
+
+        self.active_interaction = ''
+        self.action_compensation = 0
+
+        self.rotation_history = (0, 0, 0) # Past values used for comparisons
+
+        self.action_controller_thread = threading.Thread(target=self.action_controller, daemon=True)
+        self.action_controller_thread.start()
+
         while True:
             try:
                 # Buffer size 1024
@@ -947,12 +985,15 @@ class Server:
                 message_string = message.decode("utf-8")
 
                 if message_string:
-                    if not connected:
+                    received_time = time.time()
+                    self.status_var.set("Receiving Data")
+
+                    if not self.connected:
                         self.label_status_var.config(fg='green')
                         self.label_client_var.config(fg='black')
                         self.status_var.set("Receiving Data")
                         self.client_var.set(address[0])
-                        connected = True
+                        self.connected = True
 
                     message_string = message_string.replace(' ','').split(",")
 
@@ -968,6 +1009,8 @@ class Server:
 
                     self.update_sensor_data(data)
                     self.execute_command(data)
+
+                    self.received_time_history = received_time
    
             except (KeyboardInterrupt, SystemExit):
                 raise traceback.print_exc()
@@ -987,47 +1030,82 @@ class Server:
             self.rotation_z.set(str(data['Rotation']['z']))
 
     def execute_command(self, data):
-        current_interaction = data['Action'] + self.get_tilt_kind(data['Gyroscope'], data['Acceleration'], data['Rotation'])
-        self.current_action_var.set(current_interaction)
+        """
+        Executes an action based on sensor data
 
+        Parameters:
+        -----------
+            data (`dict`): Dictionary containing data from the client's sensors.
+
+        Returns:
+        --------
+            None
+        """
+        # TODO Modify this function to allow timed steps for instant actions like button presses
+        # What we need are the following:
+        # 1) Action start and keep current action
+        # 1.1) Action type modifies the parameters of said action
+        # 1.2) Keep the initial value of the current action
+        # ---> Issue: How to still have up-down and right-left gestures while keeping one action?
+        # 2) Action end to clear the current action
+        # These will allow for two types of actions: instant and dynamic
+
+        # Time between dataframes ~ 0.21 sec which means that when this thrueshold is passed a new action should be activated
+        if self.active_interaction == '':
+            if self.action_compensation == 0:
+                self.rotation_history = (data['Rotation']['x'],  data['Rotation']['y'],  data['Rotation']['z'])
+                self.action_compensation += 1
+                return False
+            elif self.action_compensation == 1:
+                self.active_interaction = data['Action'] + self.get_tilt_kind(data['Rotation'])
+                self.current_action_var.set(self.active_interaction + " - (" + self.settings[self.active_interaction]['Interaction'] + ")")
+                self.rotation_history = ( data['Rotation']['x'],  data['Rotation']['y'],  data['Rotation']['z'])
+
+        # When active_status is active the application is controlling this device's resources
         if self.active_status:
-            if self.ACTIONS[self.settings[current_interaction]['Interaction']]['has_params']:
-                self.ACTIONS[self.settings[current_interaction]['Interaction']]['function'](self.settings[current_interaction]['Type'])
+            if self.ACTIONS[self.settings[self.active_interaction]['Interaction']]['has_params']:
+                self.ACTIONS[self.settings[self.active_interaction]['Interaction']]['function'](self.settings[self.active_interaction]['Type'])
             else:
-                self.ACTIONS[self.settings[current_interaction]['Interaction']]['function']()
-        elif self.test_status:
+                self.ACTIONS[self.settings[self.active_interaction]['Interaction']]['function']()
+
+        # When test_status is active, an experiment is underway
+        if self.test_status:
             self.last_action_timestep = data['Timestep']
-            self.last_action          = current_interaction
+            self.last_action          = self.active_interaction
             if self.experiment_volume_user["state"] == "enabled":
-                if (self.settings[current_interaction]['Interaction']) == "Volume -":
+                if (self.settings[self.active_interaction]['Interaction']) == "Volume -":
                     self.experiment_volume_user.set(self.experiment_volume_user.get()-10)
-                elif (self.settings[current_interaction]['Interaction']) == "Volume +":
+                elif (self.settings[self.active_interaction]['Interaction']) == "Volume +":
                     self.experiment_volume_user.set(self.experiment_volume_user.get()+10)
             elif self.experiment_seek_user["state"] == "enabled":
-                if (self.settings[current_interaction]['Interaction']) == "Seek -":
+                if (self.settings[self.active_interaction]['Interaction']) == "Seek -":
                     self.experiment_seek_user.set(self.experiment_seek_user.get()-10)
-                elif (self.settings[current_interaction]['Interaction']) == "Seek +":
+                elif (self.settings[self.active_interaction]['Interaction']) == "Seek +":
                     self.experiment_seek_user.set(self.experiment_seek_user.get()+10)
-        else:
-            pass
 
-    def get_tilt_kind(self, gyro_data, acc_data, rot_data):
-        tilt = ""
-        if abs(rot_data['x']-self.rotation_history[0]) > abs(rot_data['y']-self.rotation_history[1]):
-            if rot_data['x']-self.rotation_history[0] > 0:
-                tilt = "TR"
-            else:
-                tilt = "TL"
-        else:
-            if rot_data['y']-self.rotation_history[1] > 0:
-                tilt = "TD"
-            else:
-                tilt = "TU"
+    def get_tilt_kind(self, rot_vector):
+        """
+        Returns the current phone's tilt gesture.
 
-        self.gyroscope_history     = [gyro_data['x'], gyro_data['y'], gyro_data['z']]
-        self.accelerometer_history = [ acc_data['x'],  acc_data['y'],  acc_data['z']]
-        self.rotation_history      = [ rot_data['x'],  rot_data['y'],  rot_data['z']]
-        return tilt
+        Parameters:
+        -----------
+            rot_vector (`float`): Data from android's rotation vector
+
+        Returns:
+        --------
+            tilt (string): String representation of tilt. Possible values are:
+            * TU: Tilt Up
+            * TD: Tilt Down
+            * TR: Tilt Right
+            * TL: Tilt Left
+        """
+
+        if abs(rot_vector['x']-self.rotation_history[0]) > abs(rot_vector['y']-self.rotation_history[1]):
+            if rot_vector['x']-self.rotation_history[0] > 0:    return "TU"
+            else:                                               return "TD"
+        else:
+            if rot_vector['y']-self.rotation_history[1] > 0:    return "TR"
+            else:                                               return "TL"
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Action Functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     def not_used(self):
@@ -1076,14 +1154,17 @@ class Server:
         keyboard.send("down", do_press=True, do_release=True)
 
     def mute(self):
-        pass
+        if self.volume.GetMute() == 0:
+            self.volume.SetMute(1, None)
+        else:
+            self.volume.SetMute(0, None)
 
     def create_udp_stream(self):
         """
         Create a socket connection and listen to datapackets.
         """
 
-        # TODO We need to check here ifwe need socket.SOCK_STREAM for TCP connection
+        # TODO We need to check here if we need socket.SOCK_STREAM for TCP connection
         self.s = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 
         # Bind the IP address and port number to socket instance
