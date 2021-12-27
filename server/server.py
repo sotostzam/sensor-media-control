@@ -37,7 +37,9 @@ class Server:
                         "Seek -"      : {"function": self.decrease_seek, "has_params": True},
                         "Scroll UP"   : {"function": self.scroll_up,     "has_params": True},
                         "Scroll DOWN" : {"function": self.scroll_down,   "has_params": True},
-                        "Mute"        : {"function": self.mute,          "has_params": False}}
+                        "Mute"        : {"function": self.mute,          "has_params": False},
+                        "OK"          : {"function": self.ok,            "has_params": False},
+                        "ESC"         : {"function": self.esc,           "has_params": False}}
 
         self.TYPES = ["Constant",
                       "Incremental",
@@ -119,6 +121,7 @@ class Server:
         self.interaction_frame = tk.Frame(self.tab_widget)
         self.interaction_frame.grid(row=0, column=0, sticky="nswe")
         self.interaction_frame.columnconfigure(0, minsize=100, weight=1)
+        self.interaction_frame.columnconfigure(2, minsize=100, weight=1)
         self.interaction_frame.rowconfigure(2, minsize=100, weight=1)
         self.create_interaction_frame(self.interaction_frame)
 
@@ -695,58 +698,81 @@ class Server:
 
     def create_interaction_frame(self, parent):
         """
-        Create the layout of the interaction frame. The order is the following:
-        * Interaction selection frame
-        * Test interaction frame
+        Creates the layout of the experiments frame.
         """
-        interaction_selection = tk.Frame(parent, height = self.height/4)
-        interaction_selection.grid(row=0, column=0, sticky="nswe", pady=10)
-        interaction_selection.rowconfigure(0, weight=1)
-        interaction_selection.grid_columnconfigure(0, weight=1)
-        interaction_selection.grid_columnconfigure(1, weight=1)
-        interaction_selection.grid_columnconfigure(2, weight=1)
-        interaction_selection.grid_columnconfigure(3, weight=2)
+        # Experiment Options Group
+        experiments_options = tk.Frame(parent)
+        experiments_options.grid(row=0, column=0, sticky="nswe", pady=3)
+        experiments_options.grid_rowconfigure(0, weight=1)
+        experiments_options.grid_columnconfigure(0, weight=1)
+        experiments_options.grid_columnconfigure(1, minsize=100)
 
-        interaction_selection_explanation = tk.Message(interaction_selection, width=180 ,text="Please select the type of interaction tests: ")
-        interaction_selection_explanation.grid(row=0, column=0, sticky="nswe")
+        experiment_info_group = tk.Frame(experiments_options)
+        experiment_info_group.grid(row=0, column=0, sticky="news")
+        experiment_info_group.grid_rowconfigure(0, weight=1)
+        experiment_info_group.grid_columnconfigure(0, weight=1)
 
-        # Mode Selection RadioButton
-        interaction_selection_choice = tk.Frame(interaction_selection)
-        interaction_selection_choice.grid(row=0, column=1, sticky="nswe")
+        experiment_info = tk.Label(experiment_info_group ,text="Experiment Information", font='Helvetica 12 bold')
+        experiment_info.grid(row=0, column=0)
 
-        self.interaction_mode = tk.IntVar(value=1)
-        self.interaction_choice_1 = tk.Radiobutton(interaction_selection_choice, variable=self.interaction_mode, value=1, tristatevalue=0, text="Speed Mode")
-        self.interaction_choice_1.grid(row=0, column=1, sticky="w")
-        self.interaction_choice_2 = tk.Radiobutton(interaction_selection_choice, variable=self.interaction_mode, value=2, tristatevalue=0, text="Interactive Mode")
-        self.interaction_choice_2.grid(row=1, column=1, sticky="w")
+        self.current_experiment_type = tk.StringVar()
+        self.current_experiment_type.set("No active experiment at the moment.")
+        label_current_experiment_type = tk.Label(experiment_info_group, textvariable=self.current_experiment_type, padx=5)
+        label_current_experiment_type.grid(row=1, column=0, sticky="wn")
 
-        self.interaction_start = ttk.Button(interaction_selection, text= "Start", command= lambda: threading.Thread(target=self.start_experiment, daemon=True).start())
-        self.interaction_start.grid(row=0, column=2, ipady=10)
+        self.current_experiment_device = tk.StringVar()
+        self.current_experiment_device.set("The experiments start measuring the Speed.")
+        label_current_experiment_device = tk.Label(experiment_info_group, textvariable=self.current_experiment_device, padx=5)
+        label_current_experiment_device.grid(row=2, column=0, sticky="wn")
 
-        experiments_progress = tk.Frame(interaction_selection)
-        experiments_progress.grid(row=0, column=3, sticky="nswe")
+        self.current_experiment_tab = tk.StringVar()
+        self.current_experiment_tab.set("Please make use of the layout control tab.")
+        label_current_experiment_tab = tk.Label(experiment_info_group, textvariable=self.current_experiment_tab, padx=5)
+        label_current_experiment_tab.grid(row=3, column=0, sticky="wn")
+
+        self.interaction_start = ttk.Button(experiments_options, text= "Start", command= lambda: threading.Thread(target=self.start_experiment, daemon=True).start())
+        self.interaction_start.grid(row=0, column=1, ipady=10)
+
+        tk.Frame(parent, height=1, width=1, bg="black").grid(row=0, column=1, sticky="news")
+
+        # Experiment Information Group
+        experiments_information = tk.Frame(parent)
+        experiments_information.grid(row=0, column=2, sticky="nswe")
+        experiments_information.grid_rowconfigure(0, weight=1)
+        experiments_information.grid_columnconfigure(0, weight=1)
+        experiments_information.grid_columnconfigure(1, weight=1)
+
+        tests_info_group = tk.Frame(experiments_information)
+        tests_info_group.grid(row=0, column=0)
+        tests_info_group.grid_columnconfigure(0, weight=1)
+
+        current_test_info = tk.Message(tests_info_group, width=180 ,text="Results", font='Helvetica 12 bold')
+        current_test_info.grid(row=0, column=0, sticky="nswe")
+
+        self.current_test_var = tk.StringVar()
+        self.current_test_var.set("Correct: 0 | Mistakes: 0")
+        label_current_test_var = tk.Label(tests_info_group, textvariable=self.current_test_var)
+        label_current_test_var.grid(row=1, column=0, sticky="we")
+
+        experiments_progress = tk.Frame(experiments_information)
+        experiments_progress.grid(row=0, column=1)
         experiments_progress.grid_columnconfigure(0, weight=1)
-        experiments_progress.grid_rowconfigure(0, weight=1)
-        experiments_progress.grid_rowconfigure(1, weight=1)
+        # experiments_progress.grid_rowconfigure(0, weight=1)
+        # experiments_progress.grid_rowconfigure(1, weight=1)
 
         self.experiments_progress_bar = ttk.Progressbar(experiments_progress, orient = tk.HORIZONTAL, length = 150, mode = 'determinate')
         self.experiments_progress_bar.grid(row=0, column=0)
 
         self.progress_value = tk.StringVar()
-        self.progress_value.set("Tests completed: 0/10")
+        self.progress_value.set("Test number: 0/10")
         progress_value_label = tk.Label(experiments_progress, textvariable=self.progress_value)
-        progress_value_label.grid(row=2, column=0, sticky="we", padx=25)
+        progress_value_label.grid(row=1, column=0, sticky="we")
 
-        tk.Frame(parent, height=1, bg="black").grid(row=1, column=0, sticky="news")
+        tk.Frame(parent, height=1, bg="black").grid(row=1, column=0, sticky="news", columnspan=3)
 
-        # Test Interaction Frame
-        interaction_test = tk.Frame(parent)
-        interaction_test.grid(row=2, column=0, sticky="nswe")
-        interaction_test.rowconfigure(0, weight=1)
-        interaction_test.columnconfigure(2, weight=1)
-
-        interaction_test_buttons = tk.Frame(interaction_test, bg="lightgray")
-        interaction_test_buttons.grid(row=0, column=0, sticky="nswe")
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Interaction Panels ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+        interaction_test_buttons = tk.Frame(parent, bg="lightgray")
+        interaction_test_buttons.grid(row=2, column=0, sticky="nswe")
         interaction_test_buttons.grid_columnconfigure(0, weight=1)
         interaction_test_buttons.grid_columnconfigure(1, weight=1)
         interaction_test_buttons.grid_columnconfigure(2, weight=1)
@@ -787,18 +813,18 @@ class Server:
         self.interaction_widgets[actions[11]].grid(row=4, column=0, sticky="we")
         self.interaction_widgets[actions[11]]["state"] = "disabled"
 
-        self.interaction_widgets['btn2'] = ttk.Button(interaction_test_buttons, text= "Button 2", image=self.green_btn, compound=tk.LEFT)
-        self.interaction_widgets['btn2'].grid(row=4, column=1, sticky="we")
-        self.interaction_widgets['btn2']["state"] = "disabled"
+        self.interaction_widgets[actions[12]] = ttk.Button(interaction_test_buttons, text= actions[12], image=self.green_btn, compound=tk.LEFT)
+        self.interaction_widgets[actions[12]].grid(row=4, column=1, sticky="we")
+        self.interaction_widgets[actions[12]]["state"] = "disabled"
 
-        self.interaction_widgets['btn3'] = ttk.Button(interaction_test_buttons, text= "Button 3", image=self.blue_btn, compound=tk.LEFT)
-        self.interaction_widgets['btn3'].grid(row=4, column=2, sticky="we")
-        self.interaction_widgets['btn3']["state"] = "disabled"
+        self.interaction_widgets[actions[13]] = ttk.Button(interaction_test_buttons, text= actions[13], image=self.blue_btn, compound=tk.LEFT)
+        self.interaction_widgets[actions[13]].grid(row=4, column=2, sticky="we")
+        self.interaction_widgets[actions[13]]["state"] = "disabled"
 
-        tk.Frame(interaction_test, height=1, bg="black").grid(row=0, column=1, sticky="ns")
+        tk.Frame(parent, height=1, bg="black").grid(row=2, column=1, sticky="ns")
 
-        interaction_test_scales = tk.Frame(interaction_test)
-        interaction_test_scales.grid(row=0, column=2, sticky="news")
+        interaction_test_scales = tk.Frame(parent)
+        interaction_test_scales.grid(row=2, column=2, sticky="news")
         interaction_test_scales.columnconfigure(0, weight=1)
         interaction_test_scales.rowconfigure(0, weight=1)
         interaction_test_scales.rowconfigure(2, weight=1)
@@ -857,77 +883,118 @@ class Server:
         Each experiment requires 10 different random actions to be matched within some time limit.
         """
 
+        # Reset information between each tested tab
+        def reset_info():
+                self.experiments_progress_bar['value'] = 0
+                self.mistakes = self.correct_answers = 0
+                self.current_test_var.set("Correct: " + str(self.correct_answers) + " | Mistakes: " + str(self.mistakes))
+
         self.test_status = True
-        mistakes = correct_answers = 0
+        self.mistakes = self.correct_answers = 0
         experiment_results = []
         self.experiments_progress_bar['value'] = 0
+        modes = ['speed', 'interactive']
+        tabs  = ['layout', 'remote']
 
         # Disable experimental controls to prevent unwanted behavior
-        self.interaction_start["state"]    = "disabled"
-        self.interaction_choice_1["state"] = "disabled"
-        self.interaction_choice_2["state"] = "disabled"
+        self.interaction_start["state"] = "disabled"
+        self.current_test_var.set("Correct: 0 | Mistakes: 0")
 
-        for i in range(0, 10):
-            self.progress_value.set("Tests completed: " + str(i+1) + "/10")
-            test_interaction, widget = random.choice(list(self.interaction_widgets.items()))
-            widget["state"] = "enabled"
-            if test_interaction == "Volume" or test_interaction == "Seek":
-                if test_interaction == "Volume":
-                    self.experiment_volume_user["state"] = "enabled"
+        for mode in modes:
+            if mode == "speed":
+                self.current_experiment_type.set("The current experiment is measuring speed. (1/2)")
+                self.current_experiment_device.set("Please hold the device between individual tests.")
+            else:
+                self.current_experiment_type.set("The current experiment is interactive. (2/2)")
+                self.current_experiment_device.set("Please let down the device between individual tests.")
+
+            for tab in tabs:
+                if tab == "layout":
+                    self.current_experiment_tab.set("Please make use of the LAYOUT control tab.")
                 else:
-                    self.experiment_seek_user["state"] = "enabled"
-                widget.set(random.randint(0, 100))
+                    self.current_experiment_tab.set("Please make use of the REMOTE control tab.")
 
-            start = time.time()
-            found = False
+                # Run 10 random tests for each mode and tab
+                for i in range(0, 10):
+                    self.progress_value.set("Test number: " + str(i+1) + "/10")
+                    test_interaction, widget = random.choice(list(self.interaction_widgets.items()))
+                    widget["state"] = "enabled"
+                    if test_interaction == "Volume" or test_interaction == "Seek":
+                        if test_interaction == "Volume":
+                            self.experiment_volume_user["state"] = "enabled"
+                        else:
+                            self.experiment_seek_user["state"] = "enabled"
+                        widget.set(random.randint(0, 100))
 
-            while (time.time()-start) <= 3:
-                if self.active_interaction == '':
-                    continue
-                if self.active_interaction == "Volume":
-                    volume_user = self.experiment_volume_user.get()
-                    volume_required = self.interaction_widgets['Volume'].get()
-                    if volume_user >= volume_required - 10 and volume_user <= volume_required + 10:
-                        correct_answers += 1
-                        found = True
-                        break
-                elif self.active_interaction == "Seek":
-                    seek_user = self.experiment_seek_user.get()
-                    seek_required = self.interaction_widgets['Seek'].get()
-                    if seek_user >= seek_required - 10 and seek_user <= seek_required + 10:
-                        correct_answers += 1
-                        found = True
-                        break
-                elif self.settings[self.active_interaction]['Interaction'] == test_interaction:
-                    correct_answers += 1
-                    found = True
-                    break
-                time.sleep(0.1)
+                    timout_start = time.time()
+                    timeout      = 3
+                    found        = False
 
-            if not found:
-                mistakes += 1
+                    # Allow 3 seconds for each required action to be matched (Very CPU consuming loop!)
+                    while time.time() < timout_start + timeout:
+                        if self.active_interaction == '':
+                            continue
+                        if test_interaction == "Volume":
+                            volume_user = self.experiment_volume_user.get()
+                            volume_required = self.interaction_widgets['Volume'].get()
+                            if volume_user >= volume_required - 10 and volume_user <= volume_required + 10:
+                                found = True
+                                break
+                        if test_interaction == "Seek":
+                            seek_user = self.experiment_seek_user.get()
+                            seek_required = self.interaction_widgets['Seek'].get()
+                            if seek_user >= seek_required - 10 and seek_user <= seek_required + 10:
+                                found = True
+                                break
+                        if self.settings[self.active_interaction]['Interaction'] == test_interaction:
+                            found = True
+                            break
+                        time.sleep(0.2)
 
-            end = time.time()
-            result = end-start
-            experiment_results.append((test_interaction, round(result,3), found, self.interaction_mode.get()))
-            widget["state"] = "disabled"
-            if self.experiment_volume_user["state"] == "enabled": self.experiment_volume_user["state"] = "disabled"
-            if self.experiment_seek_user["state"]   == "enabled": self.experiment_seek_user["state"]   = "disabled"
-            self.experiments_progress_bar['value'] += 10
+                    timeout_end = time.time()
 
-            # Check if mode is interactive thus allowing time for the device to be put down
-            if self.interaction_mode.get() == 2:
-                time.sleep(3)
+                    # Disable the controls for the required test
+                    widget["state"] = "disabled"
+                    if self.experiment_volume_user["state"] == "enabled": self.experiment_volume_user["state"] = "disabled"
+                    if self.experiment_seek_user["state"]   == "enabled": self.experiment_seek_user["state"]   = "disabled"
 
-        self.test_status = False
+                    if found: self.correct_answers += 1
+                    else:     self.mistakes += 1
+
+                    # Update correct answers and mistakes interactivelly
+                    self.current_test_var.set("Correct: " + str(self.correct_answers) + " | Mistakes: " + str(self.mistakes))
+                    self.experiments_progress_bar['value'] += 10
+                    
+                    if timeout_end < timout_start + timeout:
+                        time.sleep(timout_start + timeout - timeout_end)
+
+                    result = timeout_end-timout_start
+                    experiment_results.append((test_interaction, round(result,3), found, mode))
+
+                    # Check if mode is interactive thus allowing time for the device to be put down
+                    if mode == "interactive":
+                        time.sleep(3)
+                
+                if tab == "layout":
+                    self.current_experiment_tab.set("Please switch to the REMOTE control tab.")
+                    time.sleep(2)
+
+                reset_info()
+
+            if mode == "speed":
+                reset_info()
+                for i in range(5, 0, -1):
+                    self.current_experiment_type.set("The next experiment will start in " + str(i) + " seconds.")
+                    time.sleep(1)
         
-        # Re-enable experimental controls after experiment ended
-        self.interaction_start["state"]    = "enabled"
-        self.interaction_choice_1["state"] = "normal"
-        self.interaction_choice_2["state"] = "normal"
+        # Reset experimental status after experiments are complete
+        self.test_status = False
+        self.interaction_start["state"] = "enabled"
+        self.current_experiment_type.set("All the experiments are now complete.")
+        self.current_experiment_device.set("The experiments start measuring the Speed.")
+        self.current_experiment_tab.set("Please make use of the layout control tab.")
 
-        print('[Debug] Correct answers:', correct_answers, 'Mistakes:', mistakes)
-
+        # Write experiments to a csv file for visualization
         filename = 'experiments/' + time.strftime("%Y%m%d%H%M%S") + '_experiment.csv'
         with open(filename,'w', newline='') as f:
             writer = csv.writer(f)
@@ -955,10 +1022,15 @@ class Server:
 
     def get_data(self):
         """
-        Deserialize the UDP data stream from the Android.
-        There are currently two types of sensor data:
-        - type `G`: Gyroscope sensor values in x,y,z
-        - type `R`: Rotation vector sensor values in x,y,z
+        Read and deserialize the UDP data stream from the connected device's sensors.
+
+        Parameters:
+        -----------
+            data (`str`): Data read from UDP stream.
+
+        Returns:
+        --------
+            None
         """
         self.connected = False
         self.received_time_history = 0
@@ -1142,6 +1214,12 @@ class Server:
             self.volume.SetMute(1, None)
         else:
             self.volume.SetMute(0, None)
+
+    def ok(self):
+        keyboard.send("enter", do_press=True, do_release=True)
+
+    def esc(self):
+        keyboard.send("esc", do_press=True, do_release=True)
 
     def create_udp_stream(self):
         """
