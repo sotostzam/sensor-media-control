@@ -47,9 +47,6 @@ class Server:
         self.test_status           = False
         self.experiment_info_shown = False
 
-        self.last_action_timestep  = 0
-        self.last_action           = ''
-
         # Get default audio device using PyCAW
         self.devices   = AudioUtilities.GetSpeakers()
         self.interface = self.devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
@@ -872,43 +869,39 @@ class Server:
 
         for i in range(0, 10):
             self.progress_value.set("Tests completed: " + str(i+1) + "/10")
-            interaction, widget = random.choice(list(self.interaction_widgets.items()))
+            test_interaction, widget = random.choice(list(self.interaction_widgets.items()))
             widget["state"] = "enabled"
-            if interaction == "Volume" or interaction == "Seek":
-                if interaction == "Volume":
+            if test_interaction == "Volume" or test_interaction == "Seek":
+                if test_interaction == "Volume":
                     self.experiment_volume_user["state"] = "enabled"
                 else:
                     self.experiment_seek_user["state"] = "enabled"
                 widget.set(random.randint(0, 100))
 
             start = time.time()
-
-            terminate = False
             found = False
 
-            while not terminate and (time.time()-start) <= 3:
-                if self.last_action == '':
+            while (time.time()-start) <= 3:
+                if self.active_interaction == '':
                     continue
-                print('[Debug] Required:', interaction, '| Got:', self.settings[self.last_action]['Interaction'])
-                if interaction == "Volume":
-                    if self.experiment_volume_user.get() >= self.interaction_widgets['Volume'].get()-10 and self.experiment_volume_user.get() <= self.interaction_widgets['Volume'].get()+10:
+                if self.active_interaction == "Volume":
+                    volume_user = self.experiment_volume_user.get()
+                    volume_required = self.interaction_widgets['Volume'].get()
+                    if volume_user >= volume_required - 10 and volume_user <= volume_required + 10:
                         correct_answers += 1
-                        self.last_action = ''
                         found = True
                         break
-                elif interaction == "Seek":
-                    if self.experiment_seek_user.get() >= self.interaction_widgets['Seek'].get()-10 and self.experiment_seek_user.get() <= self.interaction_widgets['Seek'].get()+10:
+                elif self.active_interaction == "Seek":
+                    seek_user = self.experiment_seek_user.get()
+                    seek_required = self.interaction_widgets['Seek'].get()
+                    if seek_user >= seek_required - 10 and seek_user <= seek_required + 10:
                         correct_answers += 1
-                        self.last_action = ''
                         found = True
                         break
-                elif self.settings[self.last_action]['Interaction'] == interaction:
+                elif self.settings[self.active_interaction]['Interaction'] == test_interaction:
                     correct_answers += 1
-                    self.last_action = ''
                     found = True
                     break
-                else:
-                    self.last_action = ''
                 time.sleep(0.1)
 
             if not found:
@@ -916,7 +909,7 @@ class Server:
 
             end = time.time()
             result = end-start
-            experiment_results.append((interaction, round(result,3), found, self.interaction_mode.get()))
+            experiment_results.append((test_interaction, round(result,3), found, self.interaction_mode.get()))
             widget["state"] = "disabled"
             if self.experiment_volume_user["state"] == "enabled": self.experiment_volume_user["state"] = "disabled"
             if self.experiment_seek_user["state"]   == "enabled": self.experiment_seek_user["state"]   = "disabled"
@@ -946,7 +939,7 @@ class Server:
             if self.connected:
                 if time.time()-self.received_time_history >= 0.23:
                     self.active_interaction = ''
-                    self.action_compensation = 0
+                    self.action_compensation = False
                     self.current_action_var.set('None')
 
                 if time.time()-self.received_time_history >= 1:
@@ -971,9 +964,9 @@ class Server:
         self.received_time_history = 0
 
         self.active_interaction = ''
-        self.action_compensation = 0
+        self.action_compensation = False
 
-        self.rotation_history = (0, 0, 0) # Past values used for comparisons
+        self.sensor_history = (0, 0, 0) # Past values used for comparisons
 
         self.action_controller_thread = threading.Thread(target=self.action_controller, daemon=True)
         self.action_controller_thread.start()
@@ -1001,14 +994,14 @@ class Server:
                         continue
 
                     data = {}
-                    data['Timestep']     = float(message_string[0])
-                    data['Action']       = message_string[1]
-                    data['Gyroscope']    = {'x': float(message_string[2]), 'y': float(message_string[3]), 'z':  float(message_string[4])}
-                    data['Acceleration'] = {'x': float(message_string[5]), 'y': float(message_string[6]), 'z':  float(message_string[7])}
-                    data['Rotation']     = {'x': float(message_string[8]), 'y': float(message_string[9]), 'z':  float(message_string[10])}
+                    data['Timestep']      = float(message_string[0])
+                    data['Action']        = message_string[1]
+                    data['Gyroscope']     = {'x': float(message_string[2]), 'y': float(message_string[3]), 'z':  float(message_string[4])}
+                    data['Accelerometer'] = {'x': float(message_string[5]), 'y': float(message_string[6]), 'z':  float(message_string[7])}
+                    data['Rotation']      = {'x': float(message_string[8]), 'y': float(message_string[9]), 'z':  float(message_string[10])}
 
                     self.update_sensor_data(data)
-                    self.execute_command(data)
+                    self.execute_command(data, sensor="Accelerometer")
 
                     self.received_time_history = received_time
    
@@ -1021,17 +1014,18 @@ class Server:
             self.gyro_y.set(str(data['Gyroscope']['y']))
             self.gyro_z.set(str(data['Gyroscope']['z']))
 
-            self.acceleration_x.set(str(data['Acceleration']['x']))
-            self.acceleration_y.set(str(data['Acceleration']['y']))
-            self.acceleration_z.set(str(data['Acceleration']['z']))
+            self.acceleration_x.set(str(data['Accelerometer']['x']))
+            self.acceleration_y.set(str(data['Accelerometer']['y']))
+            self.acceleration_z.set(str(data['Accelerometer']['z']))
 
             self.rotation_x.set(str(data['Rotation']['x']))
             self.rotation_y.set(str(data['Rotation']['y']))
             self.rotation_z.set(str(data['Rotation']['z']))
 
-    def execute_command(self, data):
+    def execute_command(self, data, sensor):
         """
-        Executes an action based on sensor data
+        Executes an action based on sensor data. This function is also responsible for executing\n
+        actions depending on active and test statuses.
 
         Parameters:
         -----------
@@ -1041,25 +1035,17 @@ class Server:
         --------
             None
         """
-        # TODO Modify this function to allow timed steps for instant actions like button presses
-        # What we need are the following:
-        # 1) Action start and keep current action
-        # 1.1) Action type modifies the parameters of said action
-        # 1.2) Keep the initial value of the current action
-        # ---> Issue: How to still have up-down and right-left gestures while keeping one action?
-        # 2) Action end to clear the current action
-        # These will allow for two types of actions: instant and dynamic
 
         # Time between dataframes ~ 0.21 sec which means that when this thrueshold is passed a new action should be activated
         if self.active_interaction == '':
-            if self.action_compensation == 0:
-                self.rotation_history = (data['Rotation']['x'],  data['Rotation']['y'],  data['Rotation']['z'])
-                self.action_compensation += 1
+            if not self.action_compensation:
+                self.sensor_history = (data[sensor]['x'],  data[sensor]['y'],  data[sensor]['z'])
+                self.action_compensation = True
                 return False
-            elif self.action_compensation == 1:
-                self.active_interaction = data['Action'] + self.get_tilt_kind(data['Rotation'])
+            else:
+                self.active_interaction = data['Action'] + self.get_tilt_kind(data[sensor])
                 self.current_action_var.set(self.active_interaction + " - (" + self.settings[self.active_interaction]['Interaction'] + ")")
-                self.rotation_history = ( data['Rotation']['x'],  data['Rotation']['y'],  data['Rotation']['z'])
+                self.sensor_history = ( data[sensor]['x'],  data[sensor]['y'],  data[sensor]['z'])
 
         # When active_status is active the application is controlling this device's resources
         if self.active_status:
@@ -1070,26 +1056,24 @@ class Server:
 
         # When test_status is active, an experiment is underway
         if self.test_status:
-            self.last_action_timestep = data['Timestep']
-            self.last_action          = self.active_interaction
-            if self.experiment_volume_user["state"] == "enabled":
+            if self.experiment_volume_user["state"] == "enabled" and self.active_interaction != '':
                 if (self.settings[self.active_interaction]['Interaction']) == "Volume -":
                     self.experiment_volume_user.set(self.experiment_volume_user.get()-10)
                 elif (self.settings[self.active_interaction]['Interaction']) == "Volume +":
                     self.experiment_volume_user.set(self.experiment_volume_user.get()+10)
-            elif self.experiment_seek_user["state"] == "enabled":
+            elif self.experiment_seek_user["state"] == "enabled" and self.active_interaction != '':
                 if (self.settings[self.active_interaction]['Interaction']) == "Seek -":
                     self.experiment_seek_user.set(self.experiment_seek_user.get()-10)
                 elif (self.settings[self.active_interaction]['Interaction']) == "Seek +":
                     self.experiment_seek_user.set(self.experiment_seek_user.get()+10)
 
-    def get_tilt_kind(self, rot_vector):
+    def get_tilt_kind(self, sensor_data):
         """
         Returns the current phone's tilt gesture.
 
         Parameters:
         -----------
-            rot_vector (`float`): Data from android's rotation vector
+            rot_vector (`dict`): Data from client's rotation vector in x,y,z
 
         Returns:
         --------
@@ -1100,12 +1084,12 @@ class Server:
             * TL: Tilt Left
         """
 
-        if abs(rot_vector['x']-self.rotation_history[0]) > abs(rot_vector['y']-self.rotation_history[1]):
-            if rot_vector['x']-self.rotation_history[0] > 0:    return "TU"
-            else:                                               return "TD"
+        if abs(sensor_data['x']-self.sensor_history[0]) > abs(sensor_data['y']-self.sensor_history[1]):
+            if sensor_data['x']-self.sensor_history[0] > 0: return "TL"
+            else:                                           return "TR"
         else:
-            if rot_vector['y']-self.rotation_history[1] > 0:    return "TR"
-            else:                                               return "TL"
+            if sensor_data['y']-self.sensor_history[1] > 0: return "TU"
+            else:                                           return "TD"
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Action Functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
     def not_used(self):
@@ -1125,7 +1109,7 @@ class Server:
 
     def increase_vol(self, mode):
         """
-        Increase System's volume by specific ammount.
+        Increase system's volume by specific ammount.
         """
         # Get current volume
         # set_volume = min(1.0, max(0.0, mode))
@@ -1134,7 +1118,7 @@ class Server:
 
     def decrease_vol(self, mode):
         """
-        Increase System's volume by specific ammount.
+        Increase system's volume by specific ammount.
         """
         # Get current volume
         # set_volume = min(1.0, max(0.0, mode))
