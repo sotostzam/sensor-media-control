@@ -1062,18 +1062,19 @@ class Server:
 
                     message_string = message_string.replace(' ','').split(",")
 
-                    if len(message_string) != 12:
+                    if len(message_string) == 12:
+                        data = {}
+                        data['Timestep']      = float(message_string[0])
+                        data['Action']        = message_string[1]
+                        data['Gyroscope']     = {'x': float(message_string[2]), 'y': float(message_string[3]), 'z':  float(message_string[4])}
+                        data['Accelerometer'] = {'x': float(message_string[5]), 'y': float(message_string[6]), 'z':  float(message_string[7])}
+                        data['Rotation']      = {'x': float(message_string[8]), 'y': float(message_string[9]), 'z':  float(message_string[10])}
+                        self.update_sensor_data(data)
+                        self.execute_command(data, mode="layout", sensor="Accelerometer")
+                    elif len(message_string) == 1:
+                        self.execute_command(message_string, mode="remote")
+                    else:
                         continue
-
-                    data = {}
-                    data['Timestep']      = float(message_string[0])
-                    data['Action']        = message_string[1]
-                    data['Gyroscope']     = {'x': float(message_string[2]), 'y': float(message_string[3]), 'z':  float(message_string[4])}
-                    data['Accelerometer'] = {'x': float(message_string[5]), 'y': float(message_string[6]), 'z':  float(message_string[7])}
-                    data['Rotation']      = {'x': float(message_string[8]), 'y': float(message_string[9]), 'z':  float(message_string[10])}
-
-                    self.update_sensor_data(data)
-                    self.execute_command(data, sensor="Accelerometer")
 
                     self.received_time_history = received_time
    
@@ -1094,7 +1095,7 @@ class Server:
             self.rotation_y.set(str(data['Rotation']['y']))
             self.rotation_z.set(str(data['Rotation']['z']))
 
-    def execute_command(self, data, sensor):
+    def execute_command(self, data, mode, sensor="Accelerometer"):
         """
         Executes an action based on sensor data. This function is also responsible for executing\n
         actions depending on active and test statuses.
@@ -1110,14 +1111,18 @@ class Server:
 
         # Time between dataframes ~ 0.21 sec which means that when this thrueshold is passed a new action should be activated
         if self.active_interaction == '':
-            if not self.action_compensation:
-                self.sensor_history = (data[sensor]['x'],  data[sensor]['y'],  data[sensor]['z'])
-                self.action_compensation = True
-                return False
+            if mode=="layout":
+                if not self.action_compensation:
+                    self.sensor_history = (data[sensor]['x'],  data[sensor]['y'],  data[sensor]['z'])
+                    self.action_compensation = True
+                    return False
+                else:
+                    self.active_interaction = data['Action'] + self.get_tilt_kind(data[sensor])
+                    self.current_action_var.set(self.active_interaction + " - (" + self.settings[self.active_interaction]['Interaction'] + ")")
+                    self.sensor_history = ( data[sensor]['x'],  data[sensor]['y'],  data[sensor]['z'])
             else:
-                self.active_interaction = data['Action'] + self.get_tilt_kind(data[sensor])
-                self.current_action_var.set(self.active_interaction + " - (" + self.settings[self.active_interaction]['Interaction'] + ")")
-                self.sensor_history = ( data[sensor]['x'],  data[sensor]['y'],  data[sensor]['z'])
+                self.active_interaction = data[0]
+                self.current_action_var.set(data[0])
 
         # When active_status is active the application is controlling this device's resources
         if self.active_status:
