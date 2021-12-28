@@ -1,5 +1,6 @@
 package com.arvr.sensorcollector;
 
+import android.annotation.SuppressLint;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -55,6 +56,8 @@ public class OldRemoteFragment extends Fragment {
                     mPlayButton.setColorFilter(getResources().getColor(android.R.color.holo_red_dark), PorterDuff.Mode.SRC_ATOP);
                 }
 
+                String message = "";
+
                 if (event.getAction() == MotionEvent.ACTION_UP)
                 {
                     mPlayButton.setColorFilter(getResources().getColor(android.R.color.holo_blue_light), PorterDuff.Mode.SRC_ATOP);
@@ -62,13 +65,16 @@ public class OldRemoteFragment extends Fragment {
                     {
                         mPlayButton.setImageResource(android.R.drawable.ic_media_pause);
                         play[0] = true;
+                        message = "Play";
+                        new UDPThread(message).execute();
                     }
                     else
                     {
                         mPlayButton.setImageResource(android.R.drawable.ic_media_play);
                         play[0] = false;
+                        message = "Pause";
+                        new UDPThread(message).execute();
                     }
-
                 }
                 return false;
             }
@@ -78,10 +84,12 @@ public class OldRemoteFragment extends Fragment {
         mRewindButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+                String message = "";
                 if (event.getAction() == MotionEvent.ACTION_DOWN)
                 {
                     mRewindButton.setColorFilter(getResources().getColor(android.R.color.holo_red_dark), PorterDuff.Mode.SRC_ATOP);
-
+                    message = "Rewind";
+                    new UDPThread(message).execute();
                 } else if (event.getAction() == MotionEvent.ACTION_UP)
                 {
                     mRewindButton.setColorFilter(getResources().getColor(android.R.color.holo_blue_light), PorterDuff.Mode.SRC_ATOP);
@@ -93,9 +101,12 @@ public class OldRemoteFragment extends Fragment {
         mFastforwardButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+                String message = "";
                 if (event.getAction() == MotionEvent.ACTION_DOWN)
                 {
                     mFastforwardButton.setColorFilter(getResources().getColor(android.R.color.holo_red_dark), PorterDuff.Mode.SRC_ATOP);
+                    message = "Fastforward";
+                    new UDPThread(message).execute();
 
                 } else if (event.getAction() == MotionEvent.ACTION_UP)
                 {
@@ -108,9 +119,12 @@ public class OldRemoteFragment extends Fragment {
         mVolumeUpButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+                String message = "";
                 if (event.getAction() == MotionEvent.ACTION_DOWN)
                 {
                     mVolumeUpButton.setColorFilter(getResources().getColor(android.R.color.holo_red_dark), PorterDuff.Mode.SRC_ATOP);
+                    message = "Volume Increase";
+                    new UDPThread(message).execute();
 
                 } else if (event.getAction() == MotionEvent.ACTION_UP)
                 {
@@ -123,9 +137,12 @@ public class OldRemoteFragment extends Fragment {
         mVolumeDownButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+                String message = "";
                 if (event.getAction() == MotionEvent.ACTION_DOWN)
                 {
                     mVolumeDownButton.setColorFilter(getResources().getColor(android.R.color.holo_red_dark), PorterDuff.Mode.SRC_ATOP);
+                    message = "Volume Decrease";
+                    new UDPThread(message).execute();
 
                 } else if (event.getAction() == MotionEvent.ACTION_UP)
                 {
@@ -138,18 +155,22 @@ public class OldRemoteFragment extends Fragment {
         mMuteButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-
+                String message = "";
                 if (event.getAction() == MotionEvent.ACTION_UP)
                 {
                     if(!mute[0])
                     {
                         mMuteButton.setColorFilter(getResources().getColor(android.R.color.holo_red_dark), PorterDuff.Mode.SRC_ATOP);
                         mute[0] = true;
+                        message = "Mute";
+                        new UDPThread(message).execute();
                     }
                     else
                     {
                         mMuteButton.setColorFilter(getResources().getColor(android.R.color.holo_blue_light), PorterDuff.Mode.SRC_ATOP);
                         mute[0] = false;
+                        message = "Unmute";
+                        new UDPThread(message).execute();
                     }
 
                 }
