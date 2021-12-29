@@ -75,10 +75,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginTop="0dp"
-                android:scaleType="fitCenter"
                 android:background="@android:color/transparent"
+                android:scaleType="fitCenter"
                 android:src="@android:drawable/ic_media_rew"
-                app:tint="@android:color/holo_blue_light" />
+                app:tint="@color/holo_blue_light" />
         </LinearLayout>
 
         <LinearLayout
@@ -86,7 +86,19 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:orientation="horizontal"/>
+            android:orientation="horizontal"
+            android:scaleX="0.9"
+            android:scaleY="0.9">
+
+            <ImageButton
+                android:id="@+id/okButton"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@android:color/transparent"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_ok_button" />
+
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/fastForwardLinearLayout"

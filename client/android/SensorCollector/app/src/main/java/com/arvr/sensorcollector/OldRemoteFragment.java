@@ -20,7 +20,7 @@ import android.widget.ImageButton;
 public class OldRemoteFragment extends Fragment {
 
     private ImageButton mPlayButton, mPauseButton, mRewindButton, mFastforwardButton;
-    private ImageButton mVolumeUpButton, mVolumeDownButton, mMuteButton;
+    private ImageButton mVolumeUpButton, mVolumeDownButton, mMuteButton, mOkButton;
     final boolean[] mute = {false};
     final boolean[] play = {false};
 
@@ -45,6 +45,7 @@ public class OldRemoteFragment extends Fragment {
         mVolumeUpButton = (ImageButton) view.findViewById(R.id.volumeUpButton);
         mVolumeDownButton = (ImageButton) view.findViewById(R.id.volumeDownButton);
         mMuteButton = (ImageButton) view.findViewById(R.id.muteButton);
+        mOkButton = (ImageButton) view.findViewById(R.id.okButton);
 
 
 
@@ -88,7 +89,7 @@ public class OldRemoteFragment extends Fragment {
                 if (event.getAction() == MotionEvent.ACTION_DOWN)
                 {
                     mRewindButton.setColorFilter(getResources().getColor(android.R.color.holo_red_dark), PorterDuff.Mode.SRC_ATOP);
-                    message = "Rewind";
+                    message = "Seek -";
                     new UDPThread(message).execute();
                 } else if (event.getAction() == MotionEvent.ACTION_UP)
                 {
@@ -105,7 +106,7 @@ public class OldRemoteFragment extends Fragment {
                 if (event.getAction() == MotionEvent.ACTION_DOWN)
                 {
                     mFastforwardButton.setColorFilter(getResources().getColor(android.R.color.holo_red_dark), PorterDuff.Mode.SRC_ATOP);
-                    message = "Fastforward";
+                    message = "Seek +";
                     new UDPThread(message).execute();
 
                 } else if (event.getAction() == MotionEvent.ACTION_UP)
@@ -123,7 +124,7 @@ public class OldRemoteFragment extends Fragment {
                 if (event.getAction() == MotionEvent.ACTION_DOWN)
                 {
                     mVolumeUpButton.setColorFilter(getResources().getColor(android.R.color.holo_red_dark), PorterDuff.Mode.SRC_ATOP);
-                    message = "Volume Increase";
+                    message = "Volume -";
                     new UDPThread(message).execute();
 
                 } else if (event.getAction() == MotionEvent.ACTION_UP)
@@ -141,12 +142,30 @@ public class OldRemoteFragment extends Fragment {
                 if (event.getAction() == MotionEvent.ACTION_DOWN)
                 {
                     mVolumeDownButton.setColorFilter(getResources().getColor(android.R.color.holo_red_dark), PorterDuff.Mode.SRC_ATOP);
-                    message = "Volume Decrease";
+                    message = "Volume +";
                     new UDPThread(message).execute();
 
                 } else if (event.getAction() == MotionEvent.ACTION_UP)
                 {
                     mVolumeDownButton.setColorFilter(getResources().getColor(android.R.color.holo_blue_light), PorterDuff.Mode.SRC_ATOP);
+                }
+                return false;
+            }
+        });
+
+        mOkButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                String message = "";
+                if (event.getAction() == MotionEvent.ACTION_DOWN)
+                {
+                    mOkButton.setColorFilter(getResources().getColor(android.R.color.holo_red_dark), PorterDuff.Mode.SRC_ATOP);
+                    message = "OK";
+                    new UDPThread(message).execute();
+
+                } else if (event.getAction() == MotionEvent.ACTION_UP)
+                {
+                    mOkButton.setColorFilter(getResources().getColor(android.R.color.holo_blue_light), PorterDuff.Mode.SRC_ATOP);
                 }
                 return false;
             }

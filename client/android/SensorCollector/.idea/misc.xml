@@ -4,6 +4,7 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/Users/archi/AndroidStudioProjects/SensorCollector/app/src/main/res/drawable/ic_blue_circle_image.xml" value="0.290625" />
+        <entry key="..\:/Users/archi/AndroidStudioProjects/SensorCollector/app/src/main/res/drawable/ic_ok_button.xml" value="0.290625" />
         <entry key="..\:/Users/archi/AndroidStudioProjects/SensorCollector/app/src/main/res/drawable/ic_playbutton.xml" value="0.290625" />
         <entry key="..\:/Users/archi/AndroidStudioProjects/SensorCollector/app/src/main/res/drawable/ic_rectanglehorizontal.xml" value="0.290625" />
         <entry key="..\:/Users/archi/AndroidStudioProjects/SensorCollector/app/src/main/res/drawable/ic_rectanglevertical.xml" value="0.290625" />
@@ -12,7 +13,7 @@
         <entry key="..\:/Users/archi/AndroidStudioProjects/SensorCollector/app/src/main/res/layout/fragment_first.xml" value="0.25" />
         <entry key="..\:/Users/archi/AndroidStudioProjects/SensorCollector/app/src/main/res/layout/fragment_left_screen_part_press.xml" value="0.27447916666666666" />
         <entry key="..\:/Users/archi/AndroidStudioProjects/SensorCollector/app/src/main/res/layout/fragment_novel_remote.xml" value="0.27447916666666666" />
-        <entry key="..\:/Users/archi/AndroidStudioProjects/SensorCollector/app/src/main/res/layout/fragment_old_remote.xml" value="0.27447916666666666" />
+        <entry key="..\:/Users/archi/AndroidStudioProjects/SensorCollector/app/src/main/res/layout/fragment_old_remote.xml" value="0.25" />
         <entry key="..\:/Users/archi/AndroidStudioProjects/SensorCollector/app/src/main/res/layout/fragment_second.xml" value="0.264" />
         <entry key="..\:/Users/archi/AndroidStudioProjects/SensorCollector/app/src/main/res/layout/fragment_settings.xml" value="0.27447916666666666" />
         <entry key="..\:/Users/archi/AndroidStudioProjects/SensorCollector/app/src/main/res/layout/fragment_third.xml" value="0.27025641025641023" />
