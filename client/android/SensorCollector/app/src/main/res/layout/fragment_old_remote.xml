@@ -8,14 +8,52 @@
     tools:context=".OldRemoteFragment">
 
     <LinearLayout
+        android:id="@+id/zerothRowLinearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="32dp"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="0dp"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:id="@+id/blankLinearLayout0"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/blankLinearLayout01"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/blankLinearLayout02"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/escapeButton"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginStart="50dp"
+                android:background="@android:color/transparent"
+                android:scaleType="fitEnd"
+                android:src="@android:drawable/ic_delete" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/firstRowLinearLayout"
         android:layout_width="match_parent"
         android:layout_height="100dp"
         android:layout_alignParentStart="true"
-        android:orientation="horizontal"
         android:layout_marginTop="32dp"
-        android:scaleX="0.7"
-        android:scaleY="0.7">
+        android:orientation="horizontal">
 
         <LinearLayout
             android:id="@+id/blankLinearLayout1"
@@ -39,16 +77,19 @@
                 android:background="@android:color/transparent"
                 android:rotation="-90"
                 android:scaleType="fitCenter"
+                android:scaleX="0.7"
+                android:scaleY="0.7"
                 android:src="@android:drawable/ic_media_play"
                 app:tint="@android:color/holo_blue_light" />
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/blankLinearLayout2"
+            android:id="@+id/escapeLinearLayout"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:orientation="horizontal">
+
         </LinearLayout>
 
     </LinearLayout>
@@ -96,7 +137,8 @@
                 android:layout_height="match_parent"
                 android:background="@android:color/transparent"
                 android:scaleType="fitCenter"
-                android:src="@drawable/ic_ok_button" />
+                android:scaleY="0.9"
+                android:src="@drawable/ok_button" />
 
         </LinearLayout>
 
@@ -307,7 +349,7 @@
             android:orientation="horizontal">
 
             <ImageButton
-                android:id="@+id/imageButton9"
+                android:id="@+id/orangeButton"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@android:color/transparent"
@@ -325,7 +367,7 @@
             android:orientation="horizontal">
 
             <ImageButton
-                android:id="@+id/imageButton7"
+                android:id="@+id/greenButton"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@android:color/transparent"
