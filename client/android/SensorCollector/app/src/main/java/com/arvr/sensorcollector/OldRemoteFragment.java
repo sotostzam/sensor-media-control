@@ -19,8 +19,9 @@ import android.widget.ImageButton;
  */
 public class OldRemoteFragment extends Fragment {
 
-    private ImageButton mPlayButton, mPauseButton, mRewindButton, mFastforwardButton;
+    private ImageButton mPlayButton, mPauseButton, mStopButton, mRewindButton, mFastforwardButton;
     private ImageButton mVolumeUpButton, mVolumeDownButton, mMuteButton, mOkButton;
+    private ImageButton mPreviousButton, mNextButton;
     final boolean[] mute = {false};
     final boolean[] play = {false};
 
@@ -37,8 +38,7 @@ public class OldRemoteFragment extends Fragment {
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState)
-    {
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         mPlayButton = (ImageButton) view.findViewById(R.id.playButton);
         mRewindButton = (ImageButton) view.findViewById(R.id.rewindButton);
         mFastforwardButton = (ImageButton) view.findViewById(R.id.fastForwardButton);
@@ -46,36 +46,39 @@ public class OldRemoteFragment extends Fragment {
         mVolumeDownButton = (ImageButton) view.findViewById(R.id.volumeDownButton);
         mMuteButton = (ImageButton) view.findViewById(R.id.muteButton);
         mOkButton = (ImageButton) view.findViewById(R.id.okButton);
-
+        mPreviousButton = (ImageButton) view.findViewById(R.id.previousButton);
+        mNextButton = (ImageButton) view.findViewById(R.id.nextButton);
+        mStopButton = (ImageButton) view.findViewById(R.id.stopButton);
+        mPauseButton = (ImageButton) view.findViewById(R.id.pauseButton);
 
 
         mPlayButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                if (event.getAction() == MotionEvent.ACTION_DOWN)
-                {
-                    mPlayButton.setColorFilter(getResources().getColor(android.R.color.holo_red_dark), PorterDuff.Mode.SRC_ATOP);
-                }
-
                 String message = "";
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    mPlayButton.setColorFilter(getResources().getColor(android.R.color.holo_red_dark), PorterDuff.Mode.SRC_ATOP);
+                    message = "Play";
+                    new UDPThread(message).execute();
 
-                if (event.getAction() == MotionEvent.ACTION_UP)
-                {
+                } else if (event.getAction() == MotionEvent.ACTION_UP) {
                     mPlayButton.setColorFilter(getResources().getColor(android.R.color.holo_blue_light), PorterDuff.Mode.SRC_ATOP);
-                    if(!play[0])
-                    {
-                        mPlayButton.setImageResource(android.R.drawable.ic_media_pause);
-                        play[0] = true;
-                        message = "Play";
-                        new UDPThread(message).execute();
-                    }
-                    else
-                    {
-                        mPlayButton.setImageResource(android.R.drawable.ic_media_play);
-                        play[0] = false;
-                        message = "Pause";
-                        new UDPThread(message).execute();
-                    }
+                }
+                return false;
+            }
+        });
+
+        mPauseButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                String message = "";
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    mPauseButton.setColorFilter(getResources().getColor(android.R.color.holo_red_dark), PorterDuff.Mode.SRC_ATOP);
+                    message = "Pause";
+                    new UDPThread(message).execute();
+
+                } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                    mPauseButton.setColorFilter(getResources().getColor(android.R.color.holo_blue_light), PorterDuff.Mode.SRC_ATOP);
                 }
                 return false;
             }
@@ -86,13 +89,11 @@ public class OldRemoteFragment extends Fragment {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 String message = "";
-                if (event.getAction() == MotionEvent.ACTION_DOWN)
-                {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
                     mRewindButton.setColorFilter(getResources().getColor(android.R.color.holo_red_dark), PorterDuff.Mode.SRC_ATOP);
                     message = "Seek -";
                     new UDPThread(message).execute();
-                } else if (event.getAction() == MotionEvent.ACTION_UP)
-                {
+                } else if (event.getAction() == MotionEvent.ACTION_UP) {
                     mRewindButton.setColorFilter(getResources().getColor(android.R.color.holo_blue_light), PorterDuff.Mode.SRC_ATOP);
                 }
                 return false;
@@ -103,14 +104,12 @@ public class OldRemoteFragment extends Fragment {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 String message = "";
-                if (event.getAction() == MotionEvent.ACTION_DOWN)
-                {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
                     mFastforwardButton.setColorFilter(getResources().getColor(android.R.color.holo_red_dark), PorterDuff.Mode.SRC_ATOP);
                     message = "Seek +";
                     new UDPThread(message).execute();
 
-                } else if (event.getAction() == MotionEvent.ACTION_UP)
-                {
+                } else if (event.getAction() == MotionEvent.ACTION_UP) {
                     mFastforwardButton.setColorFilter(getResources().getColor(android.R.color.holo_blue_light), PorterDuff.Mode.SRC_ATOP);
                 }
                 return false;
@@ -121,14 +120,12 @@ public class OldRemoteFragment extends Fragment {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 String message = "";
-                if (event.getAction() == MotionEvent.ACTION_DOWN)
-                {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
                     mVolumeUpButton.setColorFilter(getResources().getColor(android.R.color.holo_red_dark), PorterDuff.Mode.SRC_ATOP);
                     message = "Volume -";
                     new UDPThread(message).execute();
 
-                } else if (event.getAction() == MotionEvent.ACTION_UP)
-                {
+                } else if (event.getAction() == MotionEvent.ACTION_UP) {
                     mVolumeUpButton.setColorFilter(getResources().getColor(android.R.color.holo_blue_light), PorterDuff.Mode.SRC_ATOP);
                 }
                 return false;
@@ -139,14 +136,12 @@ public class OldRemoteFragment extends Fragment {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 String message = "";
-                if (event.getAction() == MotionEvent.ACTION_DOWN)
-                {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
                     mVolumeDownButton.setColorFilter(getResources().getColor(android.R.color.holo_red_dark), PorterDuff.Mode.SRC_ATOP);
                     message = "Volume +";
                     new UDPThread(message).execute();
 
-                } else if (event.getAction() == MotionEvent.ACTION_UP)
-                {
+                } else if (event.getAction() == MotionEvent.ACTION_UP) {
                     mVolumeDownButton.setColorFilter(getResources().getColor(android.R.color.holo_blue_light), PorterDuff.Mode.SRC_ATOP);
                 }
                 return false;
@@ -157,14 +152,12 @@ public class OldRemoteFragment extends Fragment {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 String message = "";
-                if (event.getAction() == MotionEvent.ACTION_DOWN)
-                {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
                     mOkButton.setColorFilter(getResources().getColor(android.R.color.holo_red_dark), PorterDuff.Mode.SRC_ATOP);
                     message = "OK";
                     new UDPThread(message).execute();
 
-                } else if (event.getAction() == MotionEvent.ACTION_UP)
-                {
+                } else if (event.getAction() == MotionEvent.ACTION_UP) {
                     mOkButton.setColorFilter(getResources().getColor(android.R.color.holo_blue_light), PorterDuff.Mode.SRC_ATOP);
                 }
                 return false;
@@ -175,23 +168,67 @@ public class OldRemoteFragment extends Fragment {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 String message = "";
-                if (event.getAction() == MotionEvent.ACTION_UP)
-                {
-                    if(!mute[0])
-                    {
+                if (event.getAction() == MotionEvent.ACTION_UP) {
+                    if (!mute[0]) {
                         mMuteButton.setColorFilter(getResources().getColor(android.R.color.holo_red_dark), PorterDuff.Mode.SRC_ATOP);
                         mute[0] = true;
                         message = "Mute";
                         new UDPThread(message).execute();
-                    }
-                    else
-                    {
+                    } else {
                         mMuteButton.setColorFilter(getResources().getColor(android.R.color.holo_blue_light), PorterDuff.Mode.SRC_ATOP);
                         mute[0] = false;
                         message = "Unmute";
                         new UDPThread(message).execute();
                     }
 
+                }
+                return false;
+            }
+        });
+
+        mPreviousButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                String message = "";
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    mPreviousButton.setColorFilter(getResources().getColor(android.R.color.holo_red_dark), PorterDuff.Mode.SRC_ATOP);
+                    message = "Previous";
+                    new UDPThread(message).execute();
+
+                } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                    mPreviousButton.setColorFilter(getResources().getColor(android.R.color.holo_blue_light), PorterDuff.Mode.SRC_ATOP);
+                }
+                return false;
+            }
+        });
+
+        mNextButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                String message = "";
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    mNextButton.setColorFilter(getResources().getColor(android.R.color.holo_red_dark), PorterDuff.Mode.SRC_ATOP);
+                    message = "Next";
+                    new UDPThread(message).execute();
+
+                } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                    mNextButton.setColorFilter(getResources().getColor(android.R.color.holo_blue_light), PorterDuff.Mode.SRC_ATOP);
+                }
+                return false;
+            }
+        });
+
+        mStopButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                String message = "";
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    mStopButton.setColorFilter(getResources().getColor(android.R.color.holo_red_dark), PorterDuff.Mode.SRC_ATOP);
+                    message = "Stop";
+                    new UDPThread(message).execute();
+
+                } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                    mStopButton.setColorFilter(getResources().getColor(android.R.color.holo_blue_light), PorterDuff.Mode.SRC_ATOP);
                 }
                 return false;
             }
