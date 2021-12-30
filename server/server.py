@@ -961,7 +961,9 @@ class Server:
                                     found = True
                                     break
                             else:
-                                if self.settings[self.active_interaction]['Interaction'] == test_interaction:
+                                # TODO The following should be checked as we shouldn't check for empty key again.
+                                # I think it is a threading problem where the active interaction it gets reset during this loop.
+                                if self.active_interaction and self.settings[self.active_interaction]['Interaction'] == test_interaction:
                                     found = True
                                     break
                         time.sleep(0.2)
@@ -1146,11 +1148,17 @@ class Server:
                 self.current_action_var.set(data[0])
 
         # When active_status is active the application is controlling this device's resources
-        if self.active_status:
-            if self.ACTIONS[self.settings[self.active_interaction]['Interaction']]['has_params']:
-                self.ACTIONS[self.settings[self.active_interaction]['Interaction']]['function'](self.settings[self.active_interaction]['Type'])
+        if self.active_status and self.active_interaction:
+            if mode=="layout":
+                if self.ACTIONS[self.settings[self.active_interaction]['Interaction']]['has_params']:
+                    self.ACTIONS[self.settings[self.active_interaction]['Interaction']]['function'](self.settings[self.active_interaction]['Type'])
+                else:
+                    self.ACTIONS[self.settings[self.active_interaction]['Interaction']]['function']()
             else:
-                self.ACTIONS[self.settings[self.active_interaction]['Interaction']]['function']()
+                if self.ACTIONS[self.active_interaction]['has_params']:
+                    self.ACTIONS[self.active_interaction]['function']('Not Used')
+                else:
+                    self.ACTIONS[self.active_interaction]['function']()         
 
         # When test_status is active, an experiment is underway
         if self.test_status:
