@@ -1162,16 +1162,29 @@ class Server:
 
         # When test_status is active, an experiment is underway
         if self.test_status:
-            if self.experiment_volume_user["state"] == "enabled" and self.active_interaction != '':
-                if (self.settings[self.active_interaction]['Interaction']) == "Volume-":
-                    self.experiment_volume_user.set(self.experiment_volume_user.get()-10)
-                elif (self.settings[self.active_interaction]['Interaction']) == "Volume+":
-                    self.experiment_volume_user.set(self.experiment_volume_user.get()+10)
-            elif self.experiment_seek_user["state"] == "enabled" and self.active_interaction != '':
-                if (self.settings[self.active_interaction]['Interaction']) == "Seek-":
-                    self.experiment_seek_user.set(self.experiment_seek_user.get()-10)
-                elif (self.settings[self.active_interaction]['Interaction']) == "Seek+":
-                    self.experiment_seek_user.set(self.experiment_seek_user.get()+10)
+            if mode=="layout":
+                if self.experiment_volume_user["state"] == "enabled" and self.active_interaction != '':
+                    if (self.settings[self.active_interaction]['Interaction']) == "Volume-":
+                        self.experiment_volume_user.set(self.experiment_volume_user.get()-10)
+                    elif (self.settings[self.active_interaction]['Interaction']) == "Volume+":
+                        self.experiment_volume_user.set(self.experiment_volume_user.get()+10)
+                elif self.experiment_seek_user["state"] == "enabled" and self.active_interaction != '':
+                    if (self.settings[self.active_interaction]['Interaction']) == "Seek-":
+                        self.experiment_seek_user.set(self.experiment_seek_user.get()-10)
+                    elif (self.settings[self.active_interaction]['Interaction']) == "Seek+":
+                        self.experiment_seek_user.set(self.experiment_seek_user.get()+10)
+            else:
+                if self.experiment_volume_user["state"] == "enabled" and self.active_interaction != '':
+                    if (self.active_interaction) == "Volume-":
+                        self.experiment_volume_user.set(self.experiment_volume_user.get()-10)
+                    elif (self.active_interaction) == "Volume+":
+                        self.experiment_volume_user.set(self.experiment_volume_user.get()+10)
+                elif self.experiment_seek_user["state"] == "enabled" and self.active_interaction != '':
+                    if (self.active_interaction) == "Seek-":
+                        self.experiment_seek_user.set(self.experiment_seek_user.get()-10)
+                    elif (self.active_interaction) == "Seek+":
+                        self.experiment_seek_user.set(self.experiment_seek_user.get()+10)
+
 
     def get_tilt_kind(self, sensor_data):
         """
