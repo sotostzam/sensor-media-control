@@ -127,7 +127,7 @@ public class OldRemoteFragment extends Fragment {
                 String message = "";
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
                     mVolumeUpButton.setColorFilter(getResources().getColor(android.R.color.holo_red_dark), PorterDuff.Mode.SRC_ATOP);
-                    message = "Volume -";
+                    message = "Volume +";
                     new UDPThread(message).execute();
 
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
@@ -143,7 +143,7 @@ public class OldRemoteFragment extends Fragment {
                 String message = "";
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
                     mVolumeDownButton.setColorFilter(getResources().getColor(android.R.color.holo_red_dark), PorterDuff.Mode.SRC_ATOP);
-                    message = "Volume +";
+                    message = "Volume -";
                     new UDPThread(message).execute();
 
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
@@ -246,11 +246,12 @@ public class OldRemoteFragment extends Fragment {
             public boolean onTouch(View v, MotionEvent event) {
                 String message = "";
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    mEscapeButton.setColorFilter(getResources().getColor(android.R.color.holo_red_light), PorterDuff.Mode.SRC_ATOP);
+                    // mEscapeButton.setColorFilter(getResources().getColor(android.R.color.holo_red_light), PorterDuff.Mode.SRC_ATOP);
                     message = "ESC";
                     new UDPThread(message).execute();
+                    flashBtn(mEscapeButton, R.drawable.esc_button);
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                    mEscapeButton.setColorFilter(getResources().getColor(android.R.color.holo_red_dark), PorterDuff.Mode.SRC_ATOP);
+                    // mEscapeButton.setColorFilter(getResources().getColor(android.R.color.holo_red_dark), PorterDuff.Mode.SRC_ATOP);
                 }
                 return false;
             }
@@ -265,7 +266,7 @@ public class OldRemoteFragment extends Fragment {
                     message = "Not Used";
                     new UDPThread(message).execute();
                     // Flash the button
-                    flashBtn(mOrangeButton, R.drawable.ic_orangecircle);
+                    flashBtn(mOrangeButton, R.drawable.ok_button);
 
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
                     // mOrangeButton.setColorFilter(getResources().getColor(android.R.color.holo_blue_light), PorterDuff.Mode.SRC_ATOP);
@@ -282,7 +283,7 @@ public class OldRemoteFragment extends Fragment {
                     // mGreenButton.setColorFilter(getResources().getColor(android.R.color.holo_red_dark), PorterDuff.Mode.SRC_ATOP);
                     message = "Not Used";
                     new UDPThread(message).execute();
-                    flashBtn(mGreenButton, R.drawable.ic_greencircle);
+                    flashBtn(mGreenButton, R.drawable.ok_button);
 
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
                     // mGreenButton.setColorFilter(getResources().getColor(android.R.color.holo_blue_light), PorterDuff.Mode.SRC_ATOP);
@@ -293,7 +294,7 @@ public class OldRemoteFragment extends Fragment {
     }
 
     public void flashBtn (final ImageButton myBtnToFlash, int resourceID){
-        myBtnToFlash.setBackgroundResource(R.drawable.ok_button);
+        myBtnToFlash.setBackgroundResource(resourceID);
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             public void run() {

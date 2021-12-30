@@ -29,8 +29,9 @@
             android:layout_weight="1"
             android:orientation="horizontal">
         </LinearLayout>
+
         <LinearLayout
-            android:id="@+id/blankLinearLayout02"
+            android:id="@+id/escapeLinearLayout"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -40,10 +41,11 @@
                 android:id="@+id/escapeButton"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginStart="50dp"
+                android:layout_marginStart="60dp"
+                android:layout_marginEnd="0dp"
                 android:background="@android:color/transparent"
-                android:scaleType="fitEnd"
-                android:src="@android:drawable/ic_delete" />
+                android:scaleType="fitCenter"
+                android:src="@drawable/esc_button" />
         </LinearLayout>
     </LinearLayout>
 
@@ -84,7 +86,7 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/escapeLinearLayout"
+            android:id="@+id/blankLinearLayout2"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -123,7 +125,7 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/blankLinearLayout"
+            android:id="@+id/okLinearLayout"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -154,8 +156,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginTop="0dp"
-                android:scaleType="fitCenter"
                 android:background="@android:color/transparent"
+                android:scaleType="fitCenter"
                 android:src="@android:drawable/ic_media_ff"
                 app:tint="@android:color/holo_blue_light" />
         </LinearLayout>
@@ -168,12 +170,10 @@
         android:layout_height="100dp"
         android:layout_below="@+id/secondRowLinearLayout"
         android:layout_alignParentStart="true"
-        android:orientation="horizontal"
-        android:scaleX="0.7"
-        android:scaleY="0.7">
+        android:orientation="horizontal">
 
         <LinearLayout
-            android:id="@+id/blankLinearLayout4"
+            android:id="@+id/blankLinearLayout3"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -194,12 +194,14 @@
                 android:background="@android:color/transparent"
                 android:rotation="90"
                 android:scaleType="fitCenter"
+                android:scaleX="0.7"
+                android:scaleY="0.7"
                 android:src="@android:drawable/ic_media_play"
                 app:tint="@android:color/holo_blue_light" />
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/blankLinearLayout5"
+            android:id="@+id/blankLinearLayout4"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -275,7 +277,7 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/muteLinearLayout"
+            android:id="@+id/nextLinearLayout"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -354,8 +356,8 @@
                 android:layout_height="match_parent"
                 android:background="@android:color/transparent"
                 android:scaleType="fitCenter"
-                android:scaleX="0.8"
-                android:scaleY="0.8"
+                android:scaleX="0.7"
+                android:scaleY="0.7"
                 android:src="@drawable/ic_orangecircle" />
         </LinearLayout>
 
@@ -372,8 +374,8 @@
                 android:layout_height="match_parent"
                 android:background="@android:color/transparent"
                 android:scaleType="fitCenter"
-                android:scaleX="0.8"
-                android:scaleY="0.8"
+                android:scaleX="0.7"
+                android:scaleY="0.7"
                 android:src="@drawable/ic_greencircle" />
         </LinearLayout>
 

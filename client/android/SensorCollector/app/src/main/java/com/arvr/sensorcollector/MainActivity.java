@@ -32,8 +32,8 @@ public class MainActivity extends AppCompatActivity
         // Disable scrolling/swiping left and right between the two tabs
         pager2.setUserInputEnabled(false);
 
-        tabLayout.addTab(tabLayout.newTab().setText("Remote 1"));
-        tabLayout.addTab(tabLayout.newTab().setText("Remote 2"));
+        tabLayout.addTab(tabLayout.newTab().setText("Layout"));
+        tabLayout.addTab(tabLayout.newTab().setText("Remote"));
         tabLayout.addTab(tabLayout.newTab().setText("Settings"));
 
 
