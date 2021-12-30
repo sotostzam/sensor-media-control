@@ -31,10 +31,10 @@ class Server:
                         "Previous"    : {"function": self.previous,      "has_params": False},
                         "Next"        : {"function": self.next,          "has_params": False},
                         "Stop"        : {"function": self.stop,          "has_params": False},
-                        "Volume +"    : {"function": self.increase_vol,  "has_params": True},
-                        "Volume -"    : {"function": self.decrease_vol,  "has_params": True},
-                        "Seek +"      : {"function": self.increase_seek, "has_params": True},
-                        "Seek -"      : {"function": self.decrease_seek, "has_params": True},
+                        "Volume+"     : {"function": self.increase_vol,  "has_params": True},
+                        "Volume-"     : {"function": self.decrease_vol,  "has_params": True},
+                        "Seek+"       : {"function": self.increase_seek, "has_params": True},
+                        "Seek-"       : {"function": self.decrease_seek, "has_params": True},
                         "Scroll UP"   : {"function": self.scroll_up,     "has_params": True},
                         "Scroll DOWN" : {"function": self.scroll_down,   "has_params": True},
                         "Mute"        : {"function": self.mute,          "has_params": False},
@@ -48,6 +48,7 @@ class Server:
         self.active_status         = False
         self.test_status           = False
         self.experiment_info_shown = False
+        self.device_tabs           = ('layout', 'remote')
 
         # Get default audio device using PyCAW
         self.devices   = AudioUtilities.GetSpeakers()
@@ -156,8 +157,15 @@ class Server:
                                                                    "each action. After each matched action, please let the phone down.")
             mode_2.grid(row=1, column=1, sticky="w")
 
+            popup_details_label = tk.Message(popup_master_frame, width=400, text="One session of experiments consists of 4 different sets of tests. There are two "
+                                                                                 + "modes (Layout and Remote) and each of them is run twice, one measuring pute speed, "
+                                                                                 + "and the other is interactive and closer to everyday use. Within each mode, both speed"
+                                                                                 + " and interactive tests are measured, one after the other. There is also a 5s timeout "
+                                                                                 + "between each set of tests.")
+            popup_details_label.grid(row=2, column=0, sticky="w", pady=10)
+
             confirm_button = ttk.Button(popup_master_frame, text="Got It", command=popup_window.destroy)
-            confirm_button.grid(row=2, column=0, pady=20)
+            confirm_button.grid(row=3, column=0, pady=10)
 
         def on_tab_change(event):
             tab = event.widget.tab('current')['text']
@@ -757,8 +765,6 @@ class Server:
         experiments_progress = tk.Frame(experiments_information)
         experiments_progress.grid(row=0, column=1)
         experiments_progress.grid_columnconfigure(0, weight=1)
-        # experiments_progress.grid_rowconfigure(0, weight=1)
-        # experiments_progress.grid_rowconfigure(1, weight=1)
 
         self.experiments_progress_bar = ttk.Progressbar(experiments_progress, orient = tk.HORIZONTAL, length = 150, mode = 'determinate')
         self.experiments_progress_bar.grid(row=0, column=0)
@@ -882,19 +888,22 @@ class Server:
 
         Each experiment requires 10 different random actions to be matched within some time limit.
         """
-
         # Reset information between each tested tab
         def reset_info():
                 self.experiments_progress_bar['value'] = 0
                 self.mistakes = self.correct_answers = 0
                 self.current_test_var.set("Correct: " + str(self.correct_answers) + " | Mistakes: " + str(self.mistakes))
 
+        def next_experiment(duration):
+            for i in range(duration, 0, -1):
+                self.current_experiment_type.set("The next experiment will start in " + str(i) + " seconds.")
+                time.sleep(1)
+
         self.test_status = True
         self.mistakes = self.correct_answers = 0
         experiment_results = []
         self.experiments_progress_bar['value'] = 0
         modes = ['speed', 'interactive']
-        tabs  = ['layout', 'remote']
 
         # Disable experimental controls to prevent unwanted behavior
         self.interaction_start["state"] = "disabled"
@@ -908,7 +917,7 @@ class Server:
                 self.current_experiment_type.set("The current experiment is interactive. (2/2)")
                 self.current_experiment_device.set("Please let down the device between individual tests.")
 
-            for tab in tabs:
+            for tab in self.device_tabs:
                 if tab == "layout":
                     self.current_experiment_tab.set("Please make use of the LAYOUT control tab.")
                 else:
@@ -927,28 +936,34 @@ class Server:
                         widget.set(random.randint(0, 100))
 
                     timout_start = time.time()
-                    timeout      = 3
+                    timeout      = 5
                     found        = False
 
                     # Allow 3 seconds for each required action to be matched (Very CPU consuming loop!)
                     while time.time() < timout_start + timeout:
                         if self.active_interaction == '':
                             continue
-                        if test_interaction == "Volume":
-                            volume_user = self.experiment_volume_user.get()
-                            volume_required = self.interaction_widgets['Volume'].get()
-                            if volume_user >= volume_required - 10 and volume_user <= volume_required + 10:
-                                found = True
-                                break
-                        if test_interaction == "Seek":
-                            seek_user = self.experiment_seek_user.get()
-                            seek_required = self.interaction_widgets['Seek'].get()
-                            if seek_user >= seek_required - 10 and seek_user <= seek_required + 10:
-                                found = True
-                                break
-                        if self.settings[self.active_interaction]['Interaction'] == test_interaction:
-                            found = True
-                            break
+                        if self.control_type == tab:
+                            if test_interaction == "Volume":
+                                volume_user = self.experiment_volume_user.get()
+                                volume_required = self.interaction_widgets['Volume'].get()
+                                if volume_user >= volume_required - 10 and volume_user <= volume_required + 10:
+                                    found = True
+                                    break
+                            if test_interaction == "Seek":
+                                seek_user = self.experiment_seek_user.get()
+                                seek_required = self.interaction_widgets['Seek'].get()
+                                if seek_user >= seek_required - 10 and seek_user <= seek_required + 10:
+                                    found = True
+                                    break
+                            if tab == 'remote':
+                                if self.active_interaction == test_interaction:
+                                    found = True
+                                    break
+                            else:
+                                if self.settings[self.active_interaction]['Interaction'] == test_interaction:
+                                    found = True
+                                    break
                         time.sleep(0.2)
 
                     timeout_end = time.time()
@@ -977,15 +992,13 @@ class Server:
                 
                 if tab == "layout":
                     self.current_experiment_tab.set("Please switch to the REMOTE control tab.")
-                    time.sleep(2)
+                    next_experiment(timeout)
 
                 reset_info()
 
             if mode == "speed":
                 reset_info()
-                for i in range(5, 0, -1):
-                    self.current_experiment_type.set("The next experiment will start in " + str(i) + " seconds.")
-                    time.sleep(1)
+                next_experiment(timeout)
         
         # Reset experimental status after experiments are complete
         self.test_status = False
@@ -1008,6 +1021,7 @@ class Server:
                     self.active_interaction = ''
                     self.action_compensation = False
                     self.current_action_var.set('None')
+                    self.control_type = None
 
                 if time.time()-self.received_time_history >= 1:
                     self.status_var.set("Waiting for Data")
@@ -1037,6 +1051,7 @@ class Server:
 
         self.active_interaction = ''
         self.action_compensation = False
+        self.control_type = None
 
         self.sensor_history = (0, 0, 0) # Past values used for comparisons
 
@@ -1063,6 +1078,7 @@ class Server:
                     message_string = message_string.replace(' ','').split(",")
 
                     if len(message_string) == 12:
+                        self.control_type = self.device_tabs[0]
                         data = {}
                         data['Timestep']      = float(message_string[0])
                         data['Action']        = message_string[1]
@@ -1072,6 +1088,7 @@ class Server:
                         self.update_sensor_data(data)
                         self.execute_command(data, mode="layout", sensor="Accelerometer")
                     elif len(message_string) == 1:
+                        self.control_type = self.device_tabs[1]
                         self.execute_command(message_string, mode="remote")
                     else:
                         continue
@@ -1122,6 +1139,10 @@ class Server:
                     self.sensor_history = ( data[sensor]['x'],  data[sensor]['y'],  data[sensor]['z'])
             else:
                 self.active_interaction = data[0]
+                if self.active_interaction == 'Play' or self.active_interaction == 'Pause':
+                    self.active_interaction = 'Play/Pause'
+                if self.active_interaction == 'Unmute':
+                    self.active_interaction = 'Mute'
                 self.current_action_var.set(data[0])
 
         # When active_status is active the application is controlling this device's resources
@@ -1134,14 +1155,14 @@ class Server:
         # When test_status is active, an experiment is underway
         if self.test_status:
             if self.experiment_volume_user["state"] == "enabled" and self.active_interaction != '':
-                if (self.settings[self.active_interaction]['Interaction']) == "Volume -":
+                if (self.settings[self.active_interaction]['Interaction']) == "Volume-":
                     self.experiment_volume_user.set(self.experiment_volume_user.get()-10)
-                elif (self.settings[self.active_interaction]['Interaction']) == "Volume +":
+                elif (self.settings[self.active_interaction]['Interaction']) == "Volume+":
                     self.experiment_volume_user.set(self.experiment_volume_user.get()+10)
             elif self.experiment_seek_user["state"] == "enabled" and self.active_interaction != '':
-                if (self.settings[self.active_interaction]['Interaction']) == "Seek -":
+                if (self.settings[self.active_interaction]['Interaction']) == "Seek-":
                     self.experiment_seek_user.set(self.experiment_seek_user.get()-10)
-                elif (self.settings[self.active_interaction]['Interaction']) == "Seek +":
+                elif (self.settings[self.active_interaction]['Interaction']) == "Seek+":
                     self.experiment_seek_user.set(self.experiment_seek_user.get()+10)
 
     def get_tilt_kind(self, sensor_data):
