@@ -1,3 +1,4 @@
+import os
 import tkinter as tk
 from tkinter import ttk
 import socket, traceback
@@ -1010,6 +1011,8 @@ class Server:
         self.current_experiment_tab.set("Please make use of the layout control tab.")
 
         # Write experiments to a csv file for visualization
+        if not os.path.exists("./experiments"):
+            os.makedirs("./experiments")
         filename = 'experiments/' + time.strftime("%Y%m%d%H%M%S") + '_experiment.csv'
         with open(filename,'w', newline='') as f:
             writer = csv.writer(f)
