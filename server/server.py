@@ -1236,7 +1236,9 @@ class Server:
         # Get current volume
         # set_volume = min(1.0, max(0.0, mode))
         currentVolumeDb = self.volume.GetMasterVolumeLevel()
-        self.volume.SetMasterVolumeLevel(currentVolumeDb + 2.0, None)
+        # print(currentVolumeDb)
+        if currentVolumeDb < self.volume.GetVolumeRange()[1] - 1.0:
+            self.volume.SetMasterVolumeLevel(currentVolumeDb + 2.0, None)
 
     def decrease_vol(self, mode):
         """
@@ -1245,7 +1247,9 @@ class Server:
         # Get current volume
         # set_volume = min(1.0, max(0.0, mode))
         currentVolumeDb = self.volume.GetMasterVolumeLevel()
-        self.volume.SetMasterVolumeLevel(currentVolumeDb - 2.0, None)
+        # print(currentVolumeDb)
+        if currentVolumeDb > self.volume.GetVolumeRange()[0] + 1.0:
+            self.volume.SetMasterVolumeLevel(currentVolumeDb - 2.0, None)
 
     def increase_seek(self, arg):
         pass
