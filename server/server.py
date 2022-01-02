@@ -905,20 +905,23 @@ class Server:
         experiment_results = []
         self.experiments_progress_bar['value'] = 0
         modes = ['speed', 'interactive']
+        test_number = 1
+        timeout = 5
 
         # Disable experimental controls to prevent unwanted behavior
         self.interaction_start["state"] = "disabled"
         self.current_test_var.set("Correct: 0 | Mistakes: 0")
 
-        for mode in modes:
-            if mode == "speed":
-                self.current_experiment_type.set("The current experiment is measuring speed. (1/2)")
-                self.current_experiment_device.set("Please hold the device between individual tests.")
-            else:
-                self.current_experiment_type.set("The current experiment is interactive. (2/2)")
-                self.current_experiment_device.set("Please let down the device between individual tests.")
+        next_experiment(timeout)
 
+        for mode in modes:
             for tab in self.device_tabs:
+                if mode == "speed":
+                    self.current_experiment_type.set("The current experiment is measuring speed. (" + str(test_number) + "/4)")
+                    self.current_experiment_device.set("Please hold the device between individual tests.")
+                else:
+                    self.current_experiment_type.set("The current experiment is interactive. (" + str(test_number) + "/4)")
+                    self.current_experiment_device.set("Please let down the device between individual tests.")
                 if tab == "layout":
                     self.current_experiment_tab.set("Please make use of the LAYOUT control tab.")
                 else:
@@ -937,7 +940,6 @@ class Server:
                         widget.set(random.randint(0, 100))
 
                     timout_start = time.time()
-                    timeout      = 5
                     found        = False
 
                     # Allow 3 seconds for each required action to be matched (Very CPU consuming loop!)
@@ -998,6 +1000,7 @@ class Server:
                     next_experiment(timeout)
 
                 reset_info()
+                test_number += 1
 
             if mode == "speed":
                 reset_info()
@@ -1051,6 +1054,12 @@ class Server:
         --------
             None
         """
+        def decode_parameter(input):
+            if input == 'not_ready':
+                return input
+            else:
+                return float(input)
+
         self.connected = False
         self.received_time_history = 0
 
@@ -1087,11 +1096,14 @@ class Server:
                         data = {}
                         data['Timestep']      = float(message_string[0])
                         data['Action']        = message_string[1]
-                        data['Gyroscope']     = {'x': float(message_string[2]), 'y': float(message_string[3]), 'z':  float(message_string[4])}
-                        data['Accelerometer'] = {'x': float(message_string[5]), 'y': float(message_string[6]), 'z':  float(message_string[7])}
-                        data['Rotation']      = {'x': float(message_string[8]), 'y': float(message_string[9]), 'z':  float(message_string[10])}
+                        data['Gyroscope']     = {'x': decode_parameter(message_string[2]), 'y': decode_parameter(message_string[3]), 'z':  decode_parameter(message_string[4])}
+                        data['Accelerometer'] = {'x': decode_parameter(message_string[5]), 'y': decode_parameter(message_string[6]), 'z':  decode_parameter(message_string[7])}
+                        data['Rotation']      = {'x': decode_parameter(message_string[8]), 'y': decode_parameter(message_string[9]), 'z':  decode_parameter(message_string[10])}
                         self.update_sensor_data(data)
-                        self.execute_command(data, mode="layout", sensor="Accelerometer")
+                        if data['Accelerometer']['x'] != 'not_ready':
+                            self.execute_command(data, mode="layout", sensor="Accelerometer")
+                        else:
+                            tk.messagebox.showwarning(title='Sensor Warning', message='Accelerometer is not supported in this device')
                     elif len(message_string) == 1:
                         self.control_type = self.device_tabs[1]
                         self.execute_command(message_string, mode="remote")
