@@ -101,6 +101,7 @@ public class SettingsFragment extends Fragment
                 return;
             }
 
+
             boolean gyroReady = (mGyroBufferReady == true);
             boolean rotationReady = (mRotationBufferReady == true);
             boolean acceleroReady = (mAcceleroBufferReady == true);
@@ -111,17 +112,14 @@ public class SettingsFragment extends Fragment
             {
                 double[] finalBuffer = new double[9];
                 int i = 0;
-                for(; i < finalBuffer.length/3; i++)
-                {
+                for (; i < finalBuffer.length / 3; i++) {
                     finalBuffer[i] = mGyroBuffer[i];
                 }
-                for(;i < (finalBuffer.length/3) + 3; i++)
-                {
-                    finalBuffer[i] = mAcceleroBuffer[i-3];
+                for (; i < (finalBuffer.length / 3) + 3; i++) {
+                    finalBuffer[i] = mAcceleroBuffer[i - 3];
                 }
-                for(; i < finalBuffer.length; i++)
-                {
-                    finalBuffer[i] = mRotationBuffer[i-6];
+                for (; i < finalBuffer.length; i++) {
+                    finalBuffer[i] = mRotationBuffer[i - 6];
                 }
 
                 // Get which button is held pressed
@@ -130,16 +128,45 @@ public class SettingsFragment extends Fragment
                 addSensorToString(mStrBuilder, buttonName, CSV_ID_GYROSCOPE, CSV_ID_ROTATION, finalBuffer);
                 mGyroBufferReady = false;
                 mRotationBufferReady = false;
+                mAcceleroBufferReady = false;
 
-                mStrBuilder.insert(0,String.format(Locale.ENGLISH, "%s,", timeStamp));
+                mStrBuilder.insert(0, String.format(Locale.ENGLISH, "%s,", timeStamp));
                 mSensordata = mStrBuilder.toString();
 
                 // Get streaming status
                 boolean streamStatus = listener.getStreamStatus();
 
                 // Check if streaming is allowed
-                if(streamStatus)
-                {
+                if (streamStatus) {
+                    // Start a new thread for sending data over UDP
+                    new UDPThread(mSensordata).execute();
+                }
+            }
+
+            // Incase the gyro sensor is not responding / not present
+            else if (rotationReady && acceleroReady && !gyroReady)
+            {
+                // Get which button is held pressed
+                String buttonName = listener.getButtonName();
+
+                mStrBuilder.append(String.format(Locale.ENGLISH,
+                        "%s,%s,%s,%s," + "%7.3f,%7.3f,%7.3f," + "%7.3f,%7.3f,%7.3f,",
+                        buttonName, "not_ready", "not_ready", "not_ready",
+                        mAcceleroBuffer[0], mAcceleroBuffer[1], mAcceleroBuffer[2],
+                        mRotationBuffer[0], mRotationBuffer[0], mRotationBuffer[0]));
+
+                mGyroBufferReady = false;
+                mRotationBufferReady = false;
+                mAcceleroBufferReady = false;
+
+                mStrBuilder.insert(0, String.format(Locale.ENGLISH, "%s,", timeStamp));
+                mSensordata = mStrBuilder.toString();
+
+                // Get streaming status
+                boolean streamStatus = listener.getStreamStatus();
+
+                // Check if streaming is allowed
+                if (streamStatus) {
                     // Start a new thread for sending data over UDP
                     new UDPThread(mSensordata).execute();
                 }
