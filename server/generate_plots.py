@@ -13,6 +13,17 @@ def find_average(start, end):
 
 def generate():
     file_list = glob.glob('./experiments/*.csv')
+
+    # Fix for missing columns in the data
+    for file in file_list:
+        temp = pd.read_csv(file)
+        if 'Tab' not in temp.columns:
+            temp["Tab"] = "layout"
+            temp.loc[10:19,'Tab'] = "remote"
+            temp.loc[30:,'Tab'] = "remote"
+            temp.to_csv(file, index=False)
+        else: continue
+
     main_dataframe = pd.DataFrame(pd.read_csv(file_list[0]))
     main_dataframe.insert(2,'Date',os.path.basename(file_list[0])[:8])
     main_dataframe.insert(2,'Timestamp',os.path.basename(file_list[0])[8:14])
