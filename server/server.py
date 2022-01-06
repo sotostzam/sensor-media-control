@@ -989,7 +989,7 @@ class Server:
                         time.sleep(timout_start + timeout - timeout_end)
 
                     result = timeout_end-timout_start
-                    experiment_results.append((test_interaction, round(result,3), found, mode))
+                    experiment_results.append((test_interaction, round(result,3), found, mode, tab))
 
                     # Check if mode is interactive thus allowing time for the device to be put down
                     if mode == "interactive":
@@ -1019,7 +1019,7 @@ class Server:
         filename = 'experiments/' + time.strftime("%Y%m%d%H%M%S") + '_experiment.csv'
         with open(filename,'w', newline='') as f:
             writer = csv.writer(f)
-            writer.writerow(['Required Action', 'Time', 'Correct', 'Mode'])
+            writer.writerow(['Required Action', 'Time', 'Correct', 'Mode', 'Tab'])
             writer.writerows(experiment_results)
 
     def action_controller(self):
