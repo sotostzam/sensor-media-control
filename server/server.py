@@ -1166,7 +1166,8 @@ class Server:
         # When active_status is active the application is controlling this device's resources
         if self.active_status and self.active_interaction:
             if mode=="layout":
-                if time.time() - self.last_action_time > 0.5 or self.settings[self.active_interaction]['Interaction'] in ("Volume+", "Volume-", "Seek+", "Seek-"):
+                if (time.time() - self.last_action_time > 0.5 or
+                    self.settings[self.active_interaction]['Interaction'] in ("Volume+", "Volume-", "Seek+", "Seek-", "Scroll UP", "Scroll DOWN")):
                     if self.ACTIONS[self.settings[self.active_interaction]['Interaction']]['has_params']:
                         self.ACTIONS[self.settings[self.active_interaction]['Interaction']]['function'](self.settings[self.active_interaction]['Type'])
                     else:
