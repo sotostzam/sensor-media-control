@@ -1066,6 +1066,7 @@ class Server:
         self.active_interaction = ''
         self.action_compensation = False
         self.control_type = None
+        self.last_action_time = 0
 
         self.sensor_history = (0, 0, 0) # Past values used for comparisons
 
@@ -1165,10 +1166,12 @@ class Server:
         # When active_status is active the application is controlling this device's resources
         if self.active_status and self.active_interaction:
             if mode=="layout":
-                if self.ACTIONS[self.settings[self.active_interaction]['Interaction']]['has_params']:
-                    self.ACTIONS[self.settings[self.active_interaction]['Interaction']]['function'](self.settings[self.active_interaction]['Type'])
-                else:
-                    self.ACTIONS[self.settings[self.active_interaction]['Interaction']]['function']()
+                if time.time() - self.last_action_time > 0.5 or self.settings[self.active_interaction]['Interaction'] in ("Volume+", "Volume-", "Seek+", "Seek-"):
+                    if self.ACTIONS[self.settings[self.active_interaction]['Interaction']]['has_params']:
+                        self.ACTIONS[self.settings[self.active_interaction]['Interaction']]['function'](self.settings[self.active_interaction]['Type'])
+                    else:
+                        self.ACTIONS[self.settings[self.active_interaction]['Interaction']]['function']()
+                    self.last_action_time = time.time()
             else:
                 if self.ACTIONS[self.active_interaction]['has_params']:
                     self.ACTIONS[self.active_interaction]['function']('Not Used')

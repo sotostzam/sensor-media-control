@@ -124,6 +124,7 @@ def generate():
 
     ax2.xaxis.set_major_locator(mdates.DayLocator(interval=1))
     ax2.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+    ax2.set_title('Average correct answers per day')
     ax2.legend()
 
     # Create figure for the percentage of speed increase through memory
