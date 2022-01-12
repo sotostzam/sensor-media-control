@@ -1014,9 +1014,9 @@ class Server:
         self.current_experiment_tab.set("Please make use of the layout control tab.")
 
         # Write experiments to a csv file for visualization
-        if not os.path.exists("./experiments"):
-            os.makedirs("./experiments")
-        filename = 'experiments/' + time.strftime("%Y%m%d%H%M%S") + '_experiment.csv'
+        if not os.path.exists("./reports/experiments"):
+            os.makedirs("./reports/experiments")
+        filename = 'reports/experiments/' + time.strftime("%Y%m%d%H%M%S") + '_experiment.csv'
         with open(filename,'w', newline='') as f:
             writer = csv.writer(f)
             writer.writerow(['Required Action', 'Time', 'Correct', 'Mode', 'Tab'])
