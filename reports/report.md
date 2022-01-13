@@ -86,6 +86,16 @@ When an action is triggered, the appropriate function is called based on the set
 
 ## Experiments
 
+### Objectives
+
+During the conducted experiments, we were interested to identify and compare the differences in time between the most well-known and "traditional" remote control applications, versus our gestural interaction control. More specifically, we were interested in:
+
+* Measuring the time difference between by continuously using both approaches.
+* Identifying the time difference in a more natural way of using these approaches, like picking up the control device only when needed.
+* Interest in finding out if there is learning over time of this new interaction.
+
+### Experiment Sessions
+
 The Python application contains a tab called **Interaction Testing**. This tab is where the experiments held place. The user interface of this tab looks like the following image:
 
 ![Experiment_Tab](img/experiment_tab.png)
@@ -99,6 +109,82 @@ The experiments consist of two categories, namely *Speed Tests* and *Interaction
 3. Interaction test using the **Layout** tab
 4. Interaction test using the **Remote** tab
 
+![Experiments](img/experiments.png)
+
+For our experiments 7 participants were involved. All of the participants had no prior knowledge on interactions similar to our approach. Before the actual experiments started, a demonstration was given on how it works, as well as explanation of the different experimental phases and sets of tests. From that point forward, the participants were told to start a new experiment session twice per day, in a span of five days.
+
+### Post-experiments Survey
+
+After the 5-day long experiment sessions, we asked our participants to answer and fill a quationare aiming for providing feedback. In particular, the user case study, aimed to identify the extend of the disadvantages of our approach (for example memorizing the gestures) as well as gathering insight on user opinions and suggestions.
+
 ## Results and Discussion
+
+### Quantitative
+
+In the first part of this section, the shown charts share information on the learning curve over the span of 5 days of conducting experiments, the percentage in speed increase of the various controls as well as the average correct answers per day. The second brings insight on the mistakes made by specific controls and afterwards groups them by region of the screen.
+
+#### Learning Curve
+
+![Figure_1](img/Figure_1.png)
+
+This box figure displays the range of values in time (seconds) for the five days that the experiments were conducted. Each of the plots displays a specific set of tests as explained above. Here, the green triangles represent the average time value for each day. Interestingly, both approaches and on all 4 sets of tests, the participants increased their response times to the required controls, proving the fact that they can improve with time. As shown in these figures the learning curve is decreasing over time.
+
+![Figure_2](img/Figure_2.png)
+
+The previous figure displays the average times in seconds in the very first day of the experiments, and compares that time with the time in seconds during the last day. As mentioned earlier all aproaches were improved over time witht he highest improvement being by using the remote tab.
+
+This can be explained, as the participants and in general remote-like applications exist already and we are all pretty accustomed to using them. Specifically the improvement comes from memorizing the various layouts, rather than learning how to use the application. On the other hand in the layout mode, the improvement comes from both memorizing the various motion gestures availiable as well as learning how to use the approach.
+
+Following is a figure showing the average correct answers per day. As depicted and as expected the remote tab had almost perfect scores after 2 days, but the layout tab had the biggest improvement advancing from 4 correct answers in the first day to 8 in the end. We are pretty confident that should the experiments have run longer, this increasing trend could reach the same level as the remote tab.
+
+![Figure_3](img/Figure_3.png)
+
+### Qualitative
+
+We conducted a survey after the experiments were completed, which consisted of 4 questions about the usability of the approach, and 3 questions about users opinions. More specifically:
+
+1. Usability
+    1. How would you rate the difficulty to learn our new interaction? (Scale is 0-10 with 0 being easy)
+    2. Do you think 4 options per area are a lot to remember?
+    3. If the Android app was programmed to have been functioning in the background while in locked screen mode (screen turned-off), would you still be able to locate the 4 rectangles?
+    4. Do you think that if you were allowed to change the settings to your liking, it would be easier to remember?
+2. Opinions
+    1. Do you think you could replace the standard remote-like applications to this one?
+    2. What kind of applications would you like to control with this new gestural interaction?
+    3. Any other suggestion/feedback you might have for the app?
+
+#### Usability
+
+![Survey_1](img/survey_1.png)
+
+Most of the results on the difficulty level of our proposed approached were grouped between 3 an 4, thus making the general idea that this interaction is not "very hard" to learn and use.
+
+![Survey_2](img/survey_2.png)
+
+![Survey_3](img/survey_3.png)
+
+In the previous two figures the idea of the four different controls for each of the four regions of the screen is shown. In more details the majority of the participants thought that this combination of regions and controls per region is not hard to remember. Moreover, this fact can be reinforced by the idea of the custom setting configuration for the different areas, which all of the participants responded positively.
+
+![Survey_4](img/survey_4.png)
+
+We had similar results when participants were asked whether they had the finished result (which is just a black screen instead of blue regions), would they still be able to identify the regions? All answers given were positive.
+
+#### Opinions
+
+![Survey_5](img/survey_5.png)
+
+Over 70% of the participants stated that they could see themselves using this new gestural approach for day to day tasks, while only 14.3% replied with a negative answer. In addition to this, some of the suggested tasks that the participants could identify are the following:
+
+* Video control
+* Presentations
+* Music control
+* Smart home control (e.g smart lighting)
+* CCTV control
+* Robotics control
+
+Last but not least, the following list shares some suggestions coming from the participants:
+
+* It may seem difficult in the beginning but it's just a question of habit and has potential for many purposes.
+* A very nice and helpful interaction with this layout tab could be the ability to control different devices by tapping on different parts of the screen.
 
 ## Conclusion
