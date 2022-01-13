@@ -4,28 +4,33 @@
 
 ## Table of Contents
 
-- [Augmented and Virtual Reality](#augmented-and-virtual-reality)
-  - [Table of Contents](#table-of-contents)
-  - [Introduction](#introduction)
-    - [Original Idea](#original-idea)
-  - [Problem](#problem)
-  - [Related Work (SOTA)](#related-work-sota)
-    - [Phone's sensors](#phones-sensors)
-    - [Physical buttons](#physical-buttons)
-  - [Prototype](#prototype)
-    - [Architecture](#architecture)
-      - [Android Application](#android-application)
-        - [Layout](#layout)
-        - [Remote](#remote)
-        - [Settings](#settings)
-      - [Python Application](#python-application)
-        - [Communication](#communication)
-        - [Settings](#settings-1)
-        - [Operations](#operations)
-    - [Limitations](#limitations)
-  - [Experiments](#experiments)
-  - [Results and Discussion](#results-and-discussion)
-  - [Conclusion](#conclusion)
+1. [Introduction](#introduction)
+    1. [Original Idea](#original-idea)
+2. [Problem](#problem)
+3. [Related Work (SOTA)](#related-work-sota)
+    1. [Phone's sensors](#phones-sensors)
+    2. [Physical buttons](#physical-buttons)
+4. [Prototype](#prototype)
+    1. [Architecture](#architecture)
+        1. [Android Application](#android-application)
+            1. [Layout](#layout)
+            2. [Remote](#remote)
+            3. [Settings](#settings)
+        2. [Python Application](#python-application)
+            1. [Communication](#communication)
+            2. [Setting Configuration](#setting-configuration)
+            3. [Operations](#operations)
+    2. [Limitations](#limitations)
+5. [Experiments](#experiments)
+    1. [Objectives](#objectives)
+    2. [Experiment Sessions](#experiment-session)
+    3. [Post-experiments Survey](#post-experiments-survey)
+6. [Results and Discussion](#results-and-discussion)
+    1. [Quantitative](#quantitative)
+    2. [Qualitative](#qualitative)
+        1. [Usability](#usability)
+        2. [Opinions](#opinions)
+7. [Conclusion](#conclusion)
 
 ## Introduction
 
@@ -48,7 +53,8 @@ Our idea was to group the different functionalities based on the phone's orienta
 We researched on the available pre-existing prototypes that could possibly be based upon our idea. We found a couple of projects, and we decided to group them on the basis of their type of control.
 
 ### Phone's sensors
-1. Use of Smartphones as 3D Controller 
+
+1. Use of Smartphones as 3D Controller
    * This is a project made by former ENSIMAG students, wherein they made use of smartphone to control and manipulate 3D objects virtually. Blender was utilized to display the 3D object, controlled with Python scripts. The idea was interesting provided a good amount of fuel for our idea,but the main drawback of this was that it was limited to a single application, and that too without any real usage.
    * [Link](https://ensiwiki.ensimag.fr/index.php?title=Use_of_smartphones_as_3D_controller) to the wiki page of the project
 2. Android Experiment: 3D controller
@@ -56,6 +62,7 @@ We researched on the available pre-existing prototypes that could possibly be ba
    * [Link](https://experiments.withgoogle.com/3d-controller) to 3D controller
 
 ### Physical buttons
+
   1. Media remote control from Android
      * This is a type of remote modelled on a smartphone that is the most common one. It;s the simplest one in terms of type, wherein the physical buttons of an actual remote are modelled as soft clickable buttons on an Android application. The connection is typically made available via Bluetooth, or sometimes even direct WiFi.
      * [Link](https://profandroid.com/network/bluetooth/media-remote.html) to an implementation of such concept
@@ -73,6 +80,7 @@ The architecture of the complete framework of the project is described in this s
 #### Android Application
 
 We developed an Android application using Android Studio, which mainly uses Java to program the application's functionalities. We decided to build two remotes - one would be our novel remote, and another would be the conventional remote that we all are familiar with. For this, we created 3 GUIs - 2 for the two different types of remote, and 1 for the settings. So essentially, we have:
+
 * Layout
 * Remote
 * Settings
@@ -89,7 +97,7 @@ After having connected through the Settings tab to the Python server, the Androi
 
 The string that is sent from Android is of the following format:
 
-```
+```text
 [timeStamp, buttonName,
  gyroX, gyroY, gyroZ,
  acceleroX, acceleroY, acceleroZ,
@@ -102,9 +110,10 @@ The second tab is the typical "Remote", wherein we place the most common buttons
 
 In this case, the string that is sent from Android is of the following format:
 
-```
+```text
 [actionName]
 ```
+
 Where `actionName` is the action specific to the button pressed, for example "Play", "Stop", "Next", etc.
 
 ##### Settings
@@ -131,7 +140,7 @@ There are several messages that can exist in this communication channel. These m
 | Top screen    | TSTU    | TSTD      | TSTL      | TSTR       |
 | Bottom screen | BSTU    | BSTD      | BSTL      | BSTR       |
 
-##### Settings
+##### Setting Configuration
 
 This Python application supports saving and loading of custom settings, depending on the user's need. In more details, the user can choose the preferred action for each kind of gesture, and save the configuration. This configuration is later saved in separate file called `settings.json`. Additionally, when an action is received through the communication channel, it is checked against the existing setting configuration, and the appropriate action is executed.
 
