@@ -4,22 +4,28 @@
 
 ## Table of Contents
 
-1. [Introduction](#introduction)
-    1. [Original Idea](#original-idea)
-2. [Problem](#problem)
-3. [Related Work](#related-work)
-4. [Problem](#problem)
-5. [Prototype](#prototype)
-    1. [Architecture](#architecture)
-        1. [Android Application](#android-application)
-        2. [Python Application](#python-application)
-            1. [Communication](#communication)
-            2. [Settings](#settings)
-            3. [Operations](#operations)
-    2. [Limitations](#limitations)
-6. [Experiments](#experiments)
-7. [Results and Discussion](#results-and-discussion)
-8. [Conclusion](#conclusion)
+- [Augmented and Virtual Reality](#augmented-and-virtual-reality)
+  - [Table of Contents](#table-of-contents)
+  - [Introduction](#introduction)
+    - [Original Idea](#original-idea)
+  - [Problem](#problem)
+  - [Related Work (SOTA)](#related-work-sota)
+    - [Phone's sensors](#phones-sensors)
+    - [Physical buttons](#physical-buttons)
+  - [Prototype](#prototype)
+    - [Architecture](#architecture)
+      - [Android Application](#android-application)
+        - [Layout](#layout)
+        - [Remote](#remote)
+        - [Settings](#settings)
+      - [Python Application](#python-application)
+        - [Communication](#communication)
+        - [Settings](#settings-1)
+        - [Operations](#operations)
+    - [Limitations](#limitations)
+  - [Experiments](#experiments)
+  - [Results and Discussion](#results-and-discussion)
+  - [Conclusion](#conclusion)
 
 ## Introduction
 
@@ -39,8 +45,22 @@ Our idea was to group the different functionalities based on the phone's orienta
 
 ## Related Work (SOTA)
 
-* Phone's sensors
-* Simulating physical buttons
+We researched on the available pre-existing prototypes that could possibly be based upon our idea. We found a couple of projects, and we decided to group them on the basis of their type of control.
+
+### Phone's sensors
+1. Use of Smartphones as 3D Controller 
+   * This is a project made by former ENSIMAG students, wherein they made use of smartphone to control and manipulate 3D objects virtually. Blender was utilized to display the 3D object, controlled with Python scripts. The idea was interesting provided a good amount of fuel for our idea,but the main drawback of this was that it was limited to a single application, and that too without any real usage.
+   * [Link](https://ensiwiki.ensimag.fr/index.php?title=Use_of_smartphones_as_3D_controller) to the wiki page of the project
+2. Android Experiment: 3D controller
+   * A part of the 2016 Android Experiments I/O Challenge, this prototype and its API  came close to our idea and vision. It enables a user to make use of Android phone's orientation, but the user must build their own application in order to utilize this functionality.
+   * [Link](https://experiments.withgoogle.com/3d-controller) to 3D controller
+
+### Physical buttons
+  1. Media remote control from Android
+     * This is a type of remote modelled on a smartphone that is the most common one. It;s the simplest one in terms of type, wherein the physical buttons of an actual remote are modelled as soft clickable buttons on an Android application. The connection is typically made available via Bluetooth, or sometimes even direct WiFi.
+     * [Link](https://profandroid.com/network/bluetooth/media-remote.html) to an implementation of such concept
+
+The common issue with all the above prototypes is that the user has to turn on the screen everytime, unlock the phone, press a couple of buttons maybe to navigate to the app and initialise the connection. We aim to build a prototype which would reduce the need for a user to do all this and can quickly go about controlling the media smoothly.
 
 ## Prototype
 
@@ -52,7 +72,44 @@ The architecture of the complete framework of the project is described in this s
 
 #### Android Application
 
-To be added...
+We developed an Android application using Android Studio, which mainly uses Java to program the application's functionalities. We decided to build two remotes - one would be our novel remote, and another would be the conventional remote that we all are familiar with. For this, we created 3 GUIs - 2 for the two different types of remote, and 1 for the settings. So essentially, we have:
+* Layout
+* Remote
+* Settings
+
+We also make use of the APIs provided by Android though Java for accessing the data from gyroscope, accelerometer, and rotation vector sensors. Each of the 3 sensors have 3 values pertaining to x, y and z orientation.
+
+![App Screenshots](img/app-screenshots.png)
+
+##### Layout
+
+The first tab is our novel proposed idea, called "Layout". It consists of 4 buttons covering the majority portion of the screen. The 4 buttons correspond to the 4 action units that we call as "Left screen", "Right screen", "Top screen" and "Bottom screen".
+
+After having connected through the Settings tab to the Python server, the Android application enters into a streaming mode, wherein it continuously streams the data from gyroscope, accelerometer, and rotation vector sensors. But by default, the streaming is put on a conditional mode. The app will stream only as long as one of the 4 buttons are held pressed. As soon as any of the button is released, the streaming stops (but the connectivity remains).
+
+The string that is sent from Android is of the following format:
+
+```
+[timeStamp, buttonName,
+ gyroX, gyroY, gyroZ,
+ acceleroX, acceleroY, acceleroZ,
+ rotX, rotY, rotZ]
+```
+
+##### Remote
+
+The second tab is the typical "Remote", wherein we place the most common buttons on any remote like play, pause, volume up, down, etc. Pressing any of the buttons streams a static message identifying the specific button pressed.
+
+In this case, the string that is sent from Android is of the following format:
+
+```
+[actionName]
+```
+Where `actionName` is the action specific to the button pressed, for example "Play", "Stop", "Next", etc.
+
+##### Settings
+
+The third tab is the settings tab, wherein the user can specify the IP address of the computer the Android app would connect to. The port is always fixed to 50000 in the Python side, so it's not required to change it.
 
 #### Python Application
 
@@ -63,9 +120,9 @@ For this application, there are dependencies that need to be included. Most of t
 
 ##### Communication
 
-To begin with, the commnication is achieved by using a simple UDP protocol, which does not requires direct connection between the Android application and the Python backend. Instead the Android sends the data through a pre-defined port (default is 50000) in the same network. Then the Python backend is able to receive these data in its buffer and extract the information.
+To begin with, the communication is achieved by using a simple UDP protocol, which does not requires direct connection between the Android application and the Python backend. Instead the Android sends the data through a pre-defined port (default is 50000) in the same network. Then the Python backend is able to receive these data in its buffer and extract the information.
 
-There are several messages that can exist in this communication channel. These messages describe the exact user's motion as well as the region of the screen pressed. The following table explaines the different possibilies thoroughly.
+There are several messages that can exist in this communication channel. These messages describe the exact user's motion as well as the region of the screen pressed. The following table explains the different possibilities thoroughly.
 
 |    Action     | Tilt up | Tilt Down | Tilt Left | Tilt Right |
 |:--------------|:-------:|:---------:|:---------:|:----------:|
@@ -76,7 +133,7 @@ There are several messages that can exist in this communication channel. These m
 
 ##### Settings
 
-This Python application supports saving and loading of custom settings, depending on the user's need. In more details, the user can choose the prefered action for each kind of gesture, and save the configuration. This configuration is later saved in separate file called `settings.json`. Additionally, when an action is received through the communication channel, it is checked against the existing setting configuration, and the appropriate action is executed.
+This Python application supports saving and loading of custom settings, depending on the user's need. In more details, the user can choose the preferred action for each kind of gesture, and save the configuration. This configuration is later saved in separate file called `settings.json`. Additionally, when an action is received through the communication channel, it is checked against the existing setting configuration, and the appropriate action is executed.
 
 ##### Operations
 
@@ -92,7 +149,7 @@ The Python application contains a tab called **Interaction Testing**. This tab i
 
 In this tab, there are buttons to be matched for the most common actions, that a remote application is used for, namely `Play/Pause`, `Next`, `Previous`, `Stop`, `Mute`, `OK` and `ESC`. In addition to these four bars are present, two for volume and two for the seeking actions. On of each set shows the required value that has to be matches, while the other shows the current user's value.
 
-The experiments consist of two categories, namely *Speed Tests* and *Interaction Tests*. The purpose of the speed tests is to give an overall idea of the time difference required to do an action with each approach. This category requires the user to hold the Android device for the duration of this experiment. On the other hand, the interaction tests aim to extract information by a more natural way of using the two approaches. This category requires the user to leave the device down between each test. This aims to simulate the more common way of picking up the remote device to perform jsut a simple action. In total there are four sets of experiments run with the following order:
+The experiments consist of two categories, namely *Speed Tests* and *Interaction Tests*. The purpose of the speed tests is to give an overall idea of the time difference required to do an action with each approach. This category requires the user to hold the Android device for the duration of this experiment. On the other hand, the interaction tests aim to extract information by a more natural way of using the two approaches. This category requires the user to leave the device down between each test. This aims to simulate the more common way of picking up the remote device to perform just a simple action. In total there are four sets of experiments run with the following order:
 
 1. Speed test using the **Layout** tab
 2. Speed test using the **Remote** tab
