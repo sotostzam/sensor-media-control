@@ -11,7 +11,8 @@
     1. [Phone's sensors](#phones-sensors)
     2. [Physical buttons](#physical-buttons)
 4. [Prototype](#prototype)
-    1. [Architecture](#architecture)
+    1. [Limitations](#limitations)
+    2. [Architecture](#architecture)
         1. [Android Application](#android-application)
             1. [Layout](#layout)
             2. [Remote](#remote)
@@ -20,7 +21,6 @@
             1. [Communication](#communication)
             2. [Setting Configuration](#setting-configuration)
             3. [Operations](#operations)
-    2. [Limitations](#limitations)
 5. [Experiments](#experiments)
     1. [Objectives](#objectives)
     2. [Experiment Sessions](#experiment-session)
@@ -34,7 +34,7 @@
 
 ## Introduction
 
-Media production as well as consumption is on the rise since quite some time, and with the advent of smartphones, the consumption has only increased even more. People consume media on various types of devices ranging from smartphones, televisions and computer. Traditionally media controlling has been primarily done through physical buttons present on the television set itself, and later on, all those functionalities were transferred to a small rectangular device dubbed as 'remote' which consists of several physical buttons.
+Media production as well as consumption is on the rise since quite some time, and with the advent of smartphones, the consumption has only increased even more. People consume media on various types of devices ranging from smartphones, televisions and computer. Traditionally media controlling has been primarily done through physical buttons present on the television set itself, and later on, all those functionalities were transferred to a small rectangular device dubbed as 'remote' which consists of several physical buttons. With the rise and technology advancements, this idea of a 'remote' has been transformed into applications for smart mobile devices, which simulates physical buttons with software ones.
 
 ### Original Idea
 
@@ -42,7 +42,7 @@ Our original idea consisted of having an application running in the background o
 
 ## Problem
 
-The problem that we focussed mainly on was the control of media devices, more specifically, control the current video playing on a computer. The various actions that we wanted to control can be grouped and summarized in the following figure.
+The problem that we focussed mainly on was the control of media devices, more specifically, controlling the current video playing on a computer. The various actions that we wanted to control can be grouped and summarized in the following figure.
 
 ![controls](img/phone-controls.png)
 
@@ -70,6 +70,12 @@ We researched on the available pre-existing prototypes that could possibly be ba
 The common issue with all the above prototypes is that the user has to turn on the screen everytime, unlock the phone, press a couple of buttons maybe to navigate to the app and initialise the connection. We aim to build a prototype which would reduce the need for a user to do all this and can quickly go about controlling the media smoothly.
 
 ## Prototype
+
+### Limitations
+
+Very early during the experimentation process, we switched our focus and attempts, eliminating the idea of having the different sides of an Android device act as different actions. The new primary objective from that point on was to have just a single orientation (which is screen always facing the user) and support 4 distinct regions of the screen that handle the different actions. The explanation for this is that during our testing, we found out that it was extremelly hard to make gestures with specific orientations.
+
+For instance, when the screen was facing to the ground, the handling of the device became unpredicted and a lot of unwanted interactions were present. Focusing on four regions on the screen allowed for easier access of the variability of the controls. The user would only have to move the thumb to a specific region and perform a gesture.
 
 ### Architecture
 
@@ -147,8 +153,6 @@ This Python application supports saving and loading of custom settings, dependin
 ##### Operations
 
 When an action is triggered, the appropriate function is called based on the setting configuration. This behavior enables the application to be easily extended in order to support all kinds of external APIs for device manipulation. In this project we made use of the two libraries mentioned above to showcase this behavior, one being volume control and the other button presses.
-
-### Limitations
 
 ## Experiments
 
