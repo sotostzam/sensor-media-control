@@ -5,7 +5,8 @@
 ## Table of Contents
 
 1. [Introduction](#introduction)
-    1. [Original Idea](#original-idea)
+    1. [Students](#students)
+    2. [Original Idea](#original-idea)
 2. [Problem](#problem)
 3. [Related Work (SOTA)](#related-work-sota)
     1. [Phone's sensors](#phones-sensors)
@@ -31,10 +32,16 @@
         1. [Usability](#usability)
         2. [Opinions](#opinions)
 7. [Conclusion](#conclusion)
+8. [Referencies](#references)
 
 ## Introduction
 
 Media production as well as consumption is on the rise since quite some time, and with the advent of smartphones, the consumption has only increased even more. People consume media on various types of devices ranging from smartphones, televisions and computer. Traditionally media controlling has been primarily done through physical buttons present on the television set itself, and later on, all those functionalities were transferred to a small rectangular device dubbed as 'remote' which consists of several physical buttons. With the rise and technology advancements, this idea of a 'remote' has been transformed into applications for smart mobile devices, which simulates physical buttons with software ones.
+
+### Students
+
+* [Archit YADAV](https://www.linkedin.com/in/archit-yadav-95482b156/)
+* [Sotirios TZAMARAS](https://www.linkedin.com/in/sotiris-tzamaras/)
 
 ### Original Idea
 
@@ -258,3 +265,10 @@ Last but not least, the following list shares some suggestions coming from the p
 * A very nice and helpful interaction with this layout tab could be the ability to control different devices by tapping on different parts of the screen.
 
 ## Conclusion
+
+## References
+
+* Hatem S., Yury S.: 3D controller. 2016 Android Experiments I/O Challenge Winner. <https://experiments.withgoogle.com/3d-controller>
+* Bluetooth media remote control from Android. <https://profandroid.com/network/bluetooth/media-remote.html>
+* Siddhpuria, Shaishav, et al. "Exploring at-your-side gestural interaction for ubiquitous environments." Proceedings of the 2017 Conference on Designing Interactive Systems. 2017.
+* Valentina D., Florent C.: Use of smartphones as 3D controller. 2018. <https://ensiwiki.ensimag.fr/index.php?title=Use_of_smartphones_as_3D_controller#Prototype>
