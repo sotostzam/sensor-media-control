@@ -7,12 +7,14 @@
 - [Augmented and Virtual Reality](#augmented-and-virtual-reality)
   - [Table of Contents](#table-of-contents)
   - [Introduction](#introduction)
+    - [Students](#students)
     - [Original Idea](#original-idea)
   - [Problem](#problem)
   - [Related Work (SOTA)](#related-work-sota)
     - [Phone's sensors](#phones-sensors)
     - [Physical buttons](#physical-buttons)
   - [Prototype](#prototype)
+    - [Limitations](#limitations)
     - [Architecture](#architecture)
       - [Android Application](#android-application)
         - [Layout](#layout)
@@ -22,7 +24,6 @@
         - [Communication](#communication)
         - [Setting Configuration](#setting-configuration)
         - [Operations](#operations)
-    - [Limitations](#limitations)
   - [Experiments](#experiments)
     - [Objectives](#objectives)
     - [Experiment Sessions](#experiment-sessions)
@@ -34,10 +35,16 @@
       - [Usability](#usability)
       - [Opinions](#opinions)
   - [Conclusion](#conclusion)
+  - [References](#references)
 
 ## Introduction
 
-Media production as well as consumption is on the rise since quite some time, and with the advent of smartphones, the consumption has only increased even more. People consume media on various types of devices ranging from smartphones, televisions and computer. Traditionally media controlling has been primarily done through physical buttons present on the television set itself, and later on, all those functionalities were transferred to a small rectangular device dubbed as 'remote' which consists of several physical buttons.
+Media production as well as consumption is on the rise since quite some time, and with the advent of smartphones, the consumption has only increased even more. People consume media on various types of devices ranging from smartphones, televisions and computer. Traditionally media controlling has been primarily done through physical buttons present on the television set itself, and later on, all those functionalities were transferred to a small rectangular device dubbed as 'remote' which consists of several physical buttons. With the rise and technology advancements, this idea of a 'remote' has been transformed into applications for smart mobile devices, which simulates physical buttons with software ones.
+
+### Students
+
+* [Archit YADAV](https://www.linkedin.com/in/archit-yadav-95482b156/)
+* [Sotirios TZAMARAS](https://www.linkedin.com/in/sotiris-tzamaras/)
 
 ### Original Idea
 
@@ -45,7 +52,7 @@ Our original idea consisted of having an application running in the background o
 
 ## Problem
 
-The problem that we focussed mainly on was the control of media devices, more specifically, control the current video playing on a computer. The various actions that we wanted to control can be grouped and summarized in the following figure.
+The problem that we focussed mainly on was the control of media devices, more specifically, controlling the current video playing on a computer. The various actions that we wanted to control can be grouped and summarized in the following figure.
 
 ![controls](img/phone-controls.png)
 
@@ -73,6 +80,12 @@ We researched on the available pre-existing prototypes that could possibly be ba
 The common issue with all the above prototypes is that the user has to turn on the screen everytime, unlock the phone, press a couple of buttons maybe to navigate to the app and initialise the connection. We aim to build a prototype which would reduce the need for a user to do all this and can quickly go about controlling the media smoothly.
 
 ## Prototype
+
+### Limitations
+
+Very early during the experimentation process, we switched our focus and attempts, eliminating the idea of having the different sides of an Android device act as different actions. The new primary objective from that point on was to have just a single orientation (which is screen always facing the user) and support 4 distinct regions of the screen that handle the different actions. The explanation for this is that during our testing, we found out that it was extremely hard to make gestures with specific orientations.
+
+For instance, when the screen was facing to the ground, the handling of the device became unpredicted and a lot of unwanted interactions were present. Focusing on four regions on the screen allowed for easier access of the variability of the controls. The user would only have to move the thumb to a specific region and perform a gesture.
 
 ### Architecture
 
@@ -151,8 +164,6 @@ This Python application supports saving and loading of custom settings, dependin
 
 When an action is triggered, the appropriate function is called based on the setting configuration. This behavior enables the application to be easily extended in order to support all kinds of external APIs for device manipulation. In this project we made use of the two libraries mentioned above to showcase this behavior, one being volume control and the other button presses.
 
-### Limitations
-
 ## Experiments
 
 ### Objectives
@@ -184,7 +195,7 @@ For our experiments 7 participants were involved. All of the participants had no
 
 ### Post-experiments Survey
 
-After the 5-day long experiment sessions, we asked our participants to answer and fill a quationare aiming for providing feedback. In particular, the user case study, aimed to identify the extend of the disadvantages of our approach (for example memorizing the gestures) as well as gathering insight on user opinions and suggestions.
+After the 5-day long experiment sessions, we asked our participants to answer and fill a questionnaire aiming for providing feedback. In particular, the user case study, aimed to identify the extend of the disadvantages of our approach (for example memorizing the gestures) as well as gathering insight on user opinions and suggestions.
 
 ## Results and Discussion
 
@@ -200,9 +211,9 @@ This box figure displays the range of values in time (seconds) for the five days
 
 ![Figure_2](img/Figure_2.png)
 
-The previous figure displays the average times in seconds in the very first day of the experiments, and compares that time with the time in seconds during the last day. As mentioned earlier all aproaches were improved over time witht he highest improvement being by using the remote tab.
+The previous figure displays the average times in seconds in the very first day of the experiments, and compares that time with the time in seconds during the last day. As mentioned earlier all approaches were improved over time with he highest improvement being by using the remote tab.
 
-This can be explained, as the participants and in general remote-like applications exist already and we are all pretty accustomed to using them. Specifically the improvement comes from memorizing the various layouts, rather than learning how to use the application. On the other hand in the layout mode, the improvement comes from both memorizing the various motion gestures availiable as well as learning how to use the approach.
+This can be explained, as the participants and in general remote-like applications exist already and we are all pretty accustomed to using them. Specifically the improvement comes from memorizing the various layouts, rather than learning how to use the application. On the other hand in the layout mode, the improvement comes from both memorizing the various motion gestures available as well as learning how to use the approach.
 
 Following is a figure showing the average correct answers per day. As depicted and as expected the remote tab had almost perfect scores after 2 days, but the layout tab had the biggest improvement advancing from 4 correct answers in the first day to 8 in the end. We are pretty confident that should the experiments have run longer, this increasing trend could reach the same level as the remote tab.
 
@@ -263,3 +274,9 @@ From our experiments (quantitative results) and the survey answers (qualitative)
 [Link]() to the GitHub repository containing our project.
 
 ---
+## References
+
+* Hatem S., Yury S.: 3D controller. 2016 Android Experiments I/O Challenge Winner. <https://experiments.withgoogle.com/3d-controller>
+* Bluetooth media remote control from Android. <https://profandroid.com/network/bluetooth/media-remote.html>
+* Siddhpuria, Shaishav, et al. "Exploring at-your-side gestural interaction for ubiquitous environments." Proceedings of the 2017 Conference on Designing Interactive Systems. 2017.
+* Valentina D., Florent C.: Use of smartphones as 3D controller. 2018. <https://ensiwiki.ensimag.fr/index.php?title=Use_of_smartphones_as_3D_controller#Prototype>
