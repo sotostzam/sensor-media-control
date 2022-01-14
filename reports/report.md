@@ -4,33 +4,36 @@
 
 ## Table of Contents
 
-1. [Introduction](#introduction)
-    1. [Original Idea](#original-idea)
-2. [Problem](#problem)
-3. [Related Work (SOTA)](#related-work-sota)
-    1. [Phone's sensors](#phones-sensors)
-    2. [Physical buttons](#physical-buttons)
-4. [Prototype](#prototype)
-    1. [Architecture](#architecture)
-        1. [Android Application](#android-application)
-            1. [Layout](#layout)
-            2. [Remote](#remote)
-            3. [Settings](#settings)
-        2. [Python Application](#python-application)
-            1. [Communication](#communication)
-            2. [Setting Configuration](#setting-configuration)
-            3. [Operations](#operations)
-    2. [Limitations](#limitations)
-5. [Experiments](#experiments)
-    1. [Objectives](#objectives)
-    2. [Experiment Sessions](#experiment-session)
-    3. [Post-experiments Survey](#post-experiments-survey)
-6. [Results and Discussion](#results-and-discussion)
-    1. [Quantitative](#quantitative)
-    2. [Qualitative](#qualitative)
-        1. [Usability](#usability)
-        2. [Opinions](#opinions)
-7. [Conclusion](#conclusion)
+- [Augmented and Virtual Reality](#augmented-and-virtual-reality)
+  - [Table of Contents](#table-of-contents)
+  - [Introduction](#introduction)
+    - [Original Idea](#original-idea)
+  - [Problem](#problem)
+  - [Related Work (SOTA)](#related-work-sota)
+    - [Phone's sensors](#phones-sensors)
+    - [Physical buttons](#physical-buttons)
+  - [Prototype](#prototype)
+    - [Architecture](#architecture)
+      - [Android Application](#android-application)
+        - [Layout](#layout)
+        - [Remote](#remote)
+        - [Settings](#settings)
+      - [Python Application](#python-application)
+        - [Communication](#communication)
+        - [Setting Configuration](#setting-configuration)
+        - [Operations](#operations)
+    - [Limitations](#limitations)
+  - [Experiments](#experiments)
+    - [Objectives](#objectives)
+    - [Experiment Sessions](#experiment-sessions)
+    - [Post-experiments Survey](#post-experiments-survey)
+  - [Results and Discussion](#results-and-discussion)
+    - [Quantitative](#quantitative)
+      - [Learning Curve](#learning-curve)
+    - [Qualitative](#qualitative)
+      - [Usability](#usability)
+      - [Opinions](#opinions)
+  - [Conclusion](#conclusion)
 
 ## Introduction
 
@@ -254,3 +257,9 @@ Last but not least, the following list shares some suggestions coming from the p
 * A very nice and helpful interaction with this layout tab could be the ability to control different devices by tapping on different parts of the screen.
 
 ## Conclusion
+
+From our experiments (quantitative results) and the survey answers (qualitative), we are quite hopeful and confident that our proposed application has potential uses and would appeal to users if given a chance to use. There is a learning curve which can be achieved easily within a small time frame. Our original plan was to have the Layout functionality working even on the lock screen mode, so that the user won't even have to unlock the phone, and can simply pickup the phone and control the media. We can have this feature as a future work for this project. We could also make use of the other unused sensors (gyroscope + rotation vector) which could possibly improve the precision of the orientation values.
+
+[Link]() to the GitHub repository containing our project.
+
+---
